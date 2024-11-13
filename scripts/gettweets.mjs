@@ -14,7 +14,13 @@ const TWEETS_FILE = "tweets.json";
         // Log in to Twitter using the configured environment variables
         await scraper.login(
             process.env.TWITTER_USERNAME,
-            process.env.TWITTER_PASSWORD
+            process.env.TWITTER_PASSWORD,
+            undefined,
+            undefined,
+            process.env.TWITTER_API_KEY,
+            process.env.TWITTER_API_SECRET_KEY,
+            process.env.TWITTER_ACCESS_TOKEN,
+            process.env.TWITTER_ACCESS_TOKEN_SECRET
         );
 
         // Check if login was successful

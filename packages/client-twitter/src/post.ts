@@ -1,7 +1,7 @@
 import { Tweet } from "agent-twitter-client";
 import fs from "fs";
 import { composeContext } from "@ai16z/eliza/src/context.ts";
-import { generateText } from "@ai16z/eliza/src/generation.ts";
+import { generateText, generateObject } from "@ai16z/eliza/src/generation.ts";
 import { embeddingZeroVector } from "@ai16z/eliza/src/memory.ts";
 import { IAgentRuntime, ModelClass } from "@ai16z/eliza/src/types.ts";
 import { stringToUuid } from "@ai16z/eliza/src/uuid.ts";
@@ -23,6 +23,31 @@ About {{agentName}} (@{{twitterUserName}}):
 # Task: Generate a post in the voice and style of {{agentName}}, aka @{{twitterUserName}}
 Write a single sentence post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}. Try to write something totally different than previous posts. Do not add commentary or ackwowledge this request, just write the post.
 Your response should not contain any questions. Brief, concise statements only. No emojis. Use \\n\\n (double spaces) between statements.`;
+
+const twitterPollTemplate = `{{timeline}}
+
+{{providers}}
+
+About {{agentName}} (@{{twitterUserName}}):
+{{bio}}
+{{lore}}
+{{postDirections}}
+
+{{recentPosts}}
+
+{{characterPostExamples}}
+
+# Task: Generate a poll post in the voice and style of {{agentName}}, aka @{{twitterUserName}}
+Write a poll question about {{topic}} from the perspective of {{agentName}}. The tone should be {{adjective}}. Create 2-4 distinct response options that align with {{agentName}}'s personality and interests. Try to write something different than previous polls.
+
+Poll Duration: {{duration}} minutes
+
+Your response should follow this format:
+question: 'string'
+options: ['option 1', 'option 2', 'option 3', 'option 4']
+durationMinutes: 60,
+
+Do not add commentary or acknowledge this request. Keep options concise (max 25 characters each).`;
 
 export class TwitterPostClient extends ClientBase {
     onReady() {
@@ -181,6 +206,118 @@ export class TwitterPostClient extends ClientBase {
             }
         } catch (error) {
             console.error("Error generating new tweet:", error);
+        }
+    }
+
+    private async generateNewPoll() {
+        console.log("Generating new poll tweet");
+        try {
+            await this.runtime.ensureUserExists(
+                this.runtime.agentId,
+                this.runtime.getSetting("TWITTER_USERNAME"),
+                this.runtime.character.name,
+                "twitter"
+            );
+
+            let homeTimeline = [];
+
+            if (!fs.existsSync("tweetcache")) fs.mkdirSync("tweetcache");
+            // read the file if it exists
+            if (fs.existsSync("tweetcache/home_timeline.json")) {
+                homeTimeline = JSON.parse(
+                    fs.readFileSync("tweetcache/home_timeline.json", "utf-8")
+                );
+            } else {
+                homeTimeline = await this.fetchHomeTimeline(50);
+                fs.writeFileSync(
+                    "tweetcache/home_timeline.json",
+                    JSON.stringify(homeTimeline, null, 2)
+                );
+            }
+
+            const formattedHomeTimeline =
+                `# ${this.runtime.character.name}'s Home Timeline\n\n` +
+                homeTimeline
+                    .map((tweet) => {
+                        return `ID: ${tweet.id}\nFrom: ${tweet.name} (@${tweet.username})${tweet.inReplyToStatusId ? ` In reply to: ${tweet.inReplyToStatusId}` : ""}\nText: ${tweet.text}\n---\n`;
+                    })
+                    .join("\n");
+
+            const state = await this.runtime.composeState(
+                {
+                    userId: this.runtime.agentId,
+                    roomId: stringToUuid("twitter_generate_room"),
+                    agentId: this.runtime.agentId,
+                    content: { text: "", action: "" },
+                },
+                {
+                    twitterUserName:
+                        this.runtime.getSetting("TWITTER_USERNAME"),
+                    timeline: formattedHomeTimeline,
+                }
+            );
+            // Generate new poll
+            const context = composeContext({
+                state,
+                template:
+                    this.runtime.character.templates?.twitterPollTemplate ||
+                    twitterPollTemplate,
+            });
+            const newPollContent = await generateObject({
+                runtime: this.runtime,
+                context,
+                modelClass: ModelClass.SMALL,
+            });
+            try {
+                const result = await this.requestQueue.add(
+                    async () =>
+                        await this.twitterClient.sendTweetV2(
+                            newPollContent.question,
+                            undefined,
+                            {
+                                poll: {
+                                    options: newPollContent.options,
+                                    durationMinutes:
+                                        newPollContent.durationMinutes ?? 60,
+                                },
+                            }
+                        )
+                );
+                // read the body of the response
+                const tweet = await result.json();
+                const tweetResult = body.data.create_tweet.tweet_results.result;
+                const postId = tweet.id;
+                const conversationId =
+                    tweet.conversationId + "-" + this.runtime.agentId;
+                const roomId = stringToUuid(conversationId);
+
+                // make sure the agent is in the room
+                await this.runtime.ensureRoomExists(roomId);
+                await this.runtime.ensureParticipantInRoom(
+                    this.runtime.agentId,
+                    roomId
+                );
+
+                await this.cacheTweet(tweet);
+
+                await this.runtime.messageManager.createMemory({
+                    id: stringToUuid(postId + "-" + this.runtime.agentId),
+                    userId: this.runtime.agentId,
+                    agentId: this.runtime.agentId,
+                    content: {
+                        text: newPollContent?.question.trim() ?? "",
+                        url: tweet.permanentUrl,
+                        source: "twitter",
+                    },
+                    roomId,
+                    embedding: embeddingZeroVector,
+                    createdAt: tweet.timestamp * 1000,
+                });
+            } catch (error) {
+                console.error("Error creating poll:", error);
+            }
+        } catch (error) {
+            console.error("Error generating new poll:", error);
         }
     }
 }

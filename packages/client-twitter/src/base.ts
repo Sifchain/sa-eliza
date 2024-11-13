@@ -147,6 +147,19 @@ export class ClientBase extends EventEmitter {
         return tweet;
     }
 
+    async getTweetV2(tweetId: string): Promise<Tweet> {
+        const cachedTweet = await this.getCachedTweet(tweetId);
+        if (cachedTweet) {
+            return cachedTweet;
+        }
+
+        const tweet = await this.requestQueue.add(() =>
+            this.twitterClient.getTweetV2(tweetId)
+        );
+        await this.cacheTweet(tweet);
+        return tweet;
+    }
+
     callback: (self: ClientBase) => any = null;
 
     onReady() {
@@ -172,14 +185,14 @@ export class ClientBase extends EventEmitter {
             this.runtime.character.style.post.join();
 
         try {
-            console.log("this.tweetCacheFilePath", this.tweetCacheFilePath)
+            console.log("this.tweetCacheFilePath", this.tweetCacheFilePath);
             if (fs.existsSync(this.tweetCacheFilePath)) {
                 // make it?
                 const data = fs.readFileSync(this.tweetCacheFilePath, "utf-8");
                 this.lastCheckedTweetId = parseInt(data.trim());
             } else {
                 console.warn("Tweet cache file not found.");
-                console.warn(this.tweetCacheFilePath)
+                console.warn(this.tweetCacheFilePath);
             }
         } catch (error) {
             console.error(
@@ -218,7 +231,13 @@ export class ClientBase extends EventEmitter {
                     await this.twitterClient.login(
                         this.runtime.getSetting("TWITTER_USERNAME"),
                         this.runtime.getSetting("TWITTER_PASSWORD"),
-                        this.runtime.getSetting("TWITTER_EMAIL")
+                        this.runtime.getSetting("TWITTER_EMAIL"),
+                        undefined,
+                        undefined,
+                        process.env.TWITTER_API_KEY,
+                        process.env.TWITTER_API_SECRET_KEY,
+                        process.env.TWITTER_ACCESS_TOKEN,
+                        process.env.TWITTER_ACCESS_TOKEN_SECRET
                     );
                     console.log("Logged in to Twitter");
                     const cookies = await this.twitterClient.getCookies();
@@ -240,7 +259,13 @@ export class ClientBase extends EventEmitter {
                     await this.twitterClient.login(
                         this.runtime.getSetting("TWITTER_USERNAME"),
                         this.runtime.getSetting("TWITTER_PASSWORD"),
-                        this.runtime.getSetting("TWITTER_EMAIL")
+                        this.runtime.getSetting("TWITTER_EMAIL"),
+                        undefined,
+                        undefined,
+                        process.env.TWITTER_API_KEY,
+                        process.env.TWITTER_API_SECRET_KEY,
+                        process.env.TWITTER_ACCESS_TOKEN,
+                        process.env.TWITTER_ACCESS_TOKEN_SECRET
                     );
 
                     const cookies = await this.twitterClient.getCookies();
