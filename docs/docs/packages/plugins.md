@@ -21,9 +21,9 @@ interface Plugin {
 }
 ```
 
-### Available Plugins
+## Available Plugins
 
-#### 1. Bootstrap Plugin (`@eliza/plugin-bootstrap`)
+### 1. Bootstrap Plugin (`@eliza/plugin-bootstrap`)
 
 The bootstrap plugin provides essential baseline functionality:
 
@@ -46,134 +46,10 @@ The bootstrap plugin provides essential baseline functionality:
 - `boredom` - Manages engagement levels
 - `time` - Provides temporal context
 - `facts` - Supplies factual information
-
-#### 2. Image Generation Plugin (`@eliza/plugin-image-generation`)
-
-Enables AI image generation capabilities:
-
-**Actions:**
-
-- `GENERATE_IMAGE` - Create images based on text descriptions
-- Supports multiple image generation services (Anthropic, Together)
-- Auto-generates captions for created images
-
-#### 3. Node Plugin (`@eliza/plugin-node`)
-
-Provides core Node.js-based services:
-
-**Services:**
-
-- `BrowserService` - Web browsing capabilities
-- `ImageDescriptionService` - Image analysis
-- `LlamaService` - LLM integration
-- `PdfService` - PDF processing
-- `SpeechService` - Text-to-speech
-- `TranscriptionService` - Speech-to-text
-- `VideoService` - Video processing
-
-#### 4. Solana Plugin (`@eliza/plugin-solana`)
-
-Integrates Solana blockchain functionality:
-
-**Evaluators:**
-
-- `trustEvaluator` - Assess transaction trust scores
-
-**Providers:**
-
-- `walletProvider` - Wallet management
-- `trustScoreProvider` - Transaction trust metrics
-
-#### 5. Buttplug Plugin (`@eliza/plugin-buttplug`)
-
-Integrates Buttplug.io for intimate toy control:
-
-**Services:**
-
-- `ButtplugService` - Buttplug.io integration itself
-
-**Actions:**
-
-- `VIBRATE` - Control vibration intensity and duration of connected devices
-- `ROTATE` - Control rotation intensity and duration of connected devices
-- `BATTERY` - Get the battery level of connected devices
-
-## Using Plugins
-
-### Installation
-
-1. Install the desired plugin package:
-
-```bash
-pnpm add @eliza/plugin-[name]
-```
-
-2. Import and register the plugin in your character configuration:
-
-```typescript
-import { bootstrapPlugin } from "@eliza/plugin-bootstrap";
-import { imageGenerationPlugin } from "@eliza/plugin-image-generation";
-import { buttplugPlugin } from "@eliza/plugin-buttplug";
-const character = {
-  // ... other character config
-  plugins: [bootstrapPlugin, imageGenerationPlugin, buttplugPlugin],
-};
-```
-
-Here is the updated README with the Coinbase Commerce plugin information added:
 
 ---
 
-# 🧩 Plugins
-
-## Overview
-
-Eliza's plugin system provides a modular way to extend the core functionality with additional features, actions, evaluators, and providers. Plugins are self-contained modules that can be easily added or removed to customize your agent's capabilities.
-
-## Core Plugin Concepts
-
-### Plugin Structure
-
-Each plugin in Eliza must implement the `Plugin` interface with the following properties:
-
-```typescript
-interface Plugin {
-  name: string; // Unique identifier for the plugin
-  description: string; // Brief description of plugin functionality
-  actions?: Action[]; // Custom actions provided by the plugin
-  evaluators?: Evaluator[]; // Custom evaluators for behavior assessment
-  providers?: Provider[]; // Context providers for message generation
-  services?: Service[]; // Additional services (optional)
-}
-```
-
-### Available Plugins
-
-#### 1. Bootstrap Plugin (`@eliza/plugin-bootstrap`)
-
-The bootstrap plugin provides essential baseline functionality:
-
-**Actions:**
-
-- `continue` - Continue the current conversation flow
-- `followRoom` - Follow a room for updates
-- `unfollowRoom` - Unfollow a room
-- `ignore` - Ignore specific messages
-- `muteRoom` - Mute notifications from a room
-- `unmuteRoom` - Unmute notifications from a room
-
-**Evaluators:**
-
-- `fact` - Evaluate factual accuracy
-- `goal` - Assess goal completion
-
-**Providers:**
-
-- `boredom` - Manages engagement levels
-- `time` - Provides temporal context
-- `facts` - Supplies factual information
-
-#### 2. Image Generation Plugin (`@eliza/plugin-image-generation`)
+### 2. Image Generation Plugin (`@eliza/plugin-image-generation`)
 
 Enables AI image generation capabilities:
 
@@ -183,7 +59,9 @@ Enables AI image generation capabilities:
 - Supports multiple image generation services (Anthropic, Together)
 - Auto-generates captions for created images
 
-#### 3. Node Plugin (`@eliza/plugin-node`)
+---
+
+### 3. Node Plugin (`@eliza/plugin-node`)
 
 Provides core Node.js-based services:
 
@@ -197,7 +75,9 @@ Provides core Node.js-based services:
 - `TranscriptionService` - Speech-to-text
 - `VideoService` - Video processing
 
-#### 4. Solana Plugin (`@eliza/plugin-solana`)
+---
+
+### 4. Solana Plugin (`@eliza/plugin-solana`)
 
 Integrates Solana blockchain functionality:
 
@@ -210,7 +90,9 @@ Integrates Solana blockchain functionality:
 - `walletProvider` - Wallet management
 - `trustScoreProvider` - Transaction trust metrics
 
-#### 5. Coinbase Commerce Plugin (`@eliza/plugin-coinbase`)
+---
+
+### 5. Coinbase Commerce Plugin (`@eliza/plugin-coinbase`)
 
 Integrates Coinbase Commerce for payment and transaction management:
 
@@ -221,11 +103,12 @@ Integrates Coinbase Commerce for payment and transaction management:
 - `GET_CHARGE_DETAILS` - Retrieve details for a specific charge
 
 **Description:**
+
 This plugin enables Eliza to interact with the Coinbase Commerce API to create and manage payment charges, providing seamless integration with cryptocurrency-based payment systems.
 
 ---
 
-#### 6. Coinbase MassPayments Plugin (`@eliza/plugin-coinbase`)
+### 6. Coinbase MassPayments Plugin (`@eliza/plugin-coinbase`)
 
 This plugin facilitates the processing of cryptocurrency mass payouts using the Coinbase SDK. It enables the creation and management of mass payouts to multiple wallet addresses, logging all transaction details to a CSV file for further analysis.
 
@@ -294,9 +177,7 @@ Supported networks:
    - `COINBASE_API_KEY`: API key for Coinbase SDK.
    - `COINBASE_PRIVATE_KEY`: Private key for secure transactions.
 
----
-
-### Wallet Management
+**Wallet Management:**
 
 The plugin automatically handles wallet creation or uses an existing wallet if the required details are provided during the first run.
 
@@ -313,9 +194,7 @@ The plugin automatically handles wallet creation or uses an existing wallet if t
    - Provide `COINBASE_GENERATED_WALLET_HEX_SEED` and `COINBASE_GENERATED_WALLET_ID` via `runtime.character.settings.secrets` or environment variables.
    - The plugin will **import the wallet** and use it for processing mass payouts.
 
----
-
-### Required Configurations
+**Required Configurations:**
 
 The following configurations must be provided for wallet management:
 
@@ -324,9 +203,7 @@ The following configurations must be provided for wallet management:
   - `COINBASE_GENERATED_WALLET_ID`: Unique wallet ID.
   - These variables must be securely stored in `runtime.character.settings.secrets` or as environment variables.
 
----
-
-### Wallet Creation Process
+**Wallet Creation Process:**
 
 1. **Automatic Wallet Creation**
    When no wallet details are available:
@@ -357,11 +234,9 @@ The following configurations must be provided for wallet management:
      elizaLogger.log("Imported existing wallet:", wallet.getDefaultAddress());
      ```
 
----
+**Example Configuration:**
 
-### Example Configuration
-
-#### Automatic Wallet Generation:
+**Automatic Wallet Generation:**
 
 No existing wallet information is passed. The plugin creates and stores a new wallet:
 
@@ -377,7 +252,7 @@ Output Log:
 [INFO] Created and stored new wallet: 0x1234567890abcdef1234567890abcdef12345678
 ```
 
-#### Using Existing Wallet Information:
+**Using Existing Wallet Information:**
 
 Existing wallet details are passed into the runtime:
 
@@ -394,8 +269,6 @@ Output Log:
 ```plaintext
 [INFO] Imported existing wallet: 0x1234567890abcdef1234567890abcdef12345678
 ```
-
----
 
 3. **Example Call**
    An example of using the `SEND_MASS_PAYOUT` action:
@@ -437,6 +310,92 @@ When successful, a response similar to the following will be returned:
 - **Error Handling**: Monitor logs for failed transactions or errors in the payout process and adjust retry logic as needed.
 
 ---
+
+### 7. Buttplug Plugin (`@eliza/plugin-buttplug`)
+
+Integrates Buttplug.io for intimate toy control:
+
+**Services:**
+
+- `ButtplugService` - Buttplug.io integration itself
+
+**Actions:**
+
+- `VIBRATE` - Control vibration intensity and duration of connected devices
+- `ROTATE` - Control rotation intensity and duration of connected devices
+- `BATTERY` - Get the battery level of connected devices
+
+---
+
+### 8. Github Plugin (`@eliza/plugin-github`)
+
+This plugin integrates with the GitHub API to provide various actions and evaluators for managing repositories, issues, and pull requests.
+
+**Actions:**
+
+- `CREATE_ISSUE` - Create a new issue in a GitHub repository.
+- `GET_ISSUES` - Retrieve a list of issues from a GitHub repository.
+- `CLOSE_ISSUE` - Close an existing issue in a GitHub repository.
+- `CREATE_PULL_REQUEST` - Create a new pull request in a GitHub repository.
+- `GET_PULL_REQUESTS` - Retrieve a list of pull requests from a GitHub repository.
+- `MERGE_PULL_REQUEST` - Merge an existing pull request in a GitHub repository.
+
+**Evaluators:**
+
+- `issueEvaluator` - Evaluate the status and priority of an issue.
+- `pullRequestEvaluator` - Assess the status and readiness of a pull request.
+
+**Providers:**
+
+- `repositoryProvider` - Manage repository information and access.
+- `issueProvider` - Retrieve issue details and status.
+- `pullRequestProvider` - Fetch pull request information and status.
+
+**Description:**
+
+The GitHub plugin streamlines repository management and issue tracking, enabling seamless integration with GitHub repositories for efficient project collaboration and development workflows.
+
+**Usage Instructions:**
+
+1. **Configure the Plugin**
+   Add the plugin to your character’s configuration:
+
+   ```typescript
+   import { githubPlugin } from "@eliza/plugin-github";
+
+   const character = {
+     plugins: [githubPlugin],
+   };
+   ```
+
+2. **Ensure Secure Configuration**
+    Set the following environment variables or runtime settings to ensure the plugin functions securely:
+  
+    - `GITHUB_API_KEY`: API key for GitHub API access.
+    - `GITHUB_REPOSITORY_OWNER`: GitHub repository owner/organization.
+    - `GITHUB_REPOSITORY_NAME`: GitHub repository name.
+
+## Using Plugins
+
+### Installation
+
+1. Install the desired plugin package:
+
+```bash
+pnpm add @eliza/plugin-[name]
+```
+
+2. Import and register the plugin in your character configuration:
+
+```typescript
+import { bootstrapPlugin } from "@eliza/plugin-bootstrap";
+import { imageGenerationPlugin } from "@eliza/plugin-image-generation";
+
+const character = {
+  // ... other character config
+  plugins: [bootstrapPlugin, imageGenerationPlugin],
+};
+```
 
 ### Writing Custom Plugins
 
