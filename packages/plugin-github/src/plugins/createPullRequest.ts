@@ -9,46 +9,6 @@ import { composeContext, elizaLogger, generateObjectV2, Action, HandlerCallback,
 import { createPullRequestTemplate } from "../templates";
 import { CreatePullRequestContent, CreatePullRequestSchema, isCreatePullRequestContent } from "../types";
 
-export async function createReposDirectory(owner: string) {
-    try {
-        // Create repos directory if it doesn't exist
-        await fs.mkdir(path.join(process.cwd(), ".repos", owner), {
-            recursive: true,
-        });
-    } catch (error) {
-        throw new Error(`Error creating repos directory: ${error}`);
-    }
-}
-
-export async function cloneOrPullRepository(owner: string, repo: string, repoPath: string) {
-    try {
-        // Clone or pull repository
-        if (!existsSync(repoPath)) {
-            await this.git.clone(
-                `https://github.com/${owner}/${repo}.git`,
-                repoPath
-            );
-        } else {
-            const git = simpleGit(repoPath);
-            await git.pull();
-        }
-    } catch (error) {
-        throw new Error(`Error cloning or pulling repository: ${error}`);
-    }
-}
-
-export async function checkoutBranch(repoPath: string, branch: string) {
-    try {
-        // Checkout specified branch if provided
-        if (branch) {
-            const git = simpleGit(repoPath);
-            await git.checkout(branch);
-        }
-    } catch (error) {
-        throw new Error(`Error checking out branch: ${error}`);
-    }
-}
-
 export async function createNewBranch(repoPath: string, branch: string) {
     try {
         // Create a new branch
