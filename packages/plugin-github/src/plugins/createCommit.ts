@@ -2,7 +2,7 @@ import path from "path";
 import { composeContext, elizaLogger, generateObjectV2, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
 import { createCommitTemplate } from "../templates";
 import { CreateCommitContent, CreateCommitSchema, isCreateCommitContent } from "../types";
-import { commitAndPushChanges, writeFiles } from "../utils";
+import { commitAndPushChanges, getRepoPath, writeFiles } from "../utils";
 
 export const createCommitAction: Action = {
     name: "CREATE_COMMIT",
@@ -42,12 +42,7 @@ export const createCommitAction: Action = {
 
         elizaLogger.info("Committing changes to the repository...");
 
-        const repoPath = path.join(
-            process.cwd(),
-            ".repos",
-            content.owner,
-            content.repo,
-        );
+        const repoPath = getRepoPath(content.owner, content.repo);
 
         try {
             await writeFiles(repoPath, content.files);

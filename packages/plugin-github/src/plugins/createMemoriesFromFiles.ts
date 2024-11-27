@@ -4,7 +4,7 @@ import { createHash } from "crypto";
 import { composeContext, elizaLogger, generateObjectV2, knowledge, stringToUuid, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
 import { createMemoriesFromFilesTemplate } from "../templates";
 import { CreateMemoriesFromFilesContent, CreateMemoriesFromFilesSchema, isCreateMemoriesFromFilesContent } from "../types";
-import { retrieveFiles } from "../utils";
+import { getRepoPath, retrieveFiles } from "../utils";
 
 export async function addFilesToMemory(runtime: IAgentRuntime, files: string[], repoPath: string, owner: string, repo: string) {
     for (const file of files) {
@@ -89,12 +89,7 @@ export const createMemoriesFromFilesAction: Action = {
 
         elizaLogger.info("Creating memories from files...");
 
-        const repoPath = path.join(
-            process.cwd(),
-            ".repos",
-            content.owner,
-            content.repo,
-        );
+        const repoPath = getRepoPath(content.owner, content.repo);
 
         try {
             const files = await retrieveFiles(repoPath, content.path);
