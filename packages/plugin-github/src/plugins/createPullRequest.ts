@@ -19,6 +19,50 @@ export async function createNewBranch(repoPath: string, branch: string) {
     }
 }
 
+export async function writeFiles(repoPath: string, files: Array<{ path: string; content: string }>) {
+    try {
+        for (const file of files) {
+            const filePath = path.join(repoPath, file.path);
+            await fs.mkdir(path.dirname(filePath), { recursive: true });
+            await fs.writeFile(filePath, file.content);
+        }
+    } catch (error) {
+        throw new Error(`Error writing files: ${error}`);
+    }
+}
+
+export async function commitAndPushChanges(repoPath: string, branch: string, title: string) {
+    try {
+        const git = simpleGit(repoPath);
+        await git.add(".");
+        await git.commit(title);
+        await git.push("origin", branch);
+    } catch (error) {
+        throw new Error(`Error committing and pushing changes: ${error}`);
+    }
+}
+
+export async function createPullRequest(token: string, owner: string, repo: string, branch: string, title: string, description?: string, base?: string) {
+    try {
+        const octokit = new Octokit({
+            auth: token,
+        });
+
+        const pr = await octokit.pulls.create({
+            owner,
+            repo,
+            title,
+            body: description || title,
+            head: branch,
+            base: base || "main",
+        });
+
+        return pr.data;
+    } catch (error) {
+        throw new Error(`Error creating pull request: ${error}`);
+    }
+}
+
 export const createPullRequestAction: Action = {
     name: "CREATE_PULL_REQUEST",
     similes: ["CREATE_PR"],
@@ -66,12 +110,17 @@ export const createPullRequestAction: Action = {
 
         try {
             await createNewBranch(repoPath, content.branch);
-
-            // TODO: write files to the repository
-
-            // TODO: commit and push changes
-
-            // TODO: create a pull request
+            await writeFiles(repoPath, content.files);
+            await commitAndPushChanges(repoPath, content.branch, content.title);
+            await createPullRequest(
+                runtime.getSetting("GITHUB_API_TOKEN"),
+                content.owner,
+                content.repo,
+                content.branch,
+                content.title,
+                content.description,
+                content.base,
+            );
 
             elizaLogger.info("Pull request created successfully!");
 
@@ -82,10 +131,10 @@ export const createPullRequestAction: Action = {
                 }
             );
         } catch (error) {
-            elizaLogger.error(`Error creating pull request on ${content.owner}/${content.repo} branch ${content.branch} path ${content.path}:`, error);
+            elizaLogger.error(`Error creating pull request on ${content.owner}/${content.repo} branch ${content.branch}:`, error);
             callback(
                 {
-                    text: `Error creating pull request on ${content.owner}/${content.repo} branch ${content.branch} path ${content.path}. Please try again.`,
+                    text: `Error creating pull request on ${content.owner}/${content.repo} branch ${content.branch}. Please try again.`,
                 },
                 [],
             );

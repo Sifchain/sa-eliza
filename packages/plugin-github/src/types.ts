@@ -43,15 +43,21 @@ export const isCreateMemoriesFromFilesContent = (object: any): object is CreateM
 export const CreatePullRequestSchema = z.object({
     owner: z.string().min(1, "GitHub owner is required"),
     repo: z.string().min(1, "GitHub repo is required"),
-    branch: z.string().min(1, "GitHub branch is required"),
-    path: z.string().min(1, "GitHub path is required"),
+    base: z.string().optional(),
+    branch: z.string().min(1, "GitHub pull request branch is required"),
+    title: z.string().min(1, "Pull request title is required"),
+    description: z.string().optional(),
+    files: z.array(z.object({ path: z.string(), content: z.string() })),
 });
 
 export interface CreatePullRequestContent {
     owner: string;
     repo: string;
+    base?: string;
     branch: string;
-    path: string;
+    title: string;
+    description?: string;
+    files: Array<{ path: string; content: string }>;
 }
 
 export const isCreatePullRequestContent = (object: any): object is CreatePullRequestContent => {
