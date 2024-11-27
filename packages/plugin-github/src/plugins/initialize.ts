@@ -1,50 +1,7 @@
-import simpleGit from "simple-git";
-import path from "path";
-import fs from "fs/promises";
-import { existsSync } from "fs";
 import { composeContext, elizaLogger, generateObjectV2, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
 import { initializeTemplate } from "../templates";
 import { InitializeContent, InitializeSchema, isInitializeContent } from "../types";
-
-export async function createReposDirectory(owner: string) {
-    try {
-        // Create repos directory if it doesn't exist
-        await fs.mkdir(path.join(process.cwd(), ".repos", owner), {
-            recursive: true,
-        });
-    } catch (error) {
-        throw new Error(`Error creating repos directory: ${error}`);
-    }
-}
-
-export async function cloneOrPullRepository(owner: string, repo: string, repoPath: string) {
-    try {
-        // Clone or pull repository
-        if (!existsSync(repoPath)) {
-            await this.git.clone(
-                `https://github.com/${owner}/${repo}.git`,
-                repoPath
-            );
-        } else {
-            const git = simpleGit(repoPath);
-            await git.pull();
-        }
-    } catch (error) {
-        throw new Error(`Error cloning or pulling repository: ${error}`);
-    }
-}
-
-export async function checkoutBranch(repoPath: string, branch: string) {
-    try {
-        // Checkout specified branch if provided
-        if (branch) {
-            const git = simpleGit(repoPath);
-            await git.checkout(branch);
-        }
-    } catch (error) {
-        throw new Error(`Error checking out branch: ${error}`);
-    }
-}
+import { checkoutBranch, cloneOrPullRepository, createReposDirectory, getRepoPath } from "../utils";
 
 export const initializeRepositoryAction: Action = {
     name: "INITIALIZE_REPOSITORY",
@@ -84,12 +41,7 @@ export const initializeRepositoryAction: Action = {
 
         elizaLogger.info("Initializing repository...");
 
-        const repoPath = path.join(
-            process.cwd(),
-            ".repos",
-            content.owner,
-            content.repo,
-        );
+        const repoPath = getRepoPath(content.owner, content.repo);
 
         try {
             await createReposDirectory(content.owner);

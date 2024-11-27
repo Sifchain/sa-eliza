@@ -1,67 +1,7 @@
-import { Octokit } from "@octokit/rest";
-import { glob } from "glob";
-import simpleGit, { SimpleGit } from "simple-git";
-import path from "path";
-import fs from "fs/promises";
-import { existsSync } from "fs";
-import { createHash } from "crypto";
 import { composeContext, elizaLogger, generateObjectV2, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
 import { createPullRequestTemplate } from "../templates";
 import { CreatePullRequestContent, CreatePullRequestSchema, isCreatePullRequestContent } from "../types";
-
-export async function createNewBranch(repoPath: string, branch: string) {
-    try {
-        // Create a new branch
-        const git = simpleGit(repoPath);
-        await git.checkoutLocalBranch(branch);
-    } catch (error) {
-        throw new Error(`Error creating new branch: ${error}`);
-    }
-}
-
-export async function writeFiles(repoPath: string, files: Array<{ path: string; content: string }>) {
-    try {
-        for (const file of files) {
-            const filePath = path.join(repoPath, file.path);
-            await fs.mkdir(path.dirname(filePath), { recursive: true });
-            await fs.writeFile(filePath, file.content);
-        }
-    } catch (error) {
-        throw new Error(`Error writing files: ${error}`);
-    }
-}
-
-export async function commitAndPushChanges(repoPath: string, branch: string, title: string) {
-    try {
-        const git = simpleGit(repoPath);
-        await git.add(".");
-        await git.commit(title);
-        await git.push("origin", branch);
-    } catch (error) {
-        throw new Error(`Error committing and pushing changes: ${error}`);
-    }
-}
-
-export async function createPullRequest(token: string, owner: string, repo: string, branch: string, title: string, description?: string, base?: string) {
-    try {
-        const octokit = new Octokit({
-            auth: token,
-        });
-
-        const pr = await octokit.pulls.create({
-            owner,
-            repo,
-            title,
-            body: description || title,
-            head: branch,
-            base: base || "main",
-        });
-
-        return pr.data;
-    } catch (error) {
-        throw new Error(`Error creating pull request: ${error}`);
-    }
-}
+import { checkoutBranch, commitAndPushChanges, createPullRequest, getRepoPath, writeFiles } from "../utils";
 
 export const createPullRequestAction: Action = {
     name: "CREATE_PULL_REQUEST",
@@ -101,17 +41,12 @@ export const createPullRequestAction: Action = {
 
         elizaLogger.info("Creating a pull request...");
 
-        const repoPath = path.join(
-            process.cwd(),
-            ".repos",
-            content.owner,
-            content.repo,
-        );
+        const repoPath = getRepoPath(content.owner, content.repo);
 
         try {
-            await createNewBranch(repoPath, content.branch);
+            await checkoutBranch(repoPath, content.branch, true);
             await writeFiles(repoPath, content.files);
-            await commitAndPushChanges(repoPath, content.branch, content.title);
+            await commitAndPushChanges(repoPath, content.title, content.branch);
             await createPullRequest(
                 runtime.getSetting("GITHUB_API_TOKEN"),
                 content.owner,

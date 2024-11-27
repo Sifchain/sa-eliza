@@ -1,20 +1,10 @@
-import { glob } from "glob";
 import path from "path";
 import fs from "fs/promises";
 import { createHash } from "crypto";
 import { composeContext, elizaLogger, generateObjectV2, knowledge, stringToUuid, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
 import { createMemoriesFromFilesTemplate } from "../templates";
 import { CreateMemoriesFromFilesContent, CreateMemoriesFromFilesSchema, isCreateMemoriesFromFilesContent } from "../types";
-
-export async function retrieveFiles(repoPath: string, gitPath: string) {
-    const searchPath = gitPath
-        ? path.join(repoPath, gitPath, "**/*")
-        : path.join(repoPath, "**/*");
-
-    const files = await glob(searchPath, { nodir: true });
-
-    return files
-}
+import { retrieveFiles } from "../utils";
 
 export async function addFilesToMemory(runtime: IAgentRuntime, files: string[], repoPath: string, owner: string, repo: string) {
     for (const file of files) {
