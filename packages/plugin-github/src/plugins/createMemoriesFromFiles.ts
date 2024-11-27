@@ -96,33 +96,6 @@ export const createMemoriesFromFilesAction: Action = {
         }
 
         const content = details.object as CreateMemoriesFromFilesContent;
-        if (!content.owner) {
-            callback(
-                {
-                    text: "Missing github owner. Please provide the owner of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
-        if (!content.repo) {
-            callback(
-                {
-                    text: "Missing github repo. Please provide the name of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
-        if (!content.path) {
-            callback(
-                {
-                    text: "Missing github path. Please provide the path of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
 
         elizaLogger.info("Creating memories from files...");
 
@@ -133,27 +106,43 @@ export const createMemoriesFromFilesAction: Action = {
             content.repo,
         );
 
-        const files = await retrieveFiles(repoPath, content.path);
+        try {
+            const files = await retrieveFiles(repoPath, content.path);
 
-        await addFilesToMemory(
-            runtime,
-            files,
-            repoPath,
-            content.owner,
-            content.repo,
-        );
+            await addFilesToMemory(
+                runtime,
+                files,
+                repoPath,
+                content.owner,
+                content.repo,
+            );
 
-        elizaLogger.info("Memories created successfully!");
+            elizaLogger.info("Memories created successfully!");
 
-        callback(
-            {
-                text: "Memories created successfully!",
-                attachments: [],
-            }
-        );
+            callback(
+                {
+                    text: "Memories created successfully!",
+                    attachments: [],
+                }
+            );
+        } catch (error) {
+            elizaLogger.error(`Error creating memories from files on ${content.owner}/${content.repo} path ${content.path}:`, error);
+            callback(
+                {
+                    text: `Error creating memories from files on ${content.owner}/${content.repo} path ${content.path}. Please try again.`,
+                },
+                [],
+            );
+        }
     },
     examples: [
         [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Create memories from files on repository octocat/hello-world at path docs/",
+                }
+            },
             {
                 user: "{{agentName}}",
                 content: {

@@ -81,33 +81,6 @@ export const initializeRepositoryAction: Action = {
         }
 
         const content = details.object as InitializeContent;
-        if (!content.owner) {
-            callback(
-                {
-                    text: "Missing github owner. Please provide the owner of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
-        if (!content.repo) {
-            callback(
-                {
-                    text: "Missing github repo. Please provide the name of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
-        if (!content.branch) {
-            callback(
-                {
-                    text: "Missing github branch. Please provide the branch of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
 
         elizaLogger.info("Initializing repository...");
 
@@ -118,25 +91,41 @@ export const initializeRepositoryAction: Action = {
             content.repo,
         );
 
-        await createReposDirectory(content.owner);
-        await cloneOrPullRepository(
-            content.owner,
-            content.repo,
-            repoPath,
-        );
-        await checkoutBranch(repoPath, content.branch);
+        try {
+            await createReposDirectory(content.owner);
+            await cloneOrPullRepository(
+                content.owner,
+                content.repo,
+                repoPath,
+            );
+            await checkoutBranch(repoPath, content.branch);
 
-        elizaLogger.info("Repository initialized successfully!");
+            elizaLogger.info("Repository initialized successfully!");
 
-        callback(
-            {
-                text: "Repository initialized successfully!",
-                attachments: [],
-            }
-        );
+            callback(
+                {
+                    text: "Repository initialized successfully!",
+                    attachments: [],
+                }
+            );
+        } catch (error) {
+            elizaLogger.error(`Error initializing repository ${content.owner}/${content.repo} branch ${content.branch}:`, error);
+            callback(
+                {
+                    text: `Error initializing repository ${content.owner}/${content.repo} branch ${content.branch}. Please try again.`,
+                },
+                [],
+            )
+        }
     },
     examples: [
         [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Initialize the repository for user1/repo1 on main branch",
+                }
+            },
             {
                 user: "{{agentName}}",
                 content: {

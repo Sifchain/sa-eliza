@@ -94,33 +94,6 @@ export const createPullRequestAction: Action = {
         }
 
         const content = details.object as CreatePullRequestContent;
-        if (!content.owner) {
-            callback(
-                {
-                    text: "Missing github owner. Please provide the owner of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
-        if (!content.repo) {
-            callback(
-                {
-                    text: "Missing github repo. Please provide the name of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
-        if (!content.branch) {
-            callback(
-                {
-                    text: "Missing github branch. Please provide the branch of the GitHub repository.",
-                },
-                [],
-            );
-            return;
-        }
 
         elizaLogger.info("Creating a pull request...");
 
@@ -131,25 +104,41 @@ export const createPullRequestAction: Action = {
             content.repo,
         );
 
-        await createNewBranch(repoPath, content.branch);
+        try {
+            await createNewBranch(repoPath, content.branch);
 
-        // TODO: write files to the repository
+            // TODO: write files to the repository
 
-        // TODO: commit and push changes
+            // TODO: commit and push changes
 
-        // TODO: create a pull request
+            // TODO: create a pull request
 
-        elizaLogger.info("Pull request created successfully!");
+            elizaLogger.info("Pull request created successfully!");
 
-        callback(
-            {
-                text: "Pull request created successfully!",
-                attachments: [],
-            }
-        );
+            callback(
+                {
+                    text: "Pull request created successfully!",
+                    attachments: [],
+                }
+            );
+        } catch (error) {
+            elizaLogger.error(`Error creating pull request on ${content.owner}/${content.repo} branch ${content.branch} path ${content.path}:`, error);
+            callback(
+                {
+                    text: `Error creating pull request on ${content.owner}/${content.repo} branch ${content.branch} path ${content.path}. Please try again.`,
+                },
+                [],
+            );
+        }
     },
     examples: [
         [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Create a pull request on repository octocat/hello-world with branch main and path docs/",
+                }
+            },
             {
                 user: "{{agentName}}",
                 content: {
