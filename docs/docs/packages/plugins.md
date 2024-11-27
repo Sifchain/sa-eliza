@@ -333,27 +333,22 @@ This plugin integrates with the GitHub API to provide various actions and evalua
 
 **Actions:**
 
-- `CREATE_ISSUE` - Create a new issue in a GitHub repository.
-- `GET_ISSUES` - Retrieve a list of issues from a GitHub repository.
-- `CLOSE_ISSUE` - Close an existing issue in a GitHub repository.
+- `INITIALIZE_REPOSITORY` - Initialize a GitHub repository.
+- `CREATE_COMMIT` - Create a new commit in a GitHub repository.
 - `CREATE_PULL_REQUEST` - Create a new pull request in a GitHub repository.
-- `GET_PULL_REQUESTS` - Retrieve a list of pull requests from a GitHub repository.
-- `MERGE_PULL_REQUEST` - Merge an existing pull request in a GitHub repository.
+- `MEMORIES_FROM_FILES` - Generate memories from files in a GitHub repository.
 
 **Evaluators:**
 
-- `issueEvaluator` - Evaluate the status and priority of an issue.
-- `pullRequestEvaluator` - Assess the status and readiness of a pull request.
+None
 
 **Providers:**
 
-- `repositoryProvider` - Manage repository information and access.
-- `issueProvider` - Retrieve issue details and status.
-- `pullRequestProvider` - Fetch pull request information and status.
+None
 
 **Description:**
 
-The GitHub plugin streamlines repository management and issue tracking, enabling seamless integration with GitHub repositories for efficient project collaboration and development workflows.
+The GitHub plugins enable agents to interact with GitHub repositories, create commits, pull requests, and generate memories from files stored in a repository.
 
 **Usage Instructions:**
 
@@ -361,10 +356,10 @@ The GitHub plugin streamlines repository management and issue tracking, enabling
    Add the plugin to your character’s configuration:
 
    ```typescript
-   import { githubPlugin } from "@eliza/plugin-github";
+   import { githubInitializeRepository, githubCreateCommit, githubCreatePullRequest, githubMemoriesFromFiles } from "@eliza/plugin-github";
 
    const character = {
-     plugins: [githubPlugin],
+     plugins: [githubInitializeRepository, githubCreateCommit, githubCreatePullRequest, githubMemoriesFromFiles],
    };
    ```
 
@@ -372,8 +367,6 @@ The GitHub plugin streamlines repository management and issue tracking, enabling
     Set the following environment variables or runtime settings to ensure the plugin functions securely:
   
     - `GITHUB_API_KEY`: API key for GitHub API access.
-    - `GITHUB_REPOSITORY_OWNER`: GitHub repository owner/organization.
-    - `GITHUB_REPOSITORY_NAME`: GitHub repository name.
 
 ## Using Plugins
 
