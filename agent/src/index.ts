@@ -29,6 +29,9 @@ import {
     coinbaseCommercePlugin,
     coinbaseMassPaymentsPlugin,
 } from "@ai16z/plugin-coinbase";
+import {
+
+} from "@ai16z/plugin-github"
 import { confluxPlugin } from "@ai16z/plugin-conflux";
 import {
     createNodePlugin,

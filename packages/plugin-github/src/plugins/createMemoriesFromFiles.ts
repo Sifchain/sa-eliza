@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs/promises";
 import { createHash } from "crypto";
-import { composeContext, elizaLogger, generateObjectV2, knowledge, stringToUuid, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
+import { composeContext, elizaLogger, generateObjectV2, stringToUuid, Action, HandlerCallback, IAgentRuntime, Memory, ModelClass, Plugin, State } from "@ai16z/eliza";
 import { createMemoriesFromFilesTemplate } from "../templates";
 import { CreateMemoriesFromFilesContent, CreateMemoriesFromFilesSchema, isCreateMemoriesFromFilesContent } from "../types";
 import { getRepoPath, retrieveFiles } from "../utils";
@@ -13,12 +13,12 @@ export async function addFilesToMemory(runtime: IAgentRuntime, files: string[], 
         const contentHash = createHash("sha256")
             .update(content)
             .digest("hex");
-        const knowledgeId = stringToUuid(
+        const memoryId = stringToUuid(
             `github-${owner}-${repo}-${relativePath}`
         );
 
         const existingDocument =
-            await runtime.documentsManager.getMemoryById(knowledgeId);
+            await runtime.messageManager.getMemoryById(memoryId);
 
         if (
             existingDocument &&
@@ -34,8 +34,11 @@ export async function addFilesToMemory(runtime: IAgentRuntime, files: string[], 
             relativePath
         );
 
-        await knowledge.set(runtime, {
-            id: knowledgeId,
+        await runtime.messageManager.createMemory({
+            id: memoryId,
+            userId: runtime.agentId,
+            agentId: runtime.agentId,
+            roomId: memoryId,
             content: {
                 text: content,
                 hash: contentHash,
@@ -47,7 +50,7 @@ export async function addFilesToMemory(runtime: IAgentRuntime, files: string[], 
                     owner,
                 },
             },
-        });
+        } as Memory);
     }
 }
 
