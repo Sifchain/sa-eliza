@@ -35,6 +35,8 @@ PACKAGES=(
     "plugin-bootstrap"
     "plugin-image-generation"
     "plugin-coinbase"
+    "plugin-evm"
+    "plugin-tee"
     "plugin-github"
     "client-auto"
     "client-direct"

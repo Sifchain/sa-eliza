@@ -327,7 +327,87 @@ Integrates Buttplug.io for intimate toy control:
 
 ---
 
-### 8. Github Plugin (`@eliza/plugin-github`)
+#### 8. TEE Plugin (`@ai16z/plugin-tee`)
+
+Integrates [Dstack SDK](https://github.com/Dstack-TEE/dstack) to enable TEE (Trusted Execution Environment) functionality and deploy secure & privacy-enhanced Eliza Agents:
+
+**Providers:**
+
+- `deriveKeyProvider` - Allows for secure key derivation within a TEE environment. It supports deriving keys for both Solana (Ed25519) and Ethereum (ECDSA) chains.
+- `remoteAttestationProvider` - Generate a Remote Attestation Quote based on `report_data`.
+
+**DeriveKeyProvider Usage**
+
+```typescript
+import { DeriveKeyProvider } from "@ai16z/plugin-tee";
+
+// Initialize the provider
+const provider = new DeriveKeyProvider();
+
+// Derive a raw key
+try {
+    const rawKey = await provider.rawDeriveKey(
+        "/path/to/derive",
+        "subject-identifier"
+    );
+    // rawKey is a DeriveKeyResponse that can be used for further processing
+    // to get the uint8Array do the following
+    const rawKeyArray = rawKey.asUint8Array()
+} catch (error) {
+    console.error("Raw key derivation failed:", error);
+}
+
+// Derive a Solana keypair (Ed25519)
+try {
+    const solanaKeypair = await provider.deriveEd25519Keypair(
+        "/path/to/derive",
+        "subject-identifier"
+    );
+    // solanaKeypair can now be used for Solana operations
+} catch (error) {
+    console.error("Solana key derivation failed:", error);
+}
+
+// Derive an Ethereum keypair (ECDSA)
+try {
+    const evmKeypair = await provider.deriveEcdsaKeypair(
+        "/path/to/derive",
+        "subject-identifier"
+    );
+    // evmKeypair can now be used for Ethereum operations
+} catch (error) {
+    console.error("EVM key derivation failed:", error);
+}
+```
+
+**RemoteAttestationProvider Usage**
+
+```typescript
+import { RemoteAttestationProvider } from "@ai16z/plugin-tee";
+// Initialize the provider
+const provider = new RemoteAttestationProvider();
+// Generate Remote Attestation
+try {
+    const attestation = await provider.generateAttestation("your-report-data");
+    console.log("Attestation:", attestation);
+} catch (error) {
+    console.error("Failed to generate attestation:", error);
+}
+```
+
+**Configuration**
+
+When using the provider through the runtime environment, ensure the following settings are configured:
+
+```env
+ # Optional, for simulator purposes if testing on mac or windows. Leave empty for Linux x86 machines.
+DSTACK_SIMULATOR_ENDPOINT="http://host.docker.internal:8090"
+WALLET_SECRET_SALT=your-secret-salt // Required to single agent deployments
+```
+
+___
+
+### 9. Github Plugin (`@eliza/plugin-github`)
 
 This plugin integrates with the GitHub API to provide various actions and evaluators for managing repositories, issues, and pull requests.
 
@@ -366,7 +446,7 @@ The GitHub plugins enable agents to interact with GitHub repositories, create co
 2. **Ensure Secure Configuration**
     Set the following environment variables or runtime settings to ensure the plugin functions securely:
   
-    - `GITHUB_API_KEY`: API key for GitHub API access.
+    - `GITHUB_API_TOKEN`: API key for GitHub API access.
 
 ## Using Plugins
 
