@@ -4,6 +4,7 @@ import { glob } from "glob";
 import { existsSync } from "fs";
 import simpleGit from "simple-git";
 import { Octokit } from "@octokit/rest";
+import { elizaLogger } from "@ai16z/eliza";
 
 export function getRepoPath(owner: string, repo: string) {
     return path.join(
@@ -21,6 +22,7 @@ export async function createReposDirectory(owner: string) {
             recursive: true,
         });
     } catch (error) {
+        elizaLogger.error("Error creating repos directory:", error);
         throw new Error(`Error creating repos directory: ${error}`);
     }
 }
@@ -38,6 +40,7 @@ export async function cloneOrPullRepository(owner: string, repo: string, repoPat
             await git.pull();
         }
     } catch (error) {
+        elizaLogger.error(`Error cloning or pulling repository ${owner}/${repo}:`, error);
         throw new Error(`Error cloning or pulling repository: ${error}`);
     }
 }
@@ -50,6 +53,7 @@ export async function writeFiles(repoPath: string, files: Array<{ path: string; 
             await fs.writeFile(filePath, file.content);
         }
     } catch (error) {
+        elizaLogger.error("Error writing files:", error);
         throw new Error(`Error writing files: ${error}`);
     }
 }
@@ -65,6 +69,7 @@ export async function commitAndPushChanges(repoPath: string, message: string, br
             await git.push();
         }
     } catch (error) {
+        elizaLogger.error("Error committing and pushing changes:", error);
         throw new Error(`Error committing and pushing changes: ${error}`);
     }
 }
@@ -85,6 +90,7 @@ export async function checkoutBranch(repoPath: string, branch?: string, create: 
             await git.checkout(branch);
         }
     } catch (error) {
+        elizaLogger.error("Error checking out branch:", error);
         throw new Error(`Error checking out branch: ${error}`);
     }
 }
@@ -106,6 +112,7 @@ export async function createPullRequest(token: string, owner: string, repo: stri
 
         return pr.data;
     } catch (error) {
+        elizaLogger.error("Error creating pull request:", error);
         throw new Error(`Error creating pull request: ${error}`);
     }
 }

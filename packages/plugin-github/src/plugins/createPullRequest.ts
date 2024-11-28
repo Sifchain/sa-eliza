@@ -5,7 +5,7 @@ import { checkoutBranch, commitAndPushChanges, createPullRequest, getRepoPath, w
 
 export const createPullRequestAction: Action = {
     name: "CREATE_PULL_REQUEST",
-    similes: ["CREATE_PR"],
+    similes: ["CREATE_PR", "GENERATE_PR"],
     description: "Create a pull request",
     validate: async (runtime: IAgentRuntime) => {
         // Check if all required environment variables are set
