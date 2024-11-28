@@ -123,6 +123,9 @@ importers:
       '@ai16z/plugin-conflux':
         specifier: workspace:*
         version: link:../packages/plugin-conflux
+      '@ai16z/plugin-github':
+        specifier: workspace:*
+        version: link:../packages/plugin-github
       '@ai16z/plugin-image-generation':
         specifier: workspace:*
         version: link:../packages/plugin-image-generation

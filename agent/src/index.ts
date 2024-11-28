@@ -30,7 +30,10 @@ import {
     coinbaseMassPaymentsPlugin,
 } from "@ai16z/plugin-coinbase";
 import {
-
+    githubInitializePlugin,
+    githubCreateCommitPlugin,
+    githubCreatePullRequestPlugin,
+    createMemoriesFromFilesAction,
 } from "@ai16z/plugin-github"
 import { confluxPlugin } from "@ai16z/plugin-conflux";
 import {
@@ -285,6 +288,10 @@ export function createAgent(
                 getSecret(character, "COINBASE_PRIVATE_KEY")
                 ? coinbaseMassPaymentsPlugin
                 : null,
+            getSecret(character, "GITHUB_TOKEN") ? githubInitializePlugin : null,
+            getSecret(character, "GITHUB_TOKEN") ? githubCreateCommitPlugin : null,
+            getSecret(character, "GITHUB_TOKEN") ? githubCreatePullRequestPlugin : null,
+            getSecret(character, "GITHUB_TOKEN") ? createMemoriesFromFilesAction : null,
             getSecret(character, "BUTTPLUG_API_KEY") ? buttplugPlugin : null,
         ].filter(Boolean),
         providers: [],
