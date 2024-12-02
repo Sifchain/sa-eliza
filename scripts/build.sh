@@ -37,6 +37,7 @@ PACKAGES=(
     "plugin-coinbase"
     "plugin-evm"
     "plugin-tee"
+    "plugin-github"
     "client-auto"
     "client-direct"
     "client-discord"

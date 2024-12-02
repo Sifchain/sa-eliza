@@ -628,6 +628,49 @@ WALLET_SECRET_SALT=your-secret-salt // Required to single agent deployments
 
 ---
 
+### 9. Github Plugin (`@eliza/plugin-github`)
+
+This plugin integrates with the GitHub API to provide various actions and evaluators for managing repositories, issues, and pull requests.
+
+**Actions:**
+
+- `INITIALIZE_REPOSITORY` - Initialize a GitHub repository.
+- `CREATE_COMMIT` - Create a new commit in a GitHub repository.
+- `CREATE_PULL_REQUEST` - Create a new pull request in a GitHub repository.
+- `MEMORIES_FROM_FILES` - Generate memories from files in a GitHub repository.
+
+**Evaluators:**
+
+None
+
+**Providers:**
+
+None
+
+**Description:**
+
+The GitHub plugins enable agents to interact with GitHub repositories, create commits, pull requests, and generate memories from files stored in a repository.
+
+**Usage Instructions:**
+
+1. **Configure the Plugin**
+   Add the plugin to your character’s configuration:
+
+   ```typescript
+   import { githubInitializeRepository, githubCreateCommit, githubCreatePullRequest, githubMemoriesFromFiles } from "@eliza/plugin-github";
+
+   const character = {
+     plugins: [githubInitializeRepository, githubCreateCommit, githubCreatePullRequest, githubMemoriesFromFiles],
+   };
+   ```
+
+2. **Ensure Secure Configuration**
+    Set the following environment variables or runtime settings to ensure the plugin functions securely:
+
+    - `GITHUB_API_TOKEN`: API key for GitHub API access.
+
+---
+
 ### Writing Custom Plugins
 
 Create a new plugin by implementing the Plugin interface:
