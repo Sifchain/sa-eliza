@@ -10,7 +10,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1104](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1104)
+[packages/core/src/types.ts:1136](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1136)
 
 ***
 
@@ -20,7 +20,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1105](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1105)
+[packages/core/src/types.ts:1137](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1137)
 
 ***
 
@@ -30,7 +30,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1106](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1106)
+[packages/core/src/types.ts:1138](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1138)
 
 ***
 
@@ -40,7 +40,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1107](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1107)
+[packages/core/src/types.ts:1139](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1139)
 
 ***
 
@@ -50,7 +50,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1108](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1108)
+[packages/core/src/types.ts:1140](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1140)
 
 ***
 
@@ -60,7 +60,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1109](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1109)
+[packages/core/src/types.ts:1141](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1141)
 
 ***
 
@@ -70,7 +70,7 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1110](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1110)
+[packages/core/src/types.ts:1142](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1142)
 
 ***
 
@@ -80,4 +80,4 @@
 
 #### Defined in
 
-[packages/core/src/types.ts:1111](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1111)
+[packages/core/src/types.ts:1143](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L1143)

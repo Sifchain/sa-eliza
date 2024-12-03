@@ -6,12 +6,13 @@
     "types": "dist/index.d.ts",
     "dependencies": {
         "@ai16z/eliza": "workspace:*",
-        "tsup": "^8.3.5",
-        "buttplug": "^3.2.2",
-        "net": "^1.0.2"
+        "tsup": "8.3.5",
+        "buttplug": "3.2.2",
+        "net": "1.0.2"
     },
     "scripts": {
         "build": "tsup --format esm --dts",
+        "dev": "tsup --format esm --dts --watch",
         "test-via-bun": "bun test/simulate.ts"
     },
     "peerDependencies": {

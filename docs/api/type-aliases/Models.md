@@ -68,6 +68,18 @@ Model configurations by provider
 
 > **falai**: [`Model`](Model.md)
 
+### gaianet
+
+> **gaianet**: [`Model`](Model.md)
+
+### ali\_bailian
+
+> **ali\_bailian**: [`Model`](Model.md)
+
+### volengine
+
+> **volengine**: [`Model`](Model.md)
+
 ## Defined in
 
 [packages/core/src/types.ts:188](https://github.com/ai16z/eliza/blob/main/packages/core/src/types.ts#L188)

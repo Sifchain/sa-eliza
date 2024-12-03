@@ -120,8 +120,6 @@ const character = {
 };
 ```
 
-Here is the updated README with the Coinbase Commerce plugin information added:
-
 ---
 
 # 🧩 Plugins
@@ -209,6 +207,21 @@ Integrates Solana blockchain functionality:
 
 - `walletProvider` - Wallet management
 - `trustScoreProvider` - Transaction trust metrics
+
+### Charity Contributions
+
+All Coinbase trades and transfers automatically donate 1% of the transaction amount to charity. Currently, the charity addresses are hardcoded based on the network used for the transaction, with the current charity being supported as X.
+
+The charity addresses for each network are as follows:
+
+- **Base**: `0x1234567890123456789012345678901234567890`
+- **Solana**: `pWvDXKu6CpbKKvKQkZvDA66hgsTB6X2AgFxksYogHLV`
+- **Ethereum**: `0x750EF1D7a0b4Ab1c97B7A623D7917CcEb5ea779C`
+- **Arbitrum**: `0x1234567890123456789012345678901234567890`
+- **Polygon**: `0x1234567890123456789012345678901234567890`
+
+In the future, we aim to integrate with The Giving Block API to allow for dynamic and configurable donations, enabling support for a wider range of charitable organizations.
+
 
 #### 5. Coinbase Commerce Plugin (`@eliza/plugin-coinbase`)
 
@@ -538,6 +551,14 @@ try {
 
 **Configuration**
 
+To get a TEE simulator for local testing, use the following commands:
+
+```bash
+docker pull phalanetwork/tappd-simulator:latest
+# by default the simulator is available in localhost:8090
+docker run --rm -p 8090:8090 phalanetwork/tappd-simulator:latest
+```
+
 When using the provider through the runtime environment, ensure the following settings are configured:
 
 ```env
@@ -548,83 +569,46 @@ WALLET_SECRET_SALT=your-secret-salt // Required to single agent deployments
 
 ---
 
-#### 7. TEE Plugin (`@ai16z/plugin-tee`)
+### 9. Github Plugin (`@eliza/plugin-github`)
 
-Integrates [Dstack SDK](https://github.com/Dstack-TEE/dstack) to enable TEE (Trusted Execution Environment) functionality and deploy secure & privacy-enhanced Eliza Agents:
+This plugin integrates with the GitHub API to provide various actions and evaluators for managing repositories, issues, and pull requests.
+
+**Actions:**
+
+- `INITIALIZE_REPOSITORY` - Initialize a GitHub repository.
+- `CREATE_COMMIT` - Create a new commit in a GitHub repository.
+- `CREATE_PULL_REQUEST` - Create a new pull request in a GitHub repository.
+- `MEMORIES_FROM_FILES` - Generate memories from files in a GitHub repository.
+
+**Evaluators:**
+
+None
 
 **Providers:**
 
-- `deriveKeyProvider` - Allows for secure key derivation within a TEE environment. It supports deriving keys for both Solana (Ed25519) and Ethereum (ECDSA) chains.
-- `remoteAttestationProvider` - Generate a Remote Attestation Quote based on `report_data`.
+None
 
-**DeriveKeyProvider Usage**
+**Description:**
 
-```typescript
-import { DeriveKeyProvider } from "@ai16z/plugin-tee";
+The GitHub plugins enable agents to interact with GitHub repositories, create commits, pull requests, and generate memories from files stored in a repository.
 
-// Initialize the provider
-const provider = new DeriveKeyProvider();
+**Usage Instructions:**
 
-// Derive a raw key
-try {
-  const rawKey = await provider.rawDeriveKey(
-    "/path/to/derive",
-    "subject-identifier",
-  );
-  // rawKey is a DeriveKeyResponse that can be used for further processing
-  // to get the uint8Array do the following
-  const rawKeyArray = rawKey.asUint8Array();
-} catch (error) {
-  console.error("Raw key derivation failed:", error);
-}
+1. **Configure the Plugin**
+   Add the plugin to your character’s configuration:
 
-// Derive a Solana keypair (Ed25519)
-try {
-  const solanaKeypair = await provider.deriveEd25519Keypair(
-    "/path/to/derive",
-    "subject-identifier",
-  );
-  // solanaKeypair can now be used for Solana operations
-} catch (error) {
-  console.error("Solana key derivation failed:", error);
-}
+   ```typescript
+   import { githubInitializeRepository, githubCreateCommit, githubCreatePullRequest, githubMemoriesFromFiles } from "@eliza/plugin-github";
 
-// Derive an Ethereum keypair (ECDSA)
-try {
-  const evmKeypair = await provider.deriveEcdsaKeypair(
-    "/path/to/derive",
-    "subject-identifier",
-  );
-  // evmKeypair can now be used for Ethereum operations
-} catch (error) {
-  console.error("EVM key derivation failed:", error);
-}
-```
+   const character = {
+     plugins: [githubInitializeRepository, githubCreateCommit, githubCreatePullRequest, githubMemoriesFromFiles],
+   };
+   ```
 
-**RemoteAttestationProvider Usage**
+2. **Ensure Secure Configuration**
+    Set the following environment variables or runtime settings to ensure the plugin functions securely:
 
-```typescript
-import { RemoteAttestationProvider } from "@ai16z/plugin-tee";
-// Initialize the provider
-const provider = new RemoteAttestationProvider();
-// Generate Remote Attestation
-try {
-  const attestation = await provider.generateAttestation("your-report-data");
-  console.log("Attestation:", attestation);
-} catch (error) {
-  console.error("Failed to generate attestation:", error);
-}
-```
-
-**Configuration**
-
-When using the provider through the runtime environment, ensure the following settings are configured:
-
-```env
- # Optional, for simulator purposes if testing on mac or windows. Leave empty for Linux x86 machines.
-DSTACK_SIMULATOR_ENDPOINT="http://host.docker.internal:8090"
-WALLET_SECRET_SALT=your-secret-salt // Required to single agent deployments
-```
+    - `GITHUB_API_TOKEN`: API key for GitHub API access.
 
 ---
 

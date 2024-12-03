@@ -48,4 +48,8 @@ packages/core/cache/*
 packages/plugin-coinbase/src/plugins/transactions.csv
 packages/plugin-coinbase/package-lock.json
 
+tsup.config.bundled_*.mjs
+
 .turbo
+
+.repos
