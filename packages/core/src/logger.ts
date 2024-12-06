@@ -5,7 +5,7 @@ class ElizaLogger {
             typeof process !== "undefined" &&
             process.versions != null &&
             process.versions.node != null &&
-            false;
+            typeof process.stdin.isTTY !== "undefined";
 
         // Set verbose based on environment
         this.verbose = this.isNode ? process.env.VERBOSE === "true" : false;
