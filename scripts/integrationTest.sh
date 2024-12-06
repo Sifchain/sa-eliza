@@ -16,6 +16,7 @@ pwd
 # pnpm install -r
 pnpm build
 cp .env.example .env
+
 # pnpm start
 echo "exit" | pnpm start > output.txt
 # echo "hi" | pnpm start > output.txt
