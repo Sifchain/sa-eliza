@@ -13,7 +13,7 @@ fi
 cd "$(dirname "$0")"/..
 pwd
 
-# pnpm install -r
+pnpm install -r
 pnpm build
 cp .env.example .env
 
