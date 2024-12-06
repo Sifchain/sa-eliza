@@ -12,25 +12,5 @@ fi
 # Navigate to the script's directory
 cd "$(dirname "$0")"/..
 
-cp .env.example .env
-
 cd tests
 node test1.mjs
-
-# # pnpm start
-# echo "exit" | pnpm start > output.txt
-# # echo "hi" | pnpm start > output.txt
-
-# # Check the exit code of the last command
-# if [[ $? -ne 0 ]]; then
-#     echo "Error: The last command exited with an error."
-#     exit 1
-# fi
-
-# # Check if output.txt contains "Terminating and cleaning up resources..."
-# if grep -q "Terminating and cleaning up resources..." output.txt; then
-#     echo "Script completed successfully."
-# else
-#     echo "Error: The output file does not contain the expected string."
-#     exit 1
-# fi
