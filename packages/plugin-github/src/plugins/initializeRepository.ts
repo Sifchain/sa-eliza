@@ -22,6 +22,11 @@ import {
     createReposDirectory,
     getRepoPath,
 } from "../utils";
+import { sourceCodeProvider } from "../providers/sourceCode";
+import { testFilesProvider } from "../providers/testFiles";
+import { workflowFilesProvider } from "../providers/workflowFiles";
+import { documentationFilesProvider } from "../providers/documentationFiles";
+import { releasesProvider } from "../providers/releases";
 
 export const initializeRepositoryAction: Action = {
     name: "INITIALIZE_REPOSITORY",
@@ -252,5 +257,11 @@ export const githubInitializePlugin: Plugin = {
     description: "Integration with GitHub for initializing the repository",
     actions: [initializeRepositoryAction],
     evaluators: [],
-    providers: [],
+    providers: [
+        sourceCodeProvider,
+        testFilesProvider,
+        workflowFilesProvider,
+        documentationFilesProvider,
+        releasesProvider,
+    ],
 };
