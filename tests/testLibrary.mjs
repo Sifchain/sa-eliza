@@ -1,8 +1,9 @@
 import { spawn } from "child_process";
+import path from "path";
 import { isShorthandPropertyAssignment } from "typescript";
 
 function projectRoot() {
-    return ".."; // TODO use relative path
+    return path.join(import.meta.dirname, "..");
 }
 
 function runProcess(args, directory) {
@@ -13,7 +14,8 @@ function runProcess(args, directory) {
     const capture = true;
 
     return new Promise((resolve, reject) => {
-        const process = spawn(command, cmdargs, {cwd: directory, shell: true, "stdio": "inherit"});
+        const process = spawn(command, cmdargs, {
+            cwd: directory, shell: true, "stdio": capture ? "pipe" : "inherit" });
         let stdout = "";
         let stderr = "";
         if (capture) {
@@ -49,6 +51,10 @@ async function startAgent(character) {
     // TODO pnpm start --character=characters/${character}.character.json
 }
 
+async function stopAgent(character) {
+    // TODO
+}
+
 async function send(message) {
     // TODO
     // curl -s -X POST http://127.0.0.1:3000/e491ca64-1acf-4906-9579-65f1e2fafc6b/message -H "Content-Type: application/json" -d '{"text": "exit", "userId": "user", "userName": "User"}' | jq -r '.[0].text'
@@ -60,5 +66,6 @@ export {
     installProjectDependencies,
     buildProject,
     writeEnvFile,
-    startAgent
+    startAgent,
+    stopAgent
 }
