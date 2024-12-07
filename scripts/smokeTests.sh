@@ -9,26 +9,45 @@ if (( CURRENT_NODE_VERSION < REQUIRED_NODE_VERSION )); then
     exit 1
 fi
 
-# Navigate to the script's directory
-cd "$(dirname "$0")"/..
+# Autodetect project directory relative to this script's path
+PROJECT_DIR="$0"
+while [ -h "$PROJECT_DIR" ]; do
+    ls=$(ls -ld "$PROJECT_DIR")
+    link=$(expr "$ls" : '.*-> \(.*\)$')
+    if expr "$link" : '/.*' > /dev/null; then
+        PROJECT_DIR="$link"
+    else
+        PROJECT_DIR="$(dirname "$PROJECT_DIR")/$link"
+    fi
+done
+PROJECT_DIR="$(dirname "$PROJECT_DIR")/.."
+PROJECT_DIR="$(cd "$PROJECT_DIR"; pwd)"
+
+cd $PROJECT_DIR
 
 cp .env.example .env
 
-echo "exit" | pnpm start --character=characters/trump.character.json > output.txt
+pnpm install -r
+
+pnpm build
+
+OUTFILE="$(mktemp)"
+
+echo "exit" | pnpm start --character=characters/trump.character.json > "$OUTFILE"
 
 # Check the exit code of the last command
 if [[ $? -ne 0 ]]; then
-    echo "Error: The last command exited with an error."
+    echo "Error: 'start' command exited with an error."
     exit 1
 fi
 
 # Check if output.txt contains "Terminating and cleaning up resources..."
-if grep -q "Terminating and cleaning up resources..." output.txt; then
+if grep -q "Terminating and cleaning up resources..." "$OUTFILE"; then
     echo "Script completed successfully."
- else
-    echo "Error: The output file does not contain the expected string."
+else
+    echo "Error: The output does not contain the expected string."
     exit 1
 fi
 
 # Clean up
-rm output.txt
+rm "$OUTFILE"
