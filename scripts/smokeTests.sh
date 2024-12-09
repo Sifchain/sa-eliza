@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Print some information about the environment to aid in case of troubleshooting
+
+echo "node version:"
+node --version
+
+echo "python version:"
+python3 --version
+
+echo "make version:"
+make --version
+
+echo "gcc version:"
+gcc --version
+
+echo "g++ version:"
+g++ --version
+
 # Check Node.js version
 REQUIRED_NODE_VERSION=23
 CURRENT_NODE_VERSION=$(node -v | cut -d'.' -f1 | sed 's/v//')
@@ -34,9 +51,14 @@ pnpm build
 OUTFILE="$(mktemp)"
 
 echo "exit" | pnpm start --character=characters/trump.character.json > "$OUTFILE"
+RESULT=$?
+
+echo "----- OUTPUT START -----"
+cat "$OUTFILE"
+echo "----- OUTPUT END -----"
 
 # Check the exit code of the last command
-if [[ $? -ne 0 ]]; then
+if [[ $RESULT -ne 0 ]]; then
     echo "Error: 'start' command exited with an error."
     exit 1
 fi
