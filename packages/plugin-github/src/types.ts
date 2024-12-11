@@ -1,3 +1,4 @@
+import { elizaLogger } from "@ai16z/eliza";
 import { z } from "zod";
 
 export const InitializeSchema = z.object({
@@ -18,7 +19,7 @@ export const isInitializeContent = (
     if (InitializeSchema.safeParse(object).success) {
         return true;
     }
-    console.error("Invalid content: ", object);
+    elizaLogger.error("Invalid content: ", object);
     return false;
 };
 
@@ -40,7 +41,7 @@ export const isCreateMemoriesFromFilesContent = (
     if (CreateMemoriesFromFilesSchema.safeParse(object).success) {
         return true;
     }
-    console.error("Invalid content: ", object);
+    elizaLogger.error("Invalid content: ", object);
     return false;
 };
 
@@ -70,7 +71,7 @@ export const isCreatePullRequestContent = (
     if (CreatePullRequestSchema.safeParse(object).success) {
         return true;
     }
-    console.error("Invalid content: ", object);
+    elizaLogger.error("Invalid content: ", object);
     return false;
 };
 
@@ -94,6 +95,28 @@ export const isCreateCommitContent = (
     if (CreateCommitSchema.safeParse(object).success) {
         return true;
     }
-    console.error("Invalid content: ", object);
+    elizaLogger.error("Invalid content: ", object);
+    return false;
+};
+
+export const FetchFilesSchema = z.object({
+    owner: z.string().min(1, "GitHub owner is required"),
+    repo: z.string().min(1, "GitHub repo is required"),
+    branch: z.string().min(1, "GitHub branch is required"),
+});
+
+export interface FetchFilesContent {
+    owner: string;
+    repo: string;
+    branch: string;
+}
+
+export const isFetchFilesContent = (
+    object: any
+): object is FetchFilesContent => {
+    if (FetchFilesSchema.safeParse(object).success) {
+        return true;
+    }
+    elizaLogger.error("Invalid content: ", object);
     return false;
 };
