@@ -49,7 +49,10 @@ import {
     githubCreateCommitPlugin,
     githubCreatePullRequestPlugin,
     githubCreateMemorizeFromFilesPlugin,
-} from "@ai16z/plugin-github"
+    githubCreateIssuePlugin,
+    githubModifyIssuePlugin,
+    githubAddCommentToIssuePlugin,
+} from "@ai16z/plugin-github";
 import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
@@ -412,7 +415,12 @@ export function createAgent(
                 : null,
             ...(getSecret(character, "COINBASE_API_KEY") &&
             getSecret(character, "COINBASE_PRIVATE_KEY")
-                ? [coinbaseMassPaymentsPlugin, tradePlugin, tokenContractPlugin, advancedTradePlugin]
+                ? [
+                      coinbaseMassPaymentsPlugin,
+                      tradePlugin,
+                      tokenContractPlugin,
+                      advancedTradePlugin,
+                  ]
                 : []),
             getSecret(character, "COINBASE_API_KEY") &&
             getSecret(character, "COINBASE_PRIVATE_KEY") &&
@@ -420,10 +428,17 @@ export function createAgent(
                 ? webhookPlugin
                 : null,
             getSecret(character, "WALLET_SECRET_SALT") ? teePlugin : null,
-            getSecret(character, "GITHUB_API_TOKEN") ? githubInitializePlugin : null,
-            getSecret(character, "GITHUB_API_TOKEN") ? githubCreateCommitPlugin : null,
-            getSecret(character, "GITHUB_API_TOKEN") ? githubCreatePullRequestPlugin : null,
-            getSecret(character, "GITHUB_API_TOKEN") ? githubCreateMemorizeFromFilesPlugin : null,
+            ...(getSecret(character, "GITHUB_API_TOKEN")
+                ? [
+                      githubInitializePlugin,
+                      githubCreateCommitPlugin,
+                      githubCreatePullRequestPlugin,
+                      githubCreateMemorizeFromFilesPlugin,
+                      githubCreateIssuePlugin,
+                      githubModifyIssuePlugin,
+                      githubAddCommentToIssuePlugin,
+                  ]
+                : []),
             getSecret(character, "ALCHEMY_API_KEY") ? goatPlugin : null,
             getSecret(character, "FLOW_ADDRESS") &&
             getSecret(character, "FLOW_PRIVATE_KEY")
