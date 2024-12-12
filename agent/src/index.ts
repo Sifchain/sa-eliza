@@ -49,6 +49,9 @@ import {
     githubCreateCommitPlugin,
     githubCreatePullRequestPlugin,
     githubCreateMemorizeFromFilesPlugin,
+    githubCreateIssuePlugin,
+    githubModifyIssuePlugin,
+    githubAddCommentToIssuePlugin,
 } from "@ai16z/plugin-github";
 import Database from "better-sqlite3";
 import fs from "fs";
@@ -450,18 +453,17 @@ export async function createAgent(
             getSecret(character, "COINBASE_NOTIFICATION_URI")
                 ? webhookPlugin
                 : null,
-            getSecret(character, "GITHUB_API_TOKEN")
-                ? githubInitializePlugin
-                : null,
-            getSecret(character, "GITHUB_API_TOKEN")
-                ? githubCreateCommitPlugin
-                : null,
-            getSecret(character, "GITHUB_API_TOKEN")
-                ? githubCreatePullRequestPlugin
-                : null,
-            getSecret(character, "GITHUB_API_TOKEN")
-                ? githubCreateMemorizeFromFilesPlugin
-                : null,
+            ...(getSecret(character, "GITHUB_API_TOKEN")
+                ? [
+                      githubInitializePlugin,
+                      githubCreateCommitPlugin,
+                      githubCreatePullRequestPlugin,
+                      githubCreateMemorizeFromFilesPlugin,
+                      githubCreateIssuePlugin,
+                      githubModifyIssuePlugin,
+                      githubAddCommentToIssuePlugin,
+                  ]
+                : []),
             getSecret(character, "ALCHEMY_API_KEY") ? goatPlugin : null,
             getSecret(character, "FLOW_ADDRESS") &&
             getSecret(character, "FLOW_PRIVATE_KEY")

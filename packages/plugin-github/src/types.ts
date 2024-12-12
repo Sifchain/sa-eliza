@@ -120,3 +120,83 @@ export const isFetchFilesContent = (
     elizaLogger.error("Invalid content: ", object);
     return false;
 };
+
+export const CreateIssueSchema = z.object({
+    owner: z.string().min(1, "GitHub owner is required"),
+    repo: z.string().min(1, "GitHub repo is required"),
+    title: z.string().min(1, "Issue title is required"),
+    body: z.string().min(1, "Issue body is required"),
+    labels: z.array(z.string()).optional(),
+});
+
+export interface CreateIssueContent {
+    owner: string;
+    repo: string;
+    title: string;
+    body: string;
+    labels?: string[];
+}
+
+export const isCreateIssueContent = (
+    object: any
+): object is CreateIssueContent => {
+    if (CreateIssueSchema.safeParse(object).success) {
+        return true;
+    }
+    elizaLogger.error("Invalid content: ", object);
+    return false;
+};
+
+export const ModifyIssueSchema = z.object({
+    owner: z.string().min(1, "GitHub owner is required"),
+    repo: z.string().min(1, "GitHub repo is required"),
+    issue: z.number().min(1, "Issue number is required"),
+    title: z.string().optional(),
+    body: z.string().optional(),
+    state: z.string().optional(),
+    labels: z.array(z.string()).optional(),
+});
+
+export interface ModifyIssueContent {
+    owner: string;
+    repo: string;
+    issue: number;
+    title?: string;
+    body?: string;
+    state?: string;
+    labels?: string[];
+}
+
+export const isModifyIssueContent = (
+    object: any
+): object is ModifyIssueContent => {
+    if (ModifyIssueSchema.safeParse(object).success) {
+        return true;
+    }
+    elizaLogger.error("Invalid content: ", object);
+    return false;
+};
+
+export const AddCommentToIssueSchema = z.object({
+    owner: z.string().min(1, "GitHub owner is required"),
+    repo: z.string().min(1, "GitHub repo is required"),
+    issue: z.number().min(1, "Issue number is required"),
+    comment: z.string().min(1, "Comment is required"),
+});
+
+export interface AddCommentToIssueContent {
+    owner: string;
+    repo: string;
+    issue: number;
+    comment: string;
+}
+
+export const isAddCommentToIssueContent = (
+    object: any
+): object is AddCommentToIssueContent => {
+    if (AddCommentToIssueSchema.safeParse(object).success) {
+        return true;
+    }
+    elizaLogger.error("Invalid content: ", object);
+    return false;
+};

@@ -145,6 +145,97 @@ export class GitHubService {
             throw error;
         }
     }
+
+    // Create a new issue
+    async createIssue(
+        title: string,
+        body: string,
+        labels?: string[]
+    ): Promise<
+        RestEndpointMethodTypes["issues"]["create"]["response"]["data"]
+    > {
+        try {
+            const response = await this.octokit.issues.create({
+                owner: this.config.owner,
+                repo: this.config.repo,
+                title,
+                body,
+                labels,
+            });
+
+            return response.data;
+        } catch (error) {
+            elizaLogger.error(`Error creating issue: ${error}`);
+            throw error;
+        }
+    }
+
+    // Update an existing issue
+    async updateIssue(
+        issueNumber: number,
+        updates: {
+            title?: string;
+            body?: string;
+            state?: "open" | "closed";
+            labels?: string[];
+        }
+    ): Promise<
+        RestEndpointMethodTypes["issues"]["update"]["response"]["data"]
+    > {
+        try {
+            const response = await this.octokit.issues.update({
+                owner: this.config.owner,
+                repo: this.config.repo,
+                issue_number: issueNumber,
+                ...updates,
+            });
+
+            return response.data;
+        } catch (error) {
+            elizaLogger.error(`Error updating issue: ${error}`);
+            throw error;
+        }
+    }
+
+    // Add a comment to an issue
+    async addIssueComment(
+        issueNumber: number,
+        body: string
+    ): Promise<
+        RestEndpointMethodTypes["issues"]["createComment"]["response"]["data"]
+    > {
+        try {
+            const response = await this.octokit.issues.createComment({
+                owner: this.config.owner,
+                repo: this.config.repo,
+                issue_number: issueNumber,
+                body,
+            });
+
+            return response.data;
+        } catch (error) {
+            elizaLogger.error(`Error adding comment to issue: ${error}`);
+            throw error;
+        }
+    }
+
+    // Get issue details
+    async getIssue(
+        issueNumber: number
+    ): Promise<RestEndpointMethodTypes["issues"]["get"]["response"]["data"]> {
+        try {
+            const response = await this.octokit.issues.get({
+                owner: this.config.owner,
+                repo: this.config.repo,
+                issue_number: issueNumber,
+            });
+
+            return response.data;
+        } catch (error) {
+            elizaLogger.error(`Error getting issue details: ${error}`);
+            throw error;
+        }
+    }
 }
 
 export { GitHubConfig };
