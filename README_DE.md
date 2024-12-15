@@ -45,7 +45,7 @@ git clone https://github.com/ai16z/eliza-starter.git
 
 cp .env.example .env
 
-pnpm i && pnpm start
+pnpm i --frozen-lockfile && pnpm start
 ```
 
 Lies dann die [Dokumentation](https://ai16z.github.io/eliza/), um zu erfahren, wie du Eliza anpassen kannst.
@@ -96,7 +96,7 @@ sh scripts/start.sh
 ### Eliza manuell starten
 
 ```bash
-pnpm i
+pnpm i --frozen-lockfile
 pnpm build
 pnpm start
 
@@ -109,7 +109,7 @@ pnpm clean
 Möglicherweise musst du Sharp installieren. Wenn beim Starten ein Fehler auftritt, versuche es mit folgendem Befehl:
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 ### Community & Kontakt

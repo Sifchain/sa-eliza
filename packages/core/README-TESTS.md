@@ -22,7 +22,7 @@ This package contains a test suite for evaluating functionalities using **Jest**
 
 2. Install dependencies:
     ```bash
-    pnpm install
+    pnpm install --frozen-lockfile
     ```
 
 ## Running Tests

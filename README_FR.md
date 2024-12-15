@@ -51,7 +51,7 @@ cp .env.example .env
 Après avoir terminé la configuration et les fichiers personnage, lancer le bot en tapant la ligne de commande suivante:
 
 ```bash
-pnpm i
+pnpm i --frozen-lockfile
 pnpm build
 pnpm start
 
@@ -65,7 +65,7 @@ Il vous faudra peut-être installer Sharp.
 Si il y a une erreur lors du lancement du bot, essayez d'installer Sharp comme ceci :
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 ### Communauté et réseaux sociaux

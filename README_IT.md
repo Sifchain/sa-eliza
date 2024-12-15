@@ -60,7 +60,7 @@ sh scripts/start.sh
 ### Avvia Eliza Manualmente
 
 ```bash
-pnpm i
+pnpm i --frozen-lockfile
 pnpm build
 pnpm start
 
@@ -73,7 +73,7 @@ pnpm clean
 Potrebbe essere necessario installare Sharp. Se vedi un errore all'avvio, prova a installarlo con il seguente comando:
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 ### Community e contatti

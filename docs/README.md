@@ -45,7 +45,7 @@ _As seen powering [@DegenSpartanAI](https://x.com/degenspartanai) and [@MarcAInd
 After setting up the .env file and character file, you can start the bot with the following command:
 
 ```
-pnpm i
+pnpm i --frozen-lockfile
 pnpm start
 ```
 
@@ -74,7 +74,7 @@ You can run OpenAI models by setting the `XAI_MODEL` environment variable to `gp
 You may need to install Sharp. If you see an error when starting up, try installing it with the following command:
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 # Environment Setup
@@ -136,7 +136,7 @@ TOGETHER_API_KEY=
 If you have an NVIDIA GPU, you can install CUDA to speed up local inference dramatically.
 
 ```
-pnpm install
+pnpm install --frozen-lockfile
 npx --no node-llama-cpp source download --gpu cuda
 ```
 

@@ -5,9 +5,9 @@
 </div>
 
 <div align="center">
-  
+
   📖 [Dokümantasyon](https://ai16z.github.io/eliza/) | 🎯 [Örnekler](https://github.com/thejoven/awesome-eliza)
-  
+
 </div>
 
 ## ✨ Özellikler
@@ -60,7 +60,7 @@ cp .env.example .env
 .env dosyasını ve karakter dosyasını ayarladıktan sonra, botu aşağıdaki komutla başlatabilirsiniz:
 
 ```bash
-pnpm i
+pnpm i --frozen-lockfile
 pnpm build
 pnpm start
 
@@ -73,7 +73,7 @@ pnpm clean
 Sharp'ı yüklemeniz gerekebilir. Başlatma sırasında bir hata görürseniz, aşağıdaki komutla yüklemeyi deneyin:
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 ### Topluluk ve İletişim

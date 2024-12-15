@@ -39,7 +39,7 @@
 .envファイルとキャラクターファイルを設定した後、以下のコマンドでボットを起動可能:
 
 ```
-pnpm i
+pnpm i --frozen-lockfile
 pnpm start
 ```
 
@@ -68,7 +68,7 @@ pnpm start
 Sharpをインストールする必要があるかもしれません。起動時にエラーが表示された場合は、以下のコマンドでインストールを試みてください:
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 # 環境設定
@@ -138,7 +138,7 @@ TOGETHER_API_KEY=
 NVIDIA GPUを持っている場合、CUDAをインストールしてローカル推論を大幅に高速化可能
 
 ```
-pnpm install
+pnpm install --frozen-lockfile
 npx --no node-llama-cpp source download --gpu cuda
 ```
 

@@ -72,7 +72,7 @@ cp .env.example .env
 После настройки файла `.env` и файла персонажа вы можете запустить бота с помощью следующей команды:
 
 ```bash
-pnpm i
+pnpm i --frozen-lockfile
 pnpm build
 pnpm start
 
@@ -85,7 +85,7 @@ pnpm clean
 Возможно, потребуется установить Sharp. Если при запуске возникнет ошибка, попробуйте установить его с помощью следующей команды:
 
 ```bash
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 # Настройка окружения
@@ -157,7 +157,7 @@ TOGETHER_API_KEY=
 Если у вас есть NVIDIA GPU, вы можете установить CUDA для значительного ускорения локального инференса.
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 npx --no node-llama-cpp source download --gpu cuda
 ```
 

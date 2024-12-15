@@ -41,7 +41,7 @@ eliza로 뭘 할 수 있나요?
 아이디와 캐릭터 파일 설정이 완료되었다면, 다음 명령줄을 입력하여 로봇을 실행시키십시오:
 
 ```
-pnpm i
+pnpm i --frozen-lockfile
 pnpm start
 ```
 
@@ -66,7 +66,7 @@ pnpm start
 Sharp를 설치해야 할 수도 있습니다.시작시 오류가 발견되면 다음 명령으로 설치하십시오:
 
 ```
-pnpm install-include=optional sharp
+pnpm install --frozen-lockfile -include=optional sharp
 ```
 
 # 환경 설정
@@ -136,7 +136,7 @@ TOGETHER_API_KEY=
 고성능 엔비디아 그래픽을 가지고 있다면 다음 명령줄에서 cuda를 사용하여 로컬 가속을 할 수 있다
 
 ```
-pnpm install
+pnpm install --frozen-lockfile
 npx --no node-llama-cpp source download --gpu cuda
 ```
 

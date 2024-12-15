@@ -41,7 +41,7 @@
 在完成账号和角色文件的配置后，输入以下命令行启动你的bot：
 
 ```
-pnpm i
+pnpm i --frozen-lockfile
 pnpm start
 ```
 
@@ -66,7 +66,7 @@ pnpm start
 您可能需要安装 Sharp。如果在启动时看到错误，请尝试使用以下命令安装：
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 # 环境设置
@@ -136,7 +136,7 @@ TOGETHER_API_KEY=
 如果你有高性能的英伟达显卡，你可以以下命令行通过CUDA来做本地加速
 
 ```
-pnpm install
+pnpm install --frozen-lockfile
 npx --no node-llama-cpp source download --gpu cuda
 ```
 

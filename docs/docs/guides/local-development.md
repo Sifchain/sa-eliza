@@ -32,10 +32,10 @@ git clone https://github.com/ai16z/eliza.git
 cd eliza
 
 # Install dependencies
-pnpm install
+pnpm install --frozen-lockfile
 
 # Install optional dependencies
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 ### 2. Environment Configuration

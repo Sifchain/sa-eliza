@@ -57,7 +57,7 @@ Once your project is created:
 3. Install dependencies:
 
     ```bash
-    pnpm install
+    pnpm install --frozen-lockfile
     ```
 
 4. Start the development server:

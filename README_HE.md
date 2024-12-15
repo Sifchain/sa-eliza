@@ -77,7 +77,7 @@ git clone https://github.com/ai16z/eliza-starter.git
 
 cp .env.example .env
 
-pnpm i && pnpm start
+pnpm i --frozen-lockfile && pnpm start
 ```
 
 </div>
@@ -146,7 +146,7 @@ sh scripts/start.sh
 <div align="right">
 
 ```bash
-pnpm i
+pnpm i --frozen-lockfile
 pnpm build
 pnpm start
 
@@ -160,7 +160,7 @@ pnpm clean
 ייתכן שתצטרך להתקין את Sharp. אם אתה רואה שגיאה בעת ההפעלה, נסה להתקין עם הפקודה הבאה:
 
 ```
-pnpm install --include=optional sharp
+pnpm install --frozen-lockfile --include=optional sharp
 ```
 
 ### קהילה ויצירת קשר
