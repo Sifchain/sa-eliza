@@ -124,18 +124,32 @@ export async function checkoutBranch(
     elizaLogger.info(`Checking out branch ${branch} in repository ${repoPath}`);
 
     try {
-        // Checkout specified branch
         const git = simpleGit(repoPath);
+
+        // Get the list of branches
+        const branchList = await git.branch();
+
+        // Check if the branch exists
+        const branchExists = branchList.all.includes(branch);
+
         if (create) {
-            // create a new branch if it doesn't exist
-            await git.checkoutLocalBranch(branch);
+            if (branchExists) {
+                elizaLogger.warn(`Branch "${branch}" already exists. Checking out instead.`);
+                await git.checkout(branch); // Checkout the existing branch
+            } else {
+                // Create a new branch
+                await git.checkoutLocalBranch(branch);
+            }
         } else {
-            // checkout an existing branch
+            if (!branchExists) {
+                throw new Error(`Branch "${branch}" does not exist.`);
+            }
+            // Checkout an existing branch
             await git.checkout(branch);
         }
     } catch (error) {
-        elizaLogger.error("Error checking out branch:", error);
-        throw new Error(`Error checking out branch: ${error}`);
+        elizaLogger.error("Error checking out branch:", error.message);
+        throw new Error(`Error checking out branch: ${error.message}`);
     }
 }
 
