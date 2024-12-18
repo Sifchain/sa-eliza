@@ -38,6 +38,7 @@ export const createIssueAction: Action = {
         const files = await getFilesFromMemories(runtime, message);
         if (!state) {
             state = (await runtime.composeState(message, {
+                character: runtime.character,
                 files: files,
             })) as State;
         } else {
@@ -54,7 +55,7 @@ export const createIssueAction: Action = {
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.LARGE,
+            modelClass: ModelClass.SMALL,
             schema: CreateIssueSchema,
         });
 

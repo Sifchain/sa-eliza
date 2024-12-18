@@ -36,14 +36,14 @@ export const modifyIssueAction: Action = {
     ) => {
         elizaLogger.log("Composing state for message:", message);
         const files = await getFilesFromMemories(runtime, message);
-       if (!state) {
-           state = (await runtime.composeState(message, {
-               files: files,
-               character: runtime.character,
-           })) as State;
-       } else {
-           state = await runtime.updateRecentMessageState(state);
-       }
+        if (!state) {
+            state = (await runtime.composeState(message, {
+                files: files,
+                character: runtime.character,
+            })) as State;
+        } else {
+            state = await runtime.updateRecentMessageState(state);
+        }
         const context = composeContext({
             state,
             template: modifyIssueTemplate,
@@ -52,7 +52,7 @@ export const modifyIssueAction: Action = {
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.LARGE,
+            modelClass: ModelClass.SMALL,
             schema: ModifyIssueSchema,
         });
 

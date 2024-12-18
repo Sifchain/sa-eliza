@@ -1,8 +1,6 @@
 {
     "name": "LoggingAddict",
-    "clients": [
-        "github"
-    ],
+    "clients": [],
     "modelProvider": "openai",
     "settings": {
         "secrets": {},

@@ -126,7 +126,7 @@ export const createMemoriesFromFilesAction: Action = {
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.LARGE,
+            modelClass: ModelClass.SMALL,
             schema: CreateMemoriesFromFilesSchema,
         });
 
@@ -153,22 +153,8 @@ export const createMemoriesFromFilesAction: Action = {
 
             elizaLogger.info("Memories created successfully!");
 
-            let extendedState = (await runtime.composeState(message, {
-                files: files
-            })) as State;
-            extendedState.files = files;
-            const output = createMemoriesFromFilesTemplate.replace(/{{\w+(\.\w+)*}}/g, (match) => {
-                const path = match.replace(/{{|}}/g, "").split(".");
-                let value: any = extendedState;
-                for (const key of path) {
-                    value = value?.[key];
-                    if (value === undefined) break;
-                }
-                return value ?? "";
-            });
-
             callback({
-                text: output,
+                text: "Memories created successfully!",
                 attachments: [],
             });
         } catch (error) {
