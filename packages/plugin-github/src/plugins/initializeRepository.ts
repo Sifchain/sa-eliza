@@ -70,7 +70,7 @@ export const initializeRepositoryAction: Action = {
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.SMALL,
+            modelClass: ModelClass.LARGE,
             schema: InitializeSchema,
         });
 

@@ -43,7 +43,7 @@ export async function fetchFiles(
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.SMALL,
+            modelClass: ModelClass.LARGE,
             schema: FetchFilesSchema,
         });
 
@@ -100,6 +100,7 @@ export async function fetchFiles(
                 branch,
             },
         };
+        // TODO: 404 errors  ["⛔ Error getting file contents: HttpError: Not Found - https://docs.github.com/rest/repos/contents#get-repository-content"]
     } catch (error) {
         elizaLogger.error(`Error in fetchFiles for ${description}:`, error);
         return { files: [], repository: null };

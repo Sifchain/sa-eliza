@@ -21,6 +21,7 @@ import {
     getRepoPath,
     writeFiles,
     checkoutBranch,
+    getFilesFromMemories,
 } from "../utils";
 import { sourceCodeProvider } from "../providers/sourceCode";
 import { testFilesProvider } from "../providers/testFiles";
@@ -53,11 +54,15 @@ export const createCommitAction: Action = {
         callback: HandlerCallback
     ) => {
         elizaLogger.log("Composing state for message:", message);
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
-        } else {
-            state = await runtime.updateRecentMessageState(state);
-        }
+        const files = await getFilesFromMemories(runtime, message);
+       if (!state) {
+           state = (await runtime.composeState(message, {
+               files: files,
+               character: runtime.character,
+           })) as State;
+       } else {
+           state = await runtime.updateRecentMessageState(state);
+       }
 
         const context = composeContext({
             state,
@@ -67,7 +72,7 @@ export const createCommitAction: Action = {
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.SMALL,
+            modelClass: ModelClass.LARGE,
             schema: CreateCommitSchema,
         });
 

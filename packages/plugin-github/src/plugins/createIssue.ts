@@ -17,6 +17,7 @@ import {
     CreateIssueSchema,
     isCreateIssueContent,
 } from "../types";
+import { getFilesFromMemories } from "../utils";
 
 export const createIssueAction: Action = {
     name: "CREATE_ISSUE",
@@ -34,21 +35,26 @@ export const createIssueAction: Action = {
         callback: HandlerCallback
     ) => {
         elizaLogger.log("Composing state for message:", message);
+        const files = await getFilesFromMemories(runtime, message);
         if (!state) {
-            state = (await runtime.composeState(message)) as State;
+            state = (await runtime.composeState(message, {
+                files: files,
+            })) as State;
         } else {
             state = await runtime.updateRecentMessageState(state);
         }
-
+        state.files = files;
+        elizaLogger.info("State:", state);
         const context = composeContext({
             state,
             template: createIssueTemplate,
         });
+        elizaLogger.info("Context:", context);
 
         const details = await generateObjectV2({
             runtime,
             context,
-            modelClass: ModelClass.SMALL,
+            modelClass: ModelClass.LARGE,
             schema: CreateIssueSchema,
         });
 
