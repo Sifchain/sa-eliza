@@ -29,21 +29,25 @@ import { releasesProvider } from "../providers/releases";
 
 export async function addFilesToMemory(
     runtime: IAgentRuntime,
+    message: Memory,
     files: string[],
     repoPath: string,
     owner: string,
     repo: string
 ) {
+    elizaLogger.info("Adding files to memory:", files);
     for (const file of files) {
         const relativePath = path.relative(repoPath, file);
         const content = await fs.readFile(file, "utf-8");
         const contentHash = createHash("sha256").update(content).digest("hex");
         const memoryId = stringToUuid(
-            `github-${owner}-${repo}-${relativePath}`
+            `github-${owner}-${repo}-${relativePath}-${contentHash}`
         );
-
+        elizaLogger.info("Memory ID:", memoryId);
         const existingDocument =
             await runtime.messageManager.getMemoryById(memoryId);
+
+        elizaLogger.log("existingDocument", existingDocument);
 
         if (
             existingDocument &&
@@ -58,12 +62,11 @@ export async function addFilesToMemory(
             " - ",
             relativePath
         );
-
-        await runtime.messageManager.createMemory({
+        const memory = {
             id: memoryId,
-            userId: runtime.agentId,
-            agentId: runtime.agentId,
-            roomId: memoryId,
+            userId: message.userId,
+            agentId: message.agentId,
+            roomId: message.roomId,
             content: {
                 text: content,
                 hash: contentHash,
@@ -75,7 +78,9 @@ export async function addFilesToMemory(
                     owner,
                 },
             },
-        } as Memory);
+        } as Memory;
+        elizaLogger.info("Memory:", memory);
+        await runtime.messageManager.createMemory(memory);
     }
 }
 
@@ -135,12 +140,13 @@ export const createMemoriesFromFilesAction: Action = {
         elizaLogger.info("Creating memories from files...");
 
         const repoPath = getRepoPath(content.owner, content.repo);
-
+        elizaLogger.info(`Repo path: ${repoPath}`);
         try {
             const files = await retrieveFiles(repoPath, content.path);
-
+            elizaLogger.info(`Files: ${files}`);
             await addFilesToMemory(
                 runtime,
+                message,
                 files,
                 repoPath,
                 content.owner,

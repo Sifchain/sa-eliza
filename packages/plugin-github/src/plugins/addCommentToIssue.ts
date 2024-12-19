@@ -17,6 +17,7 @@ import {
     isAddCommentToIssueContent,
 } from "../types";
 import { addCommentToIssueTemplate } from "../templates";
+import { getFilesFromMemories } from "../utils";
 
 export const addCommentToIssueAction: Action = {
     name: "ADD_COMMENT_TO_ISSUE",
@@ -39,8 +40,12 @@ export const addCommentToIssueAction: Action = {
         callback: HandlerCallback
     ) => {
         elizaLogger.log("Composing state for message:", message);
+        const files = await getFilesFromMemories(runtime, message);
         if (!state) {
-            state = (await runtime.composeState(message)) as State;
+            state = (await runtime.composeState(message, {
+                files: files,
+                character: runtime.character,
+            })) as State;
         } else {
             state = await runtime.updateRecentMessageState(state);
         }

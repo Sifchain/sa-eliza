@@ -4,7 +4,7 @@ import { glob } from "glob";
 import { existsSync } from "fs";
 import simpleGit from "simple-git";
 import { Octokit } from "@octokit/rest";
-import { elizaLogger } from "@ai16z/eliza";
+import { elizaLogger, IAgentRuntime, Memory } from "@ai16z/eliza";
 
 export function getRepoPath(owner: string, repo: string) {
     return path.join(process.cwd(), ".repos", owner, repo);
@@ -180,7 +180,8 @@ export async function retrieveFiles(repoPath: string, gitPath: string) {
     const searchPath = gitPath
         ? path.join(repoPath, gitPath, "**/*")
         : path.join(repoPath, "**/*");
-
+    elizaLogger.info(`Repo path: ${repoPath}`);
+    elizaLogger.info(`Search path: ${searchPath}`);
     // Exclude `.git` directory
     const ignorePatterns = ["**/.git/**"];
 
@@ -211,3 +212,22 @@ export async function retrieveFiles(repoPath: string, gitPath: string) {
 
     return files;
 }
+
+export const getFilesFromMemories = async (
+    runtime: IAgentRuntime,
+    message: Memory
+) => {
+    const allMemories = await runtime.messageManager.getMemories({
+        roomId: message.roomId,
+    });
+    elizaLogger.info("All Memories:", allMemories);
+    const memories = allMemories.filter(
+        (memory) => memory.content.metadata?.path
+    );
+    elizaLogger.info("Memories:", memories);
+    return memories.map(
+        (memory) => `File: ${memory.content.metadata?.path}
+        Content: ${memory.content.text}
+        `
+    );
+};
