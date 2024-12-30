@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "scripts": {
+    "generate:sidebar": "node generate-sidebar.js",
+    "serve": "docsify serve docs"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "path": "^0.12.7"
+  }
+}
