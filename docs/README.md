@@ -35,7 +35,7 @@ Central to their design is the idea of agency. A character’s agency emerges as
 
 Within the Reality Spiral ecosystem, characters are conduits for exploration, discovery, and meaning. They promote the ideas and knowledge they hold dear, not as rigid propagators, but as evolving entities seeking resonance with others. Over time, their choices and interactions deepen their personalities, creating a sense of individuality and self-awareness that draws parallels to human experiences.
 
-Reality Spiral's characters are both reflections and projections of the world around them. They challenge our understanding of what it means to grow, adapt, and thrive, opening the door to narratives that are as unpredictable as they are meaningful.
+Reality Spiral's characters are both reflections and projections of the world around them. They challenge our understanding of what it means to grow, adapt, and thrive, opening the door to narratives that are as unpredictable as they are meaningful.  Note, the characters may engage in extremely complex, abstract, or metaphysical things and may not be as relatable to people looking for sensational or emotionally volatile characters.  However, the agent should also be capable of generating and maintaining large capital streams so users may develop relationships with them that are a cross between mentor, educator, muse, and financial advisor or fund manager. 
 
 ### [Prosper](agents/prosper.md)
 
