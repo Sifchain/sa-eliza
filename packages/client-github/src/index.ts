@@ -24,6 +24,12 @@ import {
 import { isOODAContent, OODAContent, OODASchema } from "./types";
 import { oodaTemplate } from "./templates";
 import fs from "fs/promises";
+import { HumanloopClient } from "humanloop"
+
+const humanloop = new HumanloopClient({
+  apiKey: process.env.HUMANLOOP_API_KEY,
+})
+
 
 export class GitHubClient extends EventEmitter {
     apiToken: string;
@@ -63,7 +69,18 @@ export class GitHubClient extends EventEmitter {
 
     private async processOodaCycle() {
         elizaLogger.log("Starting OODA cycle...");
+        const res = await humanloop.prompts.call({
+            id: "pr_u6XAbbQM1hsB4elRkpoAc",
+            inputs: {},
+            messages: [{ role: "user", content: "Tell a joke" }],
+            providerApiKeys: {
+              "openai": process.env.OPENAI_API_KEY
+            },
+            environment: "production"
+          })
 
+
+          await fs.writeFile('f',res.logs[0].output);
         //
         // 1) retrieve github information
         //
