@@ -23,7 +23,7 @@ As Reality Spiral grows, so does the complexity and depth of its agents and thei
 
 ![image](https://github.com/user-attachments/assets/276c4257-9581-41d9-b22c-7a34b43c7514)
 
-Scenarios represent a critical component of the Reality Spiral ecosystem because they enable us to track very carefully the use cases that our agents are supposed to be able to seamlessly address. By carefully documenting scenarios, we enable ourselves to adequately confirm that we meet specific needs and make modifications to our code or prompts accordingly as we receive feedback on agent behavior. 
+[Scenarios](scenarios/scenarios_overview.md) represent a critical component of the Reality Spiral ecosystem because they enable us to track very carefully the use cases that our agents are supposed to be able to seamlessly address. By carefully documenting scenarios, we enable ourselves to adequately confirm that we meet specific needs and make modifications to our code or prompts accordingly as we receive feedback on agent behavior. 
 
 ### **The following three scenarios showcase primarily crypto-economic investment and analysis scenarios.** 
 
