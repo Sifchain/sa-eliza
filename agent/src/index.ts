@@ -102,7 +102,7 @@ import net from "net";
 import path from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
-// import {dominosPlugin} from "@elizaos/plugin-dominos";
+import createNFTCollectionsPlugin from "@elizaos/plugin-nft-collections";
 
 import {
     githubInitializePlugin,
@@ -164,14 +164,29 @@ function tryLoadFile(filePath: string): string | null {
 function mergeCharacters(base: Character, child: Character): Character {
     const mergeObjects = (baseObj: any, childObj: any) => {
         const result: any = {};
-        const keys = new Set([...Object.keys(baseObj || {}), ...Object.keys(childObj || {})]);
-        keys.forEach(key => {
-            if (typeof baseObj[key] === 'object' && typeof childObj[key] === 'object' && !Array.isArray(baseObj[key]) && !Array.isArray(childObj[key])) {
+        const keys = new Set([
+            ...Object.keys(baseObj || {}),
+            ...Object.keys(childObj || {}),
+        ]);
+        keys.forEach((key) => {
+            if (
+                typeof baseObj[key] === "object" &&
+                typeof childObj[key] === "object" &&
+                !Array.isArray(baseObj[key]) &&
+                !Array.isArray(childObj[key])
+            ) {
                 result[key] = mergeObjects(baseObj[key], childObj[key]);
-            } else if (Array.isArray(baseObj[key]) || Array.isArray(childObj[key])) {
-                result[key] = [...(baseObj[key] || []), ...(childObj[key] || [])];
+            } else if (
+                Array.isArray(baseObj[key]) ||
+                Array.isArray(childObj[key])
+            ) {
+                result[key] = [
+                    ...(baseObj[key] || []),
+                    ...(childObj[key] || []),
+                ];
             } else {
-                result[key] = childObj[key] !== undefined ? childObj[key] : baseObj[key];
+                result[key] =
+                    childObj[key] !== undefined ? childObj[key] : baseObj[key];
             }
         });
         return result;
@@ -186,32 +201,36 @@ async function loadCharacter(filePath: string): Promise<Character> {
     let character = JSON.parse(content);
     validateCharacterConfig(character);
 
-     // .id isn't really valid
-     const characterId = character.id || character.name;
-     const characterPrefix = `CHARACTER.${characterId.toUpperCase().replace(/ /g, "_")}.`;
-     const characterSettings = Object.entries(process.env)
-         .filter(([key]) => key.startsWith(characterPrefix))
-         .reduce((settings, [key, value]) => {
-             const settingKey = key.slice(characterPrefix.length);
-             return { ...settings, [settingKey]: value };
-         }, {});
-     if (Object.keys(characterSettings).length > 0) {
-         character.settings = character.settings || {};
-         character.settings.secrets = {
-             ...characterSettings,
-             ...character.settings.secrets,
-         };
-     }
-     // Handle plugins
-     character.plugins = await handlePluginImporting(
-        character.plugins
-    );
+    // .id isn't really valid
+    const characterId = character.id || character.name;
+    const characterPrefix = `CHARACTER.${characterId.toUpperCase().replace(/ /g, "_")}.`;
+    const characterSettings = Object.entries(process.env)
+        .filter(([key]) => key.startsWith(characterPrefix))
+        .reduce((settings, [key, value]) => {
+            const settingKey = key.slice(characterPrefix.length);
+            return { ...settings, [settingKey]: value };
+        }, {});
+    if (Object.keys(characterSettings).length > 0) {
+        character.settings = character.settings || {};
+        character.settings.secrets = {
+            ...characterSettings,
+            ...character.settings.secrets,
+        };
+    }
+    // Handle plugins
+    character.plugins = await handlePluginImporting(character.plugins);
     if (character.extends) {
-        elizaLogger.info(`Merging  ${character.name} character with parent characters`);
+        elizaLogger.info(
+            `Merging  ${character.name} character with parent characters`
+        );
         for (const extendPath of character.extends) {
-            const baseCharacter = await loadCharacter(path.resolve(path.dirname(filePath), extendPath));
+            const baseCharacter = await loadCharacter(
+                path.resolve(path.dirname(filePath), extendPath)
+            );
             character = mergeCharacters(baseCharacter, character);
-            elizaLogger.info(`Merged ${character.name} with ${baseCharacter.name}`);
+            elizaLogger.info(
+                `Merged ${character.name} with ${baseCharacter.name}`
+            );
         }
     }
     return character;
@@ -484,7 +503,9 @@ function initializeDatabase(dataDir: string) {
         // Test the connection
         db.init()
             .then(() => {
-                elizaLogger.success("Successfully connected to Supabase database");
+                elizaLogger.success(
+                    "Successfully connected to Supabase database"
+                );
             })
             .catch((error) => {
                 elizaLogger.error("Failed to connect to Supabase:", error);
@@ -501,7 +522,9 @@ function initializeDatabase(dataDir: string) {
         // Test the connection
         db.init()
             .then(() => {
-                elizaLogger.success("Successfully connected to PostgreSQL database");
+                elizaLogger.success(
+                    "Successfully connected to PostgreSQL database"
+                );
             })
             .catch((error) => {
                 elizaLogger.error("Failed to connect to PostgreSQL:", error);
@@ -516,14 +539,17 @@ function initializeDatabase(dataDir: string) {
         });
         return db;
     } else {
-        const filePath = process.env.SQLITE_FILE ?? path.resolve(dataDir, "db.sqlite");
+        const filePath =
+            process.env.SQLITE_FILE ?? path.resolve(dataDir, "db.sqlite");
         elizaLogger.info(`Initializing SQLite database at ${filePath}...`);
         const db = new SqliteDatabaseAdapter(new Database(filePath));
 
         // Test the connection
         db.init()
             .then(() => {
-                elizaLogger.success("Successfully connected to SQLite database");
+                elizaLogger.success(
+                    "Successfully connected to SQLite database"
+                );
             })
             .catch((error) => {
                 elizaLogger.error("Failed to connect to SQLite:", error);
@@ -705,7 +731,8 @@ export async function createAgent(
     if (
         process.env.PRIMUS_APP_ID &&
         process.env.PRIMUS_APP_SECRET &&
-        process.env.VERIFIABLE_INFERENCE_ENABLED === "true"){
+        process.env.VERIFIABLE_INFERENCE_ENABLED === "true"
+    ) {
         verifiableInferenceAdapter = new PrimusAdapter({
             appId: process.env.PRIMUS_APP_ID,
             appSecret: process.env.PRIMUS_APP_SECRET,
@@ -886,6 +913,9 @@ export async function createAgent(
             // getSecret(character, "QUAI_PRIVATE_KEY")
             //     ? quaiPlugin
             //     : null,
+            getSecret(character, "RESERVOIR_API_KEY")
+                ? createNFTCollectionsPlugin()
+                : null,
         ].filter(Boolean),
         providers: [],
         actions: [],

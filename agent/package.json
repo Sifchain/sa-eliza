@@ -1,6 +1,6 @@
 {
     "name": "@elizaos/agent",
-    "version": "0.1.7",
+    "version": "0.1.8+build.1",
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
@@ -55,7 +55,7 @@
         "@elizaos/plugin-image-generation": "workspace:*",
         "@elizaos/plugin-movement": "workspace:*",
         "@elizaos/plugin-massa": "workspace:*",
-    "@elizaos/plugin-nft-generation": "workspace:*",
+        "@elizaos/plugin-nft-generation": "workspace:*",
         "@elizaos/plugin-node": "workspace:*",
         "@elizaos/plugin-solana": "workspace:*",
         "@elizaos/plugin-solana-agentkit": "workspace:*",

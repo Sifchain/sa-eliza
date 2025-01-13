@@ -412,19 +412,19 @@ function deduplicateMentions(paragraph: string) {
   }
 
   // Extract mentions from the match groups
-  let mentions = matches.slice(1).filter(Boolean) as string[];
+  let mentions = matches.slice(0, 1)[0].trim().split(' ')
 
   // Deduplicate mentions
   mentions = [...new Set(mentions)];
 
   // Reconstruct the string with deduplicated mentions
-  const uniqueMentionsString = `@${mentions.join(' ')}`;
+  const uniqueMentionsString = mentions.join(' ');
 
   // Find where the mentions end in the original string
   const endOfMentions = paragraph.indexOf(matches[0]) + matches[0].length;
 
   // Construct the result by combining unique mentions with the rest of the string
-  return uniqueMentionsString + paragraph.slice(endOfMentions);
+  return uniqueMentionsString + ' ' + paragraph.slice(endOfMentions);
 }
 
 function restoreUrls(

@@ -261,6 +261,7 @@ export enum ModelProviderName {
     NINETEEN_AI = "nineteen_ai",
     AKASH_CHAT_API = "akash_chat_api",
     LIVEPEER = "livepeer",
+    LETZAI = "letzai",
     DEEPSEEK="deepseek",
     INFERA="infera"
 }

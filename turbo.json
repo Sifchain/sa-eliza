@@ -43,6 +43,12 @@
                 "@elizaos/plugin-sgx#build"
             ]
         },
+        "@elizaos/plugin-quai#build": {
+            "outputs": ["dist/**"],
+            "dependsOn": [
+                "@elizaos/plugin-trustdb#build"
+            ]
+        },
         "eliza-docs#build": {
             "outputs": ["build/**"]
         },

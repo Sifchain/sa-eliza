@@ -21,7 +21,7 @@ BEGIN
         FROM pg_extension
         WHERE extname = 'vector'
     ) THEN
-        CREATE EXTENSION vector
+        CREATE EXTENSION vector IF NOT EXISTS
         SCHEMA extensions;
     END IF;
 END $$;
@@ -33,7 +33,7 @@ BEGIN
         FROM pg_extension
         WHERE extname = 'fuzzystrmatch'
     ) THEN
-        CREATE EXTENSION fuzzystrmatch
+        CREATE EXTENSION fuzzystrmatch IF NOT EXISTS
         SCHEMA extensions;
     END IF;
 END $$;

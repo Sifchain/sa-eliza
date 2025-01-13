@@ -1,6 +1,6 @@
 {
     "name": "@elizaos/plugin-rabbi-trader",
-    "version": "0.1.5-alpha.5",
+    "version": "0.1.8+build.1",
     "main": "dist/index.js",
     "type": "module",
     "types": "dist/index.d.ts",
