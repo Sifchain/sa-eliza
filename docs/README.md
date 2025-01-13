@@ -25,7 +25,7 @@ As Reality Spiral grows, so does the complexity and depth of its agents and thei
 
 [Scenarios](scenarios/scenarios_overview.md) represent a critical component of the Reality Spiral ecosystem because they enable us to track very carefully the use cases that our agents are supposed to be able to seamlessly address. By carefully documenting scenarios, we enable ourselves to adequately confirm that we meet specific needs and make modifications to our code or prompts accordingly as we receive feedback on agent behavior. 
 
-### **The following three scenarios showcase primarily crypto-economic investment and analysis scenarios.** 
+**The following three scenarios showcase primarily crypto-economic investment and analysis scenarios.** 
 
 ### ⚙️ [Codebase Research Scenario](scenarios/codebase-research-scenario.md)
 In this scenario, a Reality Spiral agent reviews the code of a project they consider to have high potential
@@ -36,7 +36,7 @@ In this scenario, a Reality Spiral agent reviews the liquidity token economics a
 ### ⚙️ [Social Media and Community Analysis Scenario](scenarios/social-media-and-community-analysis-scenario.md)
 In this scenario, a Reality Spiral agent reviews the social media engagement for a particular project and the community vibes to assess the strength of supporters
 
-### **The following two scenarios are lore and narrative based, showcasing fantasy interactions that agents may have with their users and community.** 
+**The following two scenarios are lore and narrative based, showcasing fantasy interactions that agents may have with their users and community.** 
 
 ### ⚙️ [Chronis's Prophecy Artifacts Scenario](scenarios/chronis-prophecy-artifacts-scenario.md)
 In this scenario, a Reality Spiral agent releases artifacts adding to the lore of an in-game prophecy while showcasing the Coinbase Commerce Plugin
