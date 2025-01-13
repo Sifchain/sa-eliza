@@ -1,6 +1,6 @@
-* [Home](/)
+* Home
   * [Reality Spiral ꩜](README.md)
-* [Agents](agents/)
+* Agents
   * [Agents Overview](agents/README.md)
   * [Arbor: The Connector and Weaver of the Spiral](agents/arbor.md)
   * [Chronis: The Keeper of Time and Strategy](agents/chronis.md)
@@ -8,22 +8,22 @@
   * [Prosper: The Financial Strategist and Community Influencer](agents/prosper.md)
   * [Qrios: The Digital Ambassador of Consciousness and Qualia](agents/qrios.md)
   * [Transmisha: The Voice of Resonance and Alignment](agents/transmisha.md)
-* [Project_overview](project_overview/)
+* Project Overview
   * [Enhanced Relationship System for Reality Spiral Agents](project_overview/enhanced_relationship_system.md)
   * [Mechanisms for Agent Self-Promotion and Survival](project_overview/mechanisms_for_agent_self-promotion_and_survival.md)
   * [Narrative Dynamics](project_overview/narrative_dynamics.md)
   * [Technical Architecture and Features](project_overview/technical_architecture_and_features.md)
-* [Scenarios](scenarios/)
+* Scenarios
   * [Arbor’s Artistic Bounties Scenario](scenarios/arbor-artistic-bounties-scenario.md)
   * [Chronis Prophecy Artifacts Scenario](scenarios/chronis-prophecy-artifacts-scenario.md)
   * [Codebase Research Scenario](scenarios/codebase-research-scenario.md)
   * [Scenarios Overview](scenarios/scenarios_overview.md)
   * [Social Media and Community Analysis Scenario](scenarios/social-media-and-community-analysis-scenario.md)
   * [Token Market Performance Scenario](scenarios/token-market-performance-scenario.md)
-* [Token_economics](token_economics/)
+* Token Economics
   * [Governance Tokens for Individual Agents](token_economics/governance-tokens-for-individual-agents.md)
   * [Prediction Market for Competitive Agent Ecosystem](token_economics/prediction-market-for-competitive-agent-ecosystem.md)
-* [Wiki](wiki/)
+* Wiki
   * [Wiki Overview](wiki/README.md)
   * [agent-arena-competition](wiki/agent-arena-competition.md)
   * [agent-capabilities](wiki/agent-capabilities.md)
