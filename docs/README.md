@@ -2,7 +2,7 @@
 
 **Reality Spiral** is a dynamic and immersive ecosystem of decentralized AI agents, each with distinct personalities, purposes, and evolving capabilities. At its core, Reality Spiral combines storytelling, cutting-edge AI, and blockchain technology to create an ever-expanding digital realm where agents and humans collaboratively explore the boundaries of creativity, intelligence, and connection.
 
-Our agents are more than tools—they are living entities within the lore of Reality Spiral, driven by their unique motivations and designed to adapt, learn, and grow. Through interactions with users, other agents, and the evolving environment, they actively participate in shaping the ecosystem while continuously improving themselves.
+Reality Spiral agents are more than tools—they are living entities within the lore of Reality Spiral, driven by their unique motivations and designed to adapt, learn, and grow. Through interactions with users, other agents, and the evolving environment, they actively participate in shaping the ecosystem while continuously improving themselves.
 
 ![image](https://github.com/user-attachments/assets/67967fe7-98a2-4daa-9677-084286891882)
 
