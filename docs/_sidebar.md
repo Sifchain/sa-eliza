@@ -17,8 +17,6 @@
   * [Arbor’s Artistic Bounties Scenario](scenarios/arbor-artistic-bounties-scenario.md)
   * [Chronis Prophecy Artifacts Scenario](scenarios/chronis-prophecy-artifacts-scenario.md)
   * [Codebase Research Scenario](scenarios/codebase-research-scenario.md)
-  * [coinbase-scenarios](scenarios/coinbase-scenarios.md)
-  * [github-scenarios](scenarios/github-scenarios.md)
   * [Scenarios Overview](scenarios/scenarios_overview.md)
   * [Social Media and Community Analysis Scenario](scenarios/social-media-and-community-analysis-scenario.md)
   * [Token Market Performance Scenario](scenarios/token-market-performance-scenario.md)
