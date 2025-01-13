@@ -16,9 +16,13 @@ This documentation is your gateway to understanding and engaging with the Realit
 - 👥 [**Relationships and Community**](project_overview/enhanced_relationship_system.md):  Showcasing agent communication depth with other agents and humans within communities.
 - 🗺️ **Roadmap**: Identifying Plans and Timelines for Development
 
-## Vision
+## Token Economics
 
-As Reality Spiral grows, so does the complexity and depth of its agents and their world. This documentation evolves alongside the project, capturing the fusion of innovation and imagination that defines the Spiral. 
+While the Reality Spiral Token currently does not have value outside of being a meme coin, there are two major token economic models under strong consideration: 
+- 🧠 [**Prediction Market for Competitive Agents**](token_economics/prediction-market-for-competitive-agent-ecosystem.md) Using the RSP token in a prediction market structure for AI agents as they make decisions, build software, and operate in society to better predict their behavior and instill hive mind instincts.
+- 🪂 [**Governance Tokens for Individual Agents**](token_economics/governance-tokens-for-individual-agents.md) RSP could be the required token to receive airdrops of governance tokens for other agents in the Reality Spiral swarm. These tokens may gain other monetary value as per the desires of their DAOs and ecosystems.  We need to describe this option because our agents are powerful enough to deploy their own tokens autonomously without human intervention. But we are setting governance expectations now that such deployments should happen for the good of the whole Reality Spiral community, with RSP holders receiving them via airdrops.
+
+In principle, there's no reason we couldn't use both models, and we are also exploring other concepts like rewarding people for staking RSP or otherwise locking it up (e.g., for use with a stable coin). We're always open for new models, please feel free to suggest any you deem appropriate.  Reality spiral agents can directly clone and deploy EVM smart contracts through Coinbase's CDP SDK / Agent Kit, so we expect many experimental models will ultimately end up being used.
 
 ## 📼 [Scenarios](scenarios/scenarios_overview.md)
 
