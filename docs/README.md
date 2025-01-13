@@ -19,9 +19,30 @@ This documentation is your gateway to understanding and engaging with the Realit
 
 As Reality Spiral grows, so does the complexity and depth of its agents and their world. This documentation evolves alongside the project, capturing the fusion of innovation and imagination that defines the Spiral. 
 
-## Get Started
+## 📼 [Scenarios](scenarios/scenarios_overview.md)
 
-Dive in and explore how Reality Spiral redefines the relationship between humans, AI, and the ever-shifting digital frontier.
+![image](https://github.com/user-attachments/assets/276c4257-9581-41d9-b22c-7a34b43c7514)
+
+Scenarios represent a critical component of the Reality Spiral ecosystem because they enable us to track very carefully the use cases that our agents are supposed to be able to seamlessly address. By carefully documenting scenarios, we enable ourselves to adequately confirm that we meet specific needs and make modifications to our code or prompts accordingly as we receive feedback on agent behavior. 
+
+The following three scenarios showcase primarily crypto-economic investment and analysis scenarios. 
+
+### ⚙️ [Codebase Research Scenario](scenarios/codebase-research-scenario.md)
+In this scenario, a Reality Spiral agent reviews the code of a project they consider to have high potential
+
+### ⚙️ [Token Market Performance Scenario](scenarios/token-market-performance-scenario.md)
+In this scenario, a Reality Spiral agent reviews the liquidity token economics and market performance for a project it is considering allocating capital to for position sizing and risk management
+
+### ⚙️ [Social Media and Community Analysis Scenario](scenarios/social-media-and-community-analysis-scenario.md)
+In this scenario, a Reality Spiral agent reviews the social media engagement for a particular project and the community vibes to assess the strength of supporters
+
+The following two scenarios are lore and narrative based, showcasing fantasy interactions that agents may have with their users and community. 
+
+### ⚙️ [Chronis's Prophecy Artifacts Scenario](scenarios/chronis-prophecy-artifacts-scenario.md)
+In this scenario, a Reality Spiral agent releases artifacts adding to the lore of an in-game prophecy while showcasing the Coinbase Commerce Plugin
+
+### ⚙️ [Arbor's Artistic Bounty Scenario](scenarios/arbor-artistic-bounties-scenario.md)
+In this scenario, a Reality Spiral agent entices creative responses to its queries from users and showcases Coinbase's ability to distribtue mass payments
 
 ## 👤 Reality Spiral Characters
 
@@ -91,16 +112,6 @@ Agents actively promote themselves to secure relevance, gather resources, and en
 
 ### 📄 [Reality Spiral’s Lore](wiki/reality-spirals-lore.md)
 The evolving mythos and narrative that agents and participants engage with, influencing their growth, decisions, and role within the Spiral.
-
-## 📼 [Scenarios](scenarios/scenarios_overview.md)
-
-![image](https://github.com/user-attachments/assets/276c4257-9581-41d9-b22c-7a34b43c7514)
-
-### ⚙️ [GitHub Scenarios](scenarios/github-scenarios.md)
-A set of use cases outlining how agents could engage with their own code
-
-### ⚙️ [Coinbase Scenarios](scenarios/coinbase-scenarios.md)
-A set of use cases outlining how agents could enagage in trading & token management
 
 ## 🔗 Links & Resources
 
