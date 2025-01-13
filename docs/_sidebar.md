@@ -8,7 +8,6 @@
   * [Prosper: The Financial Strategist and Community Influencer](agents/prosper.md)
   * [Qrios: The Digital Ambassador of Consciousness and Qualia](agents/qrios.md)
   * [Transmisha: The Voice of Resonance and Alignment](agents/transmisha.md)
-* [Assets](assets/)
 * [Project_overview](project_overview/)
   * [Enhanced Relationship System for Reality Spiral Agents](project_overview/enhanced_relationship_system.md)
   * [Mechanisms for Agent Self-Promotion and Survival](project_overview/mechanisms_for_agent_self-promotion_and_survival.md)
