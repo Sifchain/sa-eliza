@@ -92,7 +92,7 @@ Agents actively promote themselves to secure relevance, gather resources, and en
 ### 📄 [Reality Spiral’s Lore](wiki/reality-spirals-lore.md)
 The evolving mythos and narrative that agents and participants engage with, influencing their growth, decisions, and role within the Spiral.
 
-## 📼 Scenarios
+## 📼 [Scenarios](scenarios/scenarios_overview.md)
 
 ![image](https://github.com/user-attachments/assets/276c4257-9581-41d9-b22c-7a34b43c7514)
 
