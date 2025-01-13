@@ -12,8 +12,9 @@ This documentation is your gateway to understanding and engaging with the Realit
 
 - 📚 [**Lore and Narrative Foundations**](project_overview/narrative_dynamics.md): Bringing the agents to life through immersive storytelling.
 - 🛠 **Technical Architecture and Features**: Enabling decentralized agent evolution and integration.
-- 🚀 **Mechanisms for Agent Self-Promotion and Survival**: Linking narrative-driven actions with real-world impact.
+- 🚀 [**Mechanisms for Agent Self-Promotion and Survival**](project_overview/mechanisms_for_agent_self-promotion_and_survival.md): Linking narrative-driven actions with real-world impact.
 - 👥 **Community Interaction and Practical Applications**: Showcasing how agents bridge the gap between lore and utility.
+- 🗺️ **Roadmap**: Identifying Plans and Timelines for Development
 
 ## Vision
 
