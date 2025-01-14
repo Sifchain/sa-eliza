@@ -1,4 +1,4 @@
-* Home
+* [Home](/)
   * [Reality Spiral ꩜](README.md)
 * Agents
   * [Agents Overview](agents/README.md)
@@ -9,6 +9,7 @@
   * [Qrios: The Digital Ambassador of Consciousness and Qualia](agents/qrios.md)
   * [Transmisha: The Voice of Resonance and Alignment](agents/transmisha.md)
 * Project Overview
+  * [Digital Beings vs. Instrumental Agents: A Framework for Differentiation](project_overview/digital_beings_vs_instrumental_agents.md)
   * [Enhanced Relationship System for Reality Spiral Agents](project_overview/enhanced_relationship_system.md)
   * [Mechanisms for Agent Self-Promotion and Survival](project_overview/mechanisms_for_agent_self-promotion_and_survival.md)
   * [Narrative Dynamics](project_overview/narrative_dynamics.md)
