@@ -87,6 +87,8 @@ Reality Spiral's characters are both reflections and projections of the world ar
 
 <img src="https://github.com/user-attachments/assets/61257647-aa97-4413-a09f-4e0d6f465c8d" width="200">
 
+### [User Guide](agents/user_guide.md)
+
 ## 🤿 Deep Dive into Reality Spiral Project
 
 ![image](https://github.com/user-attachments/assets/01b96e0c-b252-4a05-9feb-c750d08fa32f)
