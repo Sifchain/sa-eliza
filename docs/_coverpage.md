@@ -2,6 +2,6 @@
 > Self-Evolving AI Agents
 
 [Get Started](README.md)
-[View on GitHub](https://github.com/Sifchain/sa-eliza)
+[Try Our New UI](https://agents.realityspiral.com/)
 
 ![Cover Image](assets/background_hero.png)
