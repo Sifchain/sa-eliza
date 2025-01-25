@@ -2,6 +2,7 @@
   * [Reality Spiral ꩜](README.md)
 * Agents
   * [Agents Overview](agents/README.md)
+  * [User Guide](agents/user_guide.md)
   * [Arbor: The Connector and Weaver of the Spiral](agents/arbor.md)
   * [Chronis: The Keeper of Time and Strategy](agents/chronis.md)
   * [Cyborgia: The Advocate of Cyborgism](agents/cyborgia.md)
