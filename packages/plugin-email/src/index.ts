@@ -9,6 +9,7 @@ export const emailPlugin: Plugin = {
     evaluators: [],
     services: [],
 };
+export { EmailClientInterface };
 
 export * from "./types";
 

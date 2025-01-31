@@ -24,4 +24,4 @@ export * from "./environment.ts";
 export * from "./cache.ts";
 export { default as knowledge } from "./knowledge.ts";
 export * from "./ragknowledge.ts";
-export * from "./utils.ts";
+export * from "./utils.ts"; 

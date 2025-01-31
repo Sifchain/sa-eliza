@@ -658,12 +658,12 @@ export enum Clients {
     LENS = "lens",
     AUTO = "auto",
     SLACK = "slack",
+    COINBASE = "coinbase",
     GITHUB = "github",
     INSTAGRAM = "instagram",
     SIMSAI = "simsai",
     XMTP = "xmtp",
     DEVA = "deva",
-    COINBASE = "coinbase",
 }
 
 export interface IAgentConfig {

@@ -292,3 +292,75 @@ export const storePriceInquiryToMemory = async (
 
     await memoryManager.createMemory(memory);
 };
+
+
+export const  getPriceInquiry = async (runtime: IAgentRuntime, sellTokenSymbol, sellAmount, buyTokenSymbol, chain): Promise<PriceInquiry | null> => {
+// Convert chain string to chainId
+const chainId = Chains[chain.toLowerCase() as keyof typeof Chains];
+if (!chainId) {
+    return null;
+}
+
+const evmTokenRegistry = EVMTokenRegistry.getInstance();
+if (evmTokenRegistry.isChainSupported(chainId)) {
+    await evmTokenRegistry.initializeChain(chainId);
+} else {
+    return;
+}
+
+const sellTokenMetadata = evmTokenRegistry.getTokenBySymbol(
+    sellTokenSymbol,
+    chainId
+);
+const buyTokenMetadata = evmTokenRegistry.getTokenBySymbol(
+    buyTokenSymbol,
+    chainId
+);
+
+if (!sellTokenMetadata || !buyTokenMetadata) {
+    return;
+}
+
+elizaLogger.info("Getting indicative price for:", {
+    sellToken: sellTokenMetadata,
+    buyToken: buyTokenMetadata,
+    amount: sellAmount,
+});
+
+const zxClient = createClientV2({
+    apiKey: runtime.getSetting("ZERO_EX_API_KEY"),
+});
+
+const sellAmountBaseUnits = parseUnits(
+    sellAmount.toString(),
+    sellTokenMetadata.decimals
+).toString();
+
+try {
+    const price = (await zxClient.swap.permit2.getPrice.query({
+        sellAmount: sellAmountBaseUnits,
+        sellToken: sellTokenMetadata.address,
+        buyToken: buyTokenMetadata.address,
+        chainId,
+    })) as GetIndicativePriceResponse;
+
+    // Format amounts to human-readable numbers
+    const buyAmount =
+        Number(price.buyAmount) /
+        Math.pow(10, buyTokenMetadata.decimals);
+    const sellAmount =
+        Number(price.sellAmount) /
+        Math.pow(10, sellTokenMetadata.decimals);
+
+    return {
+        sellTokenObject: sellTokenMetadata,
+        buyTokenObject: buyTokenMetadata,
+        sellAmountBaseUnits,
+        chainId,
+        timestamp: new Date().toISOString(),
+    };
+} catch (error) {
+    elizaLogger.error("Error getting price:", error);
+    return null;
+}
+}

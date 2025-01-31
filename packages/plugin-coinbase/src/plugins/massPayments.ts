@@ -95,7 +95,7 @@ export const massPayoutProvider: Provider = {
                 transactionHistory: transactions,
             };
         } catch (error) {
-            elizaLogger.error("Error in massPayoutProvider:", error);
+            elizaLogger.error("Error in massPayoutProvider:", error.message);
             return { csvRecords: [], balances: [], transactions: [] };
         }
     },
@@ -114,9 +114,9 @@ async function executeMassPayout(
     let sendingWallet: Wallet;
     try {
         elizaLogger.debug("Initializing sending wallet");
-        sendingWallet = await initializeWallet(runtime, networkId);
+        sendingWallet = (await initializeWallet(runtime, networkId)).wallet;
     } catch (error) {
-        elizaLogger.error("Error initializing sending wallet:", error);
+        elizaLogger.error("Error initializing sending wallet:", error.message);
         throw error;
     }
     for (const address of receivingAddresses) {
@@ -157,16 +157,16 @@ async function executeMassPayout(
 
                 transactions.push({
                     address,
-                    amount: transfer.getAmount().toNumber(),
+                    amount: transfer?.getAmount()?.toNumber(),
                     status: "Success",
                     errorCode: null,
-                    transactionUrl: transfer.getTransactionLink(),
+                    transactionUrl: transfer?.getTransactionLink(),
                 });
             } catch (error) {
                 elizaLogger.error(
                     "Error during transfer for address:",
                     address,
-                    error
+                    error.message
                 );
                 transactions.push({
                     address,
@@ -198,16 +198,15 @@ async function executeMassPayout(
             assetId,
             charityAddress
         );
-
         transactions.push({
             address: charityAddress,
-            amount: charityTransfer.getAmount().toNumber(),
+            amount: charityTransfer?.getAmount()?.toNumber(),
             status: "Success",
             errorCode: null,
-            transactionUrl: charityTransfer.getTransactionLink(),
+            transactionUrl: charityTransfer?.getTransactionLink(),
         });
     } catch (error) {
-        elizaLogger.error("Error during charity transfer:", error);
+        elizaLogger.error("Error during charity transfer:", error.message);
         transactions.push({
             address: charityAddress,
             amount: transferAmount * 0.01,
@@ -375,15 +374,14 @@ Details:
 ${successTransactions.length > 0 ? `✅ Successful Transactions:\n${successDetails}` : "No successful transactions."}
 ${failedTransactions.length > 0 ? `❌ Failed Transactions:\n${failedDetails}` : "No failed transactions."}
 ${charityTransactions.length > 0 ? `✅ Charity Transactions:\n${charityDetails}` : "No charity transactions."}
-
-Check the CSV file for full details.`,
+`,
                 },
                 []
             );
         } catch (error) {
-            elizaLogger.error("Error during mass payouts:", error);
+            elizaLogger.error("Error during mass payouts:", error.message);
             callback(
-                { text: "Failed to complete payouts. Please try again." },
+                { text: `Failed to complete payouts: ${error.message}` },
                 []
             );
         }

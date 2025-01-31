@@ -7,10 +7,12 @@ import {
     elizaLogger,
     MemoryManager,
 } from "@elizaos/core";
-import { Hex, numberToHex, concat } from "viem";
+import { Hex, numberToHex, concat, formatEther } from "viem";
 import { CHAIN_EXPLORERS, ZX_MEMORY } from "../constants";
 import { getWalletClient } from "../hooks.ts/useGetWalletClient";
-import { Quote } from "../types";
+import { Chains, Quote } from "../types";
+import { getPriceInquiry } from "./getIndicativePrice";
+import { getQuoteObj } from "./getQuote";
 
 export const swap: Action = {
     name: "EXECUTE_SWAP_0X",
@@ -24,8 +26,7 @@ export const swap: Action = {
     description: "Execute a token swap using 0x protocol",
     validate: async (runtime: IAgentRuntime) => {
         return (
-            !!runtime.getSetting("ZERO_EX_API_KEY") &&
-            !!runtime.getSetting("WALLET_PRIVATE_KEY")
+            !!runtime.getSetting("ZERO_EX_API_KEY")
         );
     },
     handler: async (
@@ -46,7 +47,7 @@ export const swap: Action = {
         const { quote, chainId } = latestQuote;
 
         try {
-            const client = getWalletClient(chainId); // 1 for mainnet, or pass chainId
+            const client = getWalletClient('', chainId); // 1 for mainnet, or pass chainId
 
             // 1. Handle Permit2 signature
             let signature: Hex | undefined;
@@ -186,3 +187,92 @@ export const retrieveLatestQuote = async (
         return null;
     }
 };
+
+export const tokenSwap = async (runtime: IAgentRuntime, quantity: number, fromCurrency: string, toCurrency: string, address: string, privateKey: string, chainId: number = Chains.base) => {
+    // get indicative price
+    const priceInquiry = await getPriceInquiry(runtime, fromCurrency, quantity, toCurrency, chainId);
+    // get latest quote
+    elizaLogger.log("Getting quote for swap", JSON.stringify(priceInquiry));
+    const quote = await getQuoteObj(runtime, priceInquiry, address);
+    elizaLogger.log("quotes ", JSON.stringify(quote))
+    try {
+        const client = getWalletClient(privateKey, chainId);
+
+        // 1. Handle Permit2 signature
+        let signature: Hex | undefined;
+        if (quote.permit2?.eip712) {
+            signature = await client.signTypedData({
+                account: client.account,
+                ...quote.permit2.eip712,
+            });
+
+            if (signature && quote.transaction?.data) {
+                const sigLengthHex = numberToHex(signature.length, {
+                    size: 32,
+                }) as Hex;
+                quote.transaction.data = concat([
+                    quote.transaction.data as Hex,
+                    sigLengthHex,
+                    signature,
+                ]);
+            }
+        }
+
+        const nonce = await client.getTransactionCount({
+            address: (client.account as { address: `0x${string}` }).address,
+        });
+        elizaLogger.log("nonce ", nonce)
+        const txHash = await client.sendTransaction({
+            account: client.account,
+            chain: client.chain,
+            gas: !!quote?.transaction.gas
+                ? BigInt(quote?.transaction.gas)
+                : undefined,
+            to: quote?.transaction.to as `0x${string}`,
+            data: quote.transaction.data as `0x${string}`,
+            value: BigInt(quote.transaction.value),
+            gasPrice: !!quote?.transaction.gasPrice
+                ? BigInt(quote?.transaction.gasPrice)
+                : undefined,
+            nonce: nonce,
+            kzg: undefined,
+        });
+        elizaLogger.log("txHash", txHash)
+        // Wait for transaction confirmation
+        const receipt = await client.waitForTransactionReceipt({
+            hash: txHash,
+        });
+        elizaLogger.log("receipt ", receipt)
+        if (receipt.status === "success") {
+            return txHash;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        elizaLogger.error("Swap execution failed:", error);
+        return null;
+    }
+}
+
+export const calculateOverallPNL = async (runtime: IAgentRuntime, privateKey: string, publicKey: string, chainId: number, initialBalanceInEther: number): Promise<string> => {
+    const client = getWalletClient(privateKey, chainId);
+    const balance = await client.getBalance({
+        address: publicKey as `0x${string}`,
+    });
+    const formattedBalanceInEther = formatEther(balance)
+    const pnlInEther = Number(formattedBalanceInEther) - initialBalanceInEther
+    const absoluteValuePNL = Math.abs(pnlInEther)
+    const priceInquiry = await getPriceInquiry(runtime, 'ETH', absoluteValuePNL, "USDC", chainId);
+    // get latest quote
+    elizaLogger.log("Getting quote for swap", JSON.stringify(priceInquiry));
+    const quote = await getQuoteObj(runtime, priceInquiry, publicKey);
+    const pnlUSD = Number(quote.buyAmount) 
+    const formattedPNL = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(pnlUSD);
+    return `${pnlInEther < 0 ? '-' : ''}${formattedPNL}`
+    }
+

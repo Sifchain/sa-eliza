@@ -108,11 +108,36 @@ pnpm start:client
 
 Then read the [Documentation](https://elizaos.github.io/eliza/) to learn how to customize your Eliza.
 
----
+### Manually Start Eliza (Only recommended if you know what you are doing)
+
+```bash
+# Clone the repository
+git clone https://github.com/elizaos/eliza.git
+
+# Checkout the latest release
+# This project iterates fast, so we recommend checking out the latest release
+git checkout $(git describe --tags --abbrev=0)
+# If the above doesn't checkout the latest release, this should work:
+# git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+```
+
+### Start Eliza with Gitpod
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/elizaos/eliza/tree/main)
+
+### Edit the .env file
+
+Copy .env.example to .env and fill in the appropriate values.
+
+```
+cp .env.example .env
+```
+
+Note: .env is optional. If your planning to run multiple distinct agents, you can pass secrets through the character JSON
 
 ### Automatically Start Eliza
 
-The start script provides an automated way to set up and run Eliza:
+This will run everything to setup the project and start the bot with the default character.
 
 ```bash
 sh scripts/start.sh

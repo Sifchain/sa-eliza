@@ -139,7 +139,7 @@ export const deployTokenContractAction: Action = {
                 totalSupply,
             } = contractDetails.object;
             elizaLogger.info("Contract details:", contractDetails.object);
-            const wallet = await initializeWallet(runtime, network);
+            const { wallet } = await initializeWallet(runtime, network);
             let contract: SmartContract;
             let deploymentDetails;
 
@@ -220,9 +220,7 @@ export const deployTokenContractAction: Action = {
 - Contract Address: ${contractAddress}
 - Transaction URL: ${transaction}
 ${deploymentDetails.baseURI !== "N/A" ? `- Base URI: ${deploymentDetails.baseURI}` : ""}
-${deploymentDetails.totalSupply !== "N/A" ? `- Total Supply: ${deploymentDetails.totalSupply}` : ""}
-
-Contract deployment has been logged to the CSV file.`,
+${deploymentDetails.totalSupply !== "N/A" ? `- Total Supply: ${deploymentDetails.totalSupply}` : ""}.`,
                 },
                 []
             );
@@ -230,7 +228,7 @@ Contract deployment has been logged to the CSV file.`,
             elizaLogger.error("Error deploying token contract:", error);
             callback(
                 {
-                    text: "Failed to deploy token contract. Please check the logs for more details.",
+                    text: `Failed to deploy token contract: ${error.message}`,
                 },
                 []
             );
@@ -348,7 +346,7 @@ export const invokeContractAction: Action = {
                 assetId,
                 networkId,
             } = invocationDetails.object;
-            const wallet = await initializeWallet(runtime, networkId);
+            const { wallet } = await initializeWallet(runtime, networkId);
 
             // Prepare invocation options
             const invocationOptions = {
@@ -403,19 +401,16 @@ export const invokeContractAction: Action = {
 - Method: ${method}
 - Network: ${networkId}
 - Status: ${invocation.getStatus()}
-- Transaction URL: ${invocation.getTransactionLink() || "N/A"}
-${amount ? `- Amount: ${amount}` : ""}
-${assetId ? `- Asset ID: ${assetId}` : ""}
-
-Contract invocation has been logged to the CSV file.`,
+- Transaction URL: ${invocation.getTransactionLink() || "N/A"}${amount ? `\n- Amount: ${amount}` : ""}
+${assetId ? `- Asset ID: ${assetId}` : ""}`,
                 },
                 []
             );
         } catch (error) {
-            elizaLogger.error("Error invoking contract method:", error);
+            elizaLogger.error("Error invoking contract method: ", error.message);
             callback(
                 {
-                    text: "Failed to invoke contract method. Please check the logs for more details.",
+                    text: `Failed to invoke contract method: ${error.message}`,
                 },
                 []
             );
@@ -541,7 +536,7 @@ export const readContractAction: Action = {
                 []
             );
         } catch (error) {
-            elizaLogger.error("Error reading contract:", error);
+            elizaLogger.error("Error reading contract: ", error.message);
             callback(
                 {
                     text: `Failed to read contract: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -579,7 +574,7 @@ export const tokenContractPlugin: Plugin = {
         "Enables deployment, invocation, and reading of ERC20, ERC721, and ERC1155 token contracts using the Coinbase SDK",
     actions: [
         deployTokenContractAction,
-        invokeContractAction,
+      //  invokeContractAction,
         readContractAction,
     ],
 };

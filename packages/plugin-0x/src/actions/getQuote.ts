@@ -57,7 +57,7 @@ export const getQuote: Action = {
                 sellToken: sellTokenObject.address,
                 buyToken: buyTokenObject.address,
                 chainId: chainId,
-                taker: runtime.getSetting("WALLET_PUBLIC_ADDRESS"),
+                taker: '0x0000000000000000000000000000000000000000',
             })) as GetQuoteResponse;
 
             await storeQuoteToMemory(runtime, message, {
@@ -337,3 +337,31 @@ export const formatRouteInfo = (quote: GetQuoteResponse): string[] => {
 
     return ["🛣️ Route:", routePath, ...routeDetails];
 };
+
+export const getQuoteObj = async (runtime: IAgentRuntime, priceInquiry: PriceInquiry, address: string) => {
+    const {
+        sellTokenObject,
+        sellAmountBaseUnits,
+        buyTokenObject,
+        chainId,
+    } = priceInquiry;
+
+    const zxClient = createClientV2({
+        apiKey: runtime.getSetting("ZERO_EX_API_KEY"),
+    });
+
+    try {
+        const quote = (await zxClient.swap.permit2.getQuote.query({
+            sellAmount: sellAmountBaseUnits,
+            sellToken: sellTokenObject.address,
+            buyToken: buyTokenObject.address,
+            chainId: chainId,
+            taker: address,
+        })) as GetQuoteResponse;
+        elizaLogger.info("Quote:", quote);
+        return quote;
+    } catch (error) {
+        elizaLogger.error("Error getting quote:", error);
+        return null;
+    }
+}

@@ -67,9 +67,9 @@ const CHAIN_CONFIG = {
 } as const;
 
 export const getWalletClient = (
+    rawPrivateKey: string = process.env.WALLET_PRIVATE_KEY,
     chainId: number
 ): WalletClient & PublicClient => {
-    const rawPrivateKey = process.env.WALLET_PRIVATE_KEY;
     if (!rawPrivateKey) {
         throw new Error("Wallet private key is required");
     }

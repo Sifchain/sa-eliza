@@ -72,6 +72,9 @@ eliza.manifest
 eliza.manifest.sgx
 eliza.sig
 
+all_files_content.txt
+repo_compiler.zsh
+
 packages/plugin-nvidia-nim/extra
 packages/plugin-nvidia-nim/old_code
 packages/plugin-nvidia-nim/docs

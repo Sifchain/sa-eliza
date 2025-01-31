@@ -48,14 +48,14 @@ const tradeProvider: Provider = {
             try {
                 accounts = await client.listAccounts({});
             } catch (error) {
-                elizaLogger.error("Error fetching accounts:", error);
+                elizaLogger.error("Error fetching accounts:", error.message);
                 return [];
             }
 
             try {
                 products = await client.listProducts({});
             } catch (error) {
-                elizaLogger.error("Error fetching products:", error);
+                elizaLogger.error("Error fetching products:", error.message);
                 return [];
             }
 
@@ -77,7 +77,7 @@ const tradeProvider: Provider = {
             try {
                 csvData = await readFile(tradeCsvFilePath, "utf-8");
             } catch (error) {
-                elizaLogger.error("Error reading CSV file:", error);
+                elizaLogger.error("Error reading CSV file:", error.message);
                 return [];
             }
 
@@ -87,7 +87,7 @@ const tradeProvider: Provider = {
                     skip_empty_lines: true,
                 });
             } catch (error) {
-                elizaLogger.error("Error parsing CSV data:", error);
+                elizaLogger.error("Error parsing CSV data:", error.message);
                 return [];
             }
 
@@ -97,7 +97,7 @@ const tradeProvider: Provider = {
                 trades: records,
             };
         } catch (error) {
-            elizaLogger.error("Error in tradeProvider:", error);
+            elizaLogger.error("Error in tradeProvider:", error.message);
             return [];
         }
     },
@@ -127,7 +127,7 @@ export async function appendTradeToCsv(tradeResult: any) {
         await csvWriter.writeRecords([formattedTrade]);
         elizaLogger.info("Trade written to CSV successfully");
     } catch (error) {
-        elizaLogger.error("Error writing trade to CSV:", error);
+        elizaLogger.error("Error writing trade to CSV:", error.message);
         // Log the actual error for debugging
         if (error instanceof Error) {
             elizaLogger.error("Error details:", error.message);
@@ -187,6 +187,21 @@ async function hasEnoughBalance(
     }
 }
 
+async function getPrice(client: RESTClient, productId: string) {
+    elizaLogger.debug("Fetching product info for productId:", productId);
+    try {
+        const productInfo = await client.getProduct({productId});
+        const price = JSON.parse(productInfo)?.price;
+        elizaLogger.info("Product info retrieved:", productInfo);
+        elizaLogger.info("Price:", price);
+        return Number(price);
+    } catch (error) {
+        elizaLogger.error("Error fetching product info:", error.message);
+        return null;
+    }
+}
+
+
 export const executeAdvancedTradeAction: Action = {
     name: "EXECUTE_ADVANCED_TRADE",
     description: "Execute a trade using Coinbase Advanced Trading API",
@@ -229,7 +244,7 @@ export const executeAdvancedTradeAction: Action = {
             );
             elizaLogger.info("Advanced trade client initialized");
         } catch (error) {
-            elizaLogger.error("Client initialization failed:", error);
+            elizaLogger.error("Client initialization failed:", error.message);
             callback(
                 {
                     text: "Failed to initialize trading client. Please check your API credentials.",
@@ -254,7 +269,7 @@ export const executeAdvancedTradeAction: Action = {
             });
             elizaLogger.info("Trade details generated:", tradeDetails.object);
         } catch (error) {
-            elizaLogger.error("Trade details generation failed:", error);
+            elizaLogger.error("Trade details generation failed:", error.message);
             callback(
                 {
                     text: "Failed to generate trade details. Please provide valid trading parameters.",
@@ -282,18 +297,25 @@ export const executeAdvancedTradeAction: Action = {
         // Configure order
         let orderConfiguration: OrderConfiguration;
         elizaLogger.debug("Starting order configuration");
+        let amountInCurrency = amount;
         try {
             if (orderType === "MARKET") {
+                const priceInUSD = await getPrice(client, productId);
+                elizaLogger.info("Price:", priceInUSD);
+                if (side === "SELL") {
+                    amountInCurrency = parseFloat(((1 / priceInUSD) * amountInCurrency).toFixed(7));
+                }
+                elizaLogger.info("Amount in currency:", amountInCurrency);
                 orderConfiguration =
                     side === "BUY"
                         ? {
                               market_market_ioc: {
-                                  quote_size: amount.toString(),
+                                  quote_size: amountInCurrency.toString(),
                               },
                           }
                         : {
                               market_market_ioc: {
-                                  base_size: amount.toString(),
+                                  base_size: amountInCurrency.toString(),
                               },
                           };
             } else {
@@ -302,7 +324,7 @@ export const executeAdvancedTradeAction: Action = {
                 }
                 orderConfiguration = {
                     limit_limit_gtc: {
-                        baseSize: amount.toString(),
+                        baseSize: amountInCurrency.toString(),
                         limitPrice: limitPrice.toString(),
                         postOnly: false,
                     },
@@ -313,7 +335,7 @@ export const executeAdvancedTradeAction: Action = {
                 orderConfiguration
             );
         } catch (error) {
-            elizaLogger.error("Order configuration failed:", error);
+            elizaLogger.error("Order configuration failed:", error.message);
             callback(
                 {
                     text:
@@ -327,14 +349,13 @@ export const executeAdvancedTradeAction: Action = {
         }
 
         // Execute trade
-        let order: CreateOrderResponse;
         try {
             elizaLogger.debug("Executing the trade");
             if (
                 !(await hasEnoughBalance(
                     client,
                     productId.split("-")[0],
-                    amount,
+                    amountInCurrency,
                     side
                 ))
             ) {
@@ -347,7 +368,7 @@ export const executeAdvancedTradeAction: Action = {
                 return;
             }
 
-            order = await client.createOrder({
+           const order = await client.createOrder({
                 clientOrderId: crypto.randomUUID(),
                 productId,
                 side: side === "BUY" ? OrderSide.BUY : OrderSide.SELL,
@@ -355,6 +376,29 @@ export const executeAdvancedTradeAction: Action = {
             });
 
             elizaLogger.info("Trade executed successfully:", order);
+            const parsedOrder = JSON.parse(order);
+            elizaLogger.info("Parsed order:", JSON.stringify(parsedOrder));
+            elizaLogger.info("Parsed order success:", parsedOrder.success);
+            if (parsedOrder.success == true) {
+                callback(
+                    {
+                        text: `Advanced Trade executed successfully:
+    - Product: ${productId}
+    - Type: ${orderType} Order
+    - Side: ${side}
+    - Amount: ${amountInCurrency}
+    ${orderType === "LIMIT" ? `- Limit Price: ${limitPrice}\n` : ""}`,
+                },
+                []
+            );
+        } else {
+            callback(
+                {
+                    text: `Failed to execute trade: ${(parsedOrder as any)?.error_response?.message ?? "Unknown error occurred"}`,
+                },
+                []
+            );
+        }
         } catch (error) {
             elizaLogger.error("Trade execution failed:", error?.message);
             callback(
@@ -370,25 +414,10 @@ export const executeAdvancedTradeAction: Action = {
             // await appendTradeToCsv(order);
             elizaLogger.info("Trade logged to CSV");
         } catch (csvError) {
-            elizaLogger.warn("Failed to log trade to CSV:", csvError);
+            elizaLogger.warn("Failed to log trade to CSV:", csvError.message);
             // Continue execution as this is non-critical
         }
 
-        callback(
-            {
-                text: `Advanced Trade executed successfully:
-- Product: ${productId}
-- Type: ${orderType} Order
-- Side: ${side}
-- Amount: ${amount}
-- ${orderType === "LIMIT" ? `- Limit Price: ${limitPrice}\n` : ""}- Order ID: ${order.order_id}
-- Status: ${order.success}
-- Order Id:  ${order.order_id}
-- Response: ${JSON.stringify(order.response)}
-- Order Configuration: ${JSON.stringify(order.order_configuration)}`,
-            },
-            []
-        );
     },
     examples: [
         [

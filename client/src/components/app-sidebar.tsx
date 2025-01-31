@@ -64,7 +64,7 @@ export function AppSidebar() {
                                             <SidebarMenuItem key={"skeleton-item"}>
                                                 <SidebarMenuSkeleton />
                                             </SidebarMenuItem>
-                                        )
+                                        ),
                                     )}
                                 </div>
                             ) : (
@@ -77,7 +77,7 @@ export function AppSidebar() {
                                                 >
                                                     <SidebarMenuButton
                                                         isActive={location.pathname.includes(
-                                                            agent.id
+                                                            agent.id,
                                                         )}
                                                     >
                                                         <User />
@@ -87,7 +87,7 @@ export function AppSidebar() {
                                                     </SidebarMenuButton>
                                                 </NavLink>
                                             </SidebarMenuItem>
-                                        )
+                                        ),
                                     )}
                                 </div>
                             )}

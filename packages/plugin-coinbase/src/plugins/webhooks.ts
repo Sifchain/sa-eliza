@@ -63,10 +63,6 @@ export const createWebhookAction: Action = {
             !!(
                 runtime.character.settings.secrets?.COINBASE_PRIVATE_KEY ||
                 process.env.COINBASE_PRIVATE_KEY
-            ) &&
-            !!(
-                runtime.character.settings.secrets?.COINBASE_NOTIFICATION_URI ||
-                process.env.COINBASE_NOTIFICATION_URI
             )
         );
     },
@@ -111,11 +107,18 @@ export const createWebhookAction: Action = {
                 return;
             }
 
-            const { networkId, eventType, eventFilters, eventTypeFilter } =
-                webhookDetails.object as WebhookContent;
+            const {
+                networkId,
+                eventType,
+                eventFilters,
+                eventTypeFilter,
+                webhookUrl,
+            } = webhookDetails.object as WebhookContent;
             const notificationUri =
-                runtime.getSetting("COINBASE_NOTIFICATION_URI") ??
-                process.env.COINBASE_NOTIFICATION_URI;
+                webhookUrl != null && webhookUrl != ""
+                    ? webhookUrl
+                    : runtime.getSetting("COINBASE_NOTIFICATION_URI") ??
+                      process.env.COINBASE_NOTIFICATION_URI;
 
             if (!notificationUri) {
                 callback(
@@ -152,10 +155,10 @@ export const createWebhookAction: Action = {
             await appendWebhooksToCsv([webhook]);
             elizaLogger.info("Webhook appended to CSV successfully");
         } catch (error) {
-            elizaLogger.error("Error during webhook creation:", error);
+            elizaLogger.error("Error during webhook creation:", error.message);
             callback(
                 {
-                    text: "Failed to create the webhook. Please check the logs for more details.",
+                    text: `Failed to create the webhook: ${error.message}`,
                 },
                 []
             );
@@ -167,7 +170,37 @@ export const createWebhookAction: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "Create a webhook on base for address 0xbcF7C64B880FA89a015970dC104E848d485f99A3 on the event type: transfers",
+                    text: "Create a webhook on base for address 0xbcF7C64B880FA89a015970dC104E848d485f99A3 on the event type: erc 20 transfers to the url: https://example.com",
+                },
+            },
+            {
+                user: "{{agentName}}",
+                content: {
+                    text: `Webhook created successfully: Webhook ID: {{webhookId}}, Network ID: {{networkId}}, Notification URI: {{notificationUri}}, Event Type: {{eventType}}`,
+                    action: "CREATE_WEBHOOK",
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Create a webhook on base for address 0xbcF7C64B880FA89a015970dC104E848d485f99A3 on the event type: erc 721 transfers to the url: https://example.com",
+                },
+            },
+            {
+                user: "{{agentName}}",
+                content: {
+                    text: `Webhook created successfully: Webhook ID: {{webhookId}}, Network ID: {{networkId}}, Notification URI: {{notificationUri}}, Event Type: {{eventType}}`,
+                    action: "CREATE_WEBHOOK",
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Create a webhook on base for address 0xbcF7C64B880FA89a015970dC104E848d485f99A3 on the event type: wallet activity to the url: https://example.com",
                 },
             },
             {

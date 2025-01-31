@@ -1,0 +1,18 @@
+# Load custom actions from the actions directory
+
+# Clone this into a elizaConfig.yaml file that is ignored by git
+
+# Paths are relative to the core/src directory
+
+plugins:
+    - name: solana
+      enabled: true
+      settings:
+          network: mainnet-beta
+          endpoint: https://api.mainnet-beta.solana.com
+
+    - name: image-generation
+      enabled: true
+      settings:
+          provider: dalle
+          size: 1024x1024

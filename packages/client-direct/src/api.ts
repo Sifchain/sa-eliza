@@ -19,6 +19,7 @@ import type { TeeLogQuery, TeeLogService } from "@elizaos/plugin-tee-log";
 import { REST, Routes } from "discord.js";
 import type { DirectClient } from ".";
 import { validateUuid } from "@elizaos/core";
+import { WebhookEvent } from "@elizaos/client-coinbase";
 
 interface UUIDParams {
     agentId: UUID;
@@ -69,7 +70,7 @@ function validateUUIDParams(
 
 export function createApiRouter(
     agents: Map<string, AgentRuntime>,
-    directClient: DirectClient
+    directClient: DirectClient,
 ) {
     const router = express.Router();
 
@@ -79,8 +80,51 @@ export function createApiRouter(
     router.use(
         express.json({
             limit: getEnvVariable("EXPRESS_MAX_PAYLOAD") || "100kb",
-        })
+        }),
     );
+
+    router.get("/webhook/coinbase/health", (req, res) => {
+        elizaLogger.info("Health check received");
+        res.status(200).json({ status: "ok" });
+    });
+
+    router.post("/webhook/coinbase/:agentId", async (req, res) => {
+        elizaLogger.info("Webhook received for agent:", req.params.agentId);
+        const agentId = req.params.agentId;
+        const runtime = agents.get(agentId);
+
+        if (!runtime) {
+            res.status(404).json({ error: "Agent not found" });
+            return;
+        }
+
+        // Validate the webhook payload
+        const event = req.body as WebhookEvent;
+        if (!event.event || !event.ticker || !event.timestamp || !event.price) {
+            res.status(400).json({ error: "Invalid webhook payload" });
+            return;
+        }
+        if (event.event !== 'buy' && event.event !== 'sell') {
+            res.status(400).json({ error: "Invalid event type" });
+            return;
+        }
+
+        try {
+            // Access the coinbase client through the runtime
+            const coinbaseClient = runtime.clients.coinbase as any;
+            if (!coinbaseClient) {
+                res.status(400).json({ error: "Coinbase client not initialized for this agent" });
+                return;
+            }
+
+            // Forward the webhook event to the client's handleWebhookEvent method
+            await coinbaseClient.handleWebhookEvent(event);
+            res.status(200).json({ status: "success" });
+        } catch (error) {
+            elizaLogger.error("Error processing Coinbase webhook:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
 
     router.get("/", (req, res) => {
         res.send("Welcome, this is the REST API!");
@@ -99,7 +143,7 @@ export function createApiRouter(
         res.json({ agents: agentsList });
     });
 
-    router.get('/storage', async (req, res) => {
+    router.get("/storage", async (req, res) => {
         try {
             const uploadDir = path.join(process.cwd(), "data", "characters");
             const files = await fs.promises.readdir(uploadDir);
@@ -201,7 +245,7 @@ export function createApiRouter(
                 const uploadDir = path.join(
                     process.cwd(),
                     "data",
-                    "characters"
+                    "characters",
                 );
                 const filepath = path.join(uploadDir, filename);
                 await fs.promises.mkdir(uploadDir, { recursive: true });
@@ -210,15 +254,15 @@ export function createApiRouter(
                     JSON.stringify(
                         { ...characterJson, id: agent.agentId },
                         null,
-                        2
-                    )
+                        2,
+                    ),
                 );
                 elizaLogger.info(
-                    `Character stored successfully at ${filepath}`
+                    `Character stored successfully at ${filepath}`,
                 );
             } catch (error) {
                 elizaLogger.error(
-                    `Failed to store character: ${error.message}`
+                    `Failed to store character: ${error.message}`,
                 );
             }
         }
@@ -271,7 +315,7 @@ export function createApiRouter(
         // if runtime is null, look for runtime with the same name
         if (!runtime) {
             runtime = Array.from(agents.values()).find(
-                (a) => a.character.name.toLowerCase() === agentId.toLowerCase()
+                (a) => a.character.name.toLowerCase() === agentId.toLowerCase(),
             );
         }
 
@@ -316,7 +360,7 @@ export function createApiRouter(
                                 description: attachment.description,
                                 text: attachment.text,
                                 contentType: attachment.contentType,
-                            })
+                            }),
                         ),
                     },
                     embedding: memory.embedding,
@@ -375,7 +419,7 @@ export function createApiRouter(
                 .getService<TeeLogService>(ServiceType.TEE_LOG)
                 .getInstance();
             const attestation = await teeLogService.generateAttestation(
-                JSON.stringify(allAgents)
+                JSON.stringify(allAgents),
             );
             res.json({ agents: allAgents, attestation: attestation });
         } catch (error) {
@@ -401,7 +445,7 @@ export function createApiRouter(
 
             const teeAgent = await teeLogService.getAgent(agentId);
             const attestation = await teeLogService.generateAttestation(
-                JSON.stringify(teeAgent)
+                JSON.stringify(teeAgent),
             );
             res.json({ agent: teeAgent, attestation: attestation });
         } catch (error) {
@@ -436,10 +480,10 @@ export function createApiRouter(
                 const pageQuery = await teeLogService.getLogs(
                     teeLogQuery,
                     page,
-                    pageSize
+                    pageSize,
                 );
                 const attestation = await teeLogService.generateAttestation(
-                    JSON.stringify(pageQuery)
+                    JSON.stringify(pageQuery),
                 );
                 res.json({
                     logs: pageQuery,
@@ -451,7 +495,7 @@ export function createApiRouter(
                     error: "Failed to get TEE logs",
                 });
             }
-        }
+        },
     );
 
     router.post("/agent/start", async (req, res) => {
@@ -463,7 +507,7 @@ export function createApiRouter(
             if (characterJson) {
                 character = await directClient.jsonToCharacter(
                     characterPath,
-                    characterJson
+                    characterJson,
                 );
             } else if (characterPath) {
                 character =
@@ -502,6 +546,49 @@ export function createApiRouter(
         } else {
             res.status(404).json({ error: "Agent not found" });
         }
+    });
+
+    // Add Coinbase webhook forwarding endpoint
+    router.post("/webhook/coinbase/:agentId", async (req, res) => {
+        const agentId = req.params.agentId;
+        const runtime = agents.get(agentId);
+
+        if (!runtime) {
+            res.status(404).json({ error: "Agent not found" });
+            return;
+        }
+
+        // Validate the webhook payload
+        const event = req.body as WebhookEvent;
+        if (!event.event || !event.ticker || !event.timestamp || !event.price) {
+            res.status(400).json({ error: "Invalid webhook payload" });
+            return;
+        }
+        if (event.event !== 'buy' && event.event !== 'sell') {
+            res.status(400).json({ error: "Invalid event type" });
+            return;
+        }
+
+        try {
+            // Access the coinbase client through the runtime
+            const coinbaseClient = runtime.clients.coinbase as any;
+            if (!coinbaseClient) {
+                res.status(400).json({ error: "Coinbase client not initialized for this agent" });
+                return;
+            }
+
+            // Forward the webhook event to the client's handleWebhookEvent method
+            await coinbaseClient.handleWebhookEvent(event);
+            res.status(200).json({ status: "success" });
+        } catch (error) {
+            elizaLogger.error("Error processing Coinbase webhook:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+    // Add health check endpoint for Coinbase webhook
+    router.get("/webhook/coinbase/health", (req, res) => {
+        res.status(200).json({ status: "ok" });
     });
 
     return router;

@@ -60,7 +60,7 @@ async function composeTweet(
     }
 }
 
-async function sendTweet(twitterClient: Scraper, content: string) {
+export async function sendTweet(twitterClient: Scraper, content: string) {
     const result = await twitterClient.sendTweet(content);
 
     const body = await result.json();
@@ -84,7 +84,7 @@ async function sendTweet(twitterClient: Scraper, content: string) {
     return true;
 }
 
-async function postTweet(
+export async function postTweet(
     runtime: IAgentRuntime,
     content: string
 ): Promise<boolean> {

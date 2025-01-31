@@ -9,4 +9,5 @@ export const twitterPlugin: Plugin = {
     providers: [],
 };
 
+export { postTweet } from "./actions/post";
 export default twitterPlugin;

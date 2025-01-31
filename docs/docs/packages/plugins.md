@@ -586,7 +586,6 @@ The Webhook Plugin enables Eliza to interact with the Coinbase SDK to create and
     ```
 
 2. **Ensure Secure Configuration**
-   Set the following environment variables or runtime settings to ensure the plugin functions securely:
 
     - `COINBASE_API_KEY`: API key for Coinbase SDK.
     - `COINBASE_PRIVATE_KEY`: Private key for secure transactions.
@@ -615,9 +614,7 @@ console.log("Webhook creation response:", response);
 
 #### 10. Fuel Plugin (`@elizaos/plugin-fuel`)
 
-The Fuel plugin provides an interface to the Fuel Ignition blockchain.
-
-**Actions:**
+**Usage Instructions:**
 
 1. `TRANSFER_FUEL_ETH` - Transfer ETH to a given Fuel address. - **Inputs**: - `toAddress` (string): The Fuel address to transfer ETH to. - `amount` (string): The amount of ETH to transfer. - **Outputs**: Confirmation message with transaction details. - **Example**:
 
@@ -630,22 +627,6 @@ The Fuel plugin provides an interface to the Fuel Ignition blockchain.
 
     **Setup and Configuration:**
 
-1. **Configure the Plugin**
-   Add the plugin to your character's configuration:
-
-    ```typescript
-    import { fuelPlugin } from "@eliza/plugin-fuel";
-
-    const character = {
-        plugins: [fuelPlugin],
-    };
-    ```
-
-1. **Required Configurations**
-   Set the following environment variables or runtime settings:
-
-    - `FUEL_WALLET_PRIVATE_KEY`: Private key for secure transactions
-
 ---
 
 #### 11. Marlin TEE Plugin (`@elizaos/plugin-tee-marlin`)
@@ -655,6 +636,7 @@ Makes Eliza TEE-aware by using the [Marlin Oyster](https://github.com/marlinprot
 **Configuration:**
 
 Add the following to your `.env` file to enable the plugin:
+
 ```
 TEE_MARLIN=yes
 ```
@@ -666,6 +648,7 @@ TEE_MARLIN=yes
 **REMOTE_ATTESTATION Configuration:**
 
 The agent fetches the remote attestation from an attestation server whose URL can be configured in the `.env` file:
+
 ```
 # Optional, default is http://127.0.0.1:1350
 TEE_MARLIN_ATTESTATION_ENDPOINT="http://127.0.0.1:1350"
@@ -742,30 +725,86 @@ cargo run --ip-addr <ip>:<port>
 docker run --init -p 127.0.0.1:1350:1350 marlinorg/attestation-server-custom-mock
 ```
 
-### 12. Allora Plugin (`@elizaos/allora-plugin`)
+---
 
-The [Allora Network](https://allora.network) plugin seamlessly empowers Eliza agents with real-time, advanced, self-improving AI inferences, delivering high-performance insights without introducing any additional complexity.
+#### 12. Github Plugin (`@eliza/plugin-github`)
 
-#### Setup and Configuration
+This plugin integrates with the GitHub API to provide various actions and evaluators for managing repositories, issues, and pull requests.
 
-1. Add the plugin to your character's configuration
+**Actions:**
+
+- `INITIALIZE_REPOSITORY` - Initialize a GitHub repository.
+- `CREATE_COMMIT` - Create a new commit in a GitHub repository.
+- `CREATE_PULL_REQUEST` - Create a new pull request in a GitHub repository.
+- `MEMORIES_FROM_FILES` - Generate memories from files in a GitHub repository.
+
+**Evaluators:**
+
+None
+
+**Providers:**
+
+None
+
+**Description:**
+
+The GitHub plugins enable agents to interact with GitHub repositories, create commits, pull requests, and generate memories from files stored in a repository.
+
+1. **Configure the Plugin**
+   Add the plugin to your character’s configuration:
 
     ```typescript
-    import { alloraPlugin } from "@eliza/plugin-allora";
+    import {
+        githubInitializeRepository,
+        githubCreateCommit,
+        githubCreatePullRequest,
+        githubMemoriesFromFiles,
+    } from "@eliza/plugin-github";
 
     const character = {
-        plugins: [alloraPlugin],
+        plugins: [
+            githubInitializeRepository,
+            githubCreateCommit,
+            githubCreatePullRequest,
+            githubMemoriesFromFiles,
+        ],
     };
     ```
 
-2. Set the following environment variables:
-    - `ALLORA_API_KEY`: Create an API key by [creating an account](https://developer.upshot.xyz/signup).
+2. **Ensure Secure Configuration**
+   Set the following environment variables within the `.env` file. See next section to know how to create a new github api token.
 
-#### Actions
+    - `GITHUB_API_TOKEN`: API key for GitHub API access.
 
-- `GET_INFERENCE`: Retrieves predictions for a specific topic.
+3. **Creating a GitHub Classic Token with `public_repo` Scope**
 
-Example interactions:
+To generate a GitHub Classic token with the required `public_repo` scope, follow these steps:
+
+- **\*Log in to GitHub**: Go to [GitHub](https://github.com/) and log in to your account.
+
+- **Access Personal Access Tokens**:
+
+    - Navigate to **Settings** by clicking on your profile picture in the top-right corner.
+    - Under **Developer settings**, select **Personal access tokens** > **Tokens (classic)**.
+    - Alternatively, you can go directly to [GitHub's token settings page](https://github.com/settings/tokens).
+
+- **Generate New Token**:
+
+    - Click on **Generate new token**.
+    - Provide a note to identify the purpose of the token (e.g., "Plugin API Access").
+
+- **Select the Scope**:
+
+    - Under **Select scopes**, check the box for `public_repo`. This grants access to public repositories.
+
+- **Generate and Save the Token**:
+
+    - Scroll to the bottom and click **Generate token**.
+    - **Important**: Copy and save the token securely as it will not be shown again.
+
+- **Set the Token as Environment Variable**:
+    - Add the generated token to your `.env` file:
+        - `GITHUB_API_TOKEN=<your_token>`
 
 ```
 User: "What is the predicted ETH price in 5 minutes?"
