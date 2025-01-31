@@ -17,6 +17,9 @@
       repo: 'https://github.com/Sifchain/sa-eliza',
       loadSidebar: true,
       subMaxLevel: 2,
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md'  // ✅ Fixes sidebar for subpages
+      },
       coverpage: true,
       onlyCover: false,
       autoHeader: true,
