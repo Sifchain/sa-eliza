@@ -36,6 +36,7 @@ import {
     mergePRAction,
     replyToPRCommentAction,
     implementFeatureAction,
+    generateCodeFileChangesAction,
 } from "./plugins/interactWithPR";
 import { githubIdeationPlugin, ideationAction } from "./plugins/ideationPlugin";
 import type { Plugin } from "@elizaos/core";
@@ -44,6 +45,7 @@ import { testFilesProvider } from "./providers/testFiles";
 import { workflowFilesProvider } from "./providers/workflowFiles";
 import { documentationFilesProvider } from "./providers/documentationFiles";
 import { releasesProvider } from "./providers/releases";
+import { githubOrchestratePlugin, orchestrateAction } from "./plugins/orchestrate";
 
 export const plugins = {
     githubInitializePlugin,
@@ -55,6 +57,7 @@ export const plugins = {
     githubInteractWithIssuePlugin,
     githubInteractWithPRPlugin,
     githubIdeationPlugin,
+    githubOrchestratePlugin,
 };
 
 export * from "./plugins/initializeRepository";
@@ -66,6 +69,7 @@ export * from "./plugins/modifyIssue";
 export * from "./plugins/interactWithIssue";
 export * from "./plugins/ideationPlugin";
 export * from "./plugins/interactWithPR";
+export * from "./plugins/orchestrate";
 
 export * from "./providers/sourceCode";
 export * from "./providers/testFiles";
@@ -98,7 +102,9 @@ export const githubPlugin: Plugin = {
         reactToIssueAction,
         closeIssueAction,
         replyToPRCommentAction,
+        generateCodeFileChangesAction,
         implementFeatureAction,
+        orchestrateAction,
     ],
     evaluators: [],
     providers: [
