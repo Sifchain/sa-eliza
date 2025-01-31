@@ -1,0 +1,22 @@
+{
+    "name": "@sa-eliza/api",
+    "version": "1.0.0",
+    "description": "SA-ELIZA REST API",
+    "main": "server.js",
+    "scripts": {
+      "dev": "ts-node server.ts",
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.3",
+      "pg": "^8.10.0",
+      "swagger-ui-express": "^4.3.0",
+      "swagger-jsdoc": "^6.2.8"
+    },
+    "devDependencies": {
+      "ts-node": "^10.9.1",
+      "typescript": "^5.1.6"
+    }
+  }

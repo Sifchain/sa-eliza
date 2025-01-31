@@ -110,9 +110,11 @@ export function AppSidebar() {
                         </NavLink>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <SidebarMenuButton disabled>
+                    <NavLink to="/logs">
+                        <SidebarMenuButton>
                             <Cog /> Settings
                         </SidebarMenuButton>
+                        </NavLink>
                     </SidebarMenuItem>
                     <ConnectionStatus />
                 </SidebarMenu>

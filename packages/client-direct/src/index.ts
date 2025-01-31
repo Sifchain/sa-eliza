@@ -29,6 +29,10 @@ import * as path from "path";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import OpenAI from "openai";
 
+
+
+
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = path.join(process.cwd(), "data", "uploads");
@@ -43,7 +47,6 @@ const storage = multer.diskStorage({
         cb(null, `${uniqueSuffix}-${file.originalname}`);
     },
 });
-
 // some people have more memory than disk.io
 const upload = multer({ storage /*: multer.memoryStorage() */ });
 
