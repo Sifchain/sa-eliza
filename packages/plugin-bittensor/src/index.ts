@@ -1,4 +1,4 @@
-import { Plugin } from "@elizaos/core";
+import type { Plugin } from "@elizaos/core";
 import { TwitterClientInterface } from "@elizaos/client-twitter";
 
 import { analyzeImage, analysisHistory } from "./actions/sn34.ts";

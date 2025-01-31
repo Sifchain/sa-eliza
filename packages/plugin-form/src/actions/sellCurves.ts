@@ -1,9 +1,9 @@
 import {
-    Action,
+    type Action,
     composeContext,
     elizaLogger,
     generateObjectDeprecated,
-    HandlerCallback,
+    type HandlerCallback,
     ModelClass,
     type IAgentRuntime,
     type Memory,
@@ -97,10 +97,12 @@ export const sellCurvesTokenAction: Action = {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         elizaLogger.debug(
@@ -119,7 +121,7 @@ export const sellCurvesTokenAction: Action = {
         const action = new SellCurvesTokenAction(wallet);
 
         try {
-            const sellParams = await buildSellCurvesDetails(state, runtime);
+            const sellParams = await buildSellCurvesDetails(currentState, runtime);
             const sellResp = await action.sell(sellParams);
 
             if (callback) {

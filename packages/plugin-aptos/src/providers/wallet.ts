@@ -16,7 +16,7 @@ import {
 } from "@aptos-labs/ts-sdk";
 import BigNumber from "bignumber.js";
 import NodeCache from "node-cache";
-import * as path from "path";
+import * as path from "node:path";
 import { APT_DECIMALS } from "../constants";
 
 // Provider configuration
@@ -109,9 +109,8 @@ export class WalletProvider {
                 console.error(`Attempt ${i + 1} failed:`, error);
                 lastError = error;
                 if (i < PROVIDER_CONFIG.MAX_RETRIES - 1) {
-                    const delay = PROVIDER_CONFIG.RETRY_DELAY * Math.pow(2, i);
+                    const delay = PROVIDER_CONFIG.RETRY_DELAY * (2 ** i);
                     await new Promise((resolve) => setTimeout(resolve, delay));
-                    continue;
                 }
             }
         }

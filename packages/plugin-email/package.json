@@ -8,7 +8,11 @@
     "scripts": {
         "build": "tsup --format esm --dts",
         "test": "jest",
-        "lint": "eslint --fix --cache ."
+        "clean": "rm -rf dist",
+        "lint": "biome lint .",
+        "lint:fix": "biome check --apply .",
+        "format": "biome format .",
+        "format:fix": "biome format --write ."
     },
     "dependencies": {
         "@elizaos/adapter-postgres": "workspace:^",
@@ -27,6 +31,7 @@
         }
     },
     "devDependencies": {
+        "@biomejs/biome": "1.9.4",
         "@types/jest": "^29.5.14",
         "@types/mail-notifier": "0.5.2",
         "@types/node": "^20.0.0",

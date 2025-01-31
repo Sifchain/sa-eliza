@@ -1,9 +1,9 @@
 import { ByteArray, formatEther, parseEther, type Hex, isAddress } from "viem";
 import {
-    Action,
+    type Action,
     composeContext,
     generateObject,
-    HandlerCallback,
+    type HandlerCallback,
     ModelClass,
     type IAgentRuntime,
     type Memory,
@@ -11,7 +11,7 @@ import {
 } from "@elizaos/core";
 import { z } from "zod";
 
-import { CronosWalletProvider, initCronosWalletProvider } from "../providers/wallet";
+import { type CronosWalletProvider, initCronosWalletProvider } from "../providers/wallet";
 import type { Transaction, TransferParams } from "../types";
 import { transferTemplate } from "../templates";
 import { cronos, cronosTestnet } from "../constants/chains";
@@ -78,7 +78,7 @@ export class TransferAction {
 const buildTransferDetails = async (
     state: State,
     runtime: IAgentRuntime,
-    wp: CronosWalletProvider
+    _wp: CronosWalletProvider
 ): Promise<TransferParams> => {
     state.supportedChains = '"cronos"|"cronosTestnet"';
 
@@ -104,20 +104,22 @@ export const transferAction: Action = {
         runtime: IAgentRuntime,
         message: Memory,
         state: State | undefined,
-        _options: any,
+        _options: Record<string, unknown>,
         callback?: HandlerCallback
     ) => {
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         const walletProvider = await initCronosWalletProvider(runtime);
         const action = new TransferAction(walletProvider);
 
         const paramOptions = await buildTransferDetails(
-            state,
+            currentState,
             runtime,
             walletProvider
         );

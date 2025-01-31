@@ -84,7 +84,7 @@ export class EchoChamberClient {
                 return await operation();
             } catch (error) {
                 if (i === retries - 1) throw error;
-                const delay = RETRY_DELAY * Math.pow(2, i);
+                const delay = RETRY_DELAY * (2 ** i);
                 elizaLogger.warn(`Retrying operation in ${delay}ms...`);
                 await new Promise((resolve) => setTimeout(resolve, delay));
             }

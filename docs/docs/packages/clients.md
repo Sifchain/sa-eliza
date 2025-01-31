@@ -603,4 +603,4 @@ async processMessage(message) {
 
 ## Related Resources
 
--   [Error Handling](../../packages/core)
+-   [Error Handling](../../packages/core/#error-handling)

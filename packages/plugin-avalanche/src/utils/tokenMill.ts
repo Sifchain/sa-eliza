@@ -90,7 +90,7 @@ export const createMarketAndToken = async (
         },
     ];
 
-    if (name.length == 0) {
+    if (name.length === 0) {
         throw new Error("Name must be provided");
     }
 
@@ -98,7 +98,7 @@ export const createMarketAndToken = async (
         throw new Error("Name must be less than 12 characters");
     }
 
-    if (symbol.length == 0) {
+    if (symbol.length === 0) {
         throw new Error("Symbol must be provided");
     }
 

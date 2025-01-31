@@ -21,7 +21,7 @@ export class TokenPriceAction implements Action {
     suppressInitialMessage = true;
     template = priceTemplate;
 
-    async validate(runtime: IAgentRuntime, message: Memory): Promise<boolean> {
+    async validate(_runtime: IAgentRuntime, message: Memory): Promise<boolean> {
         const content = typeof message.content === 'string'
             ? message.content
             : message.content?.text;

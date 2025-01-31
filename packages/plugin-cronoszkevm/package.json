@@ -23,9 +23,16 @@
 		"tsup": "^8.3.5",
 		"viem": "2.22.2"
 	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4"
+	},
 	"scripts": {
 		"build": "tsup --format esm --dts",
-		"lint": "eslint --fix  --cache ."
+		"clean": "rm -rf dist",
+		"lint": "biome lint .",
+		"lint:fix": "biome check --apply .",
+		"format": "biome format .",
+		"format:fix": "biome format --write ."
 	},
 	"peerDependencies": {
 		"whatwg-url": "7.1.0"

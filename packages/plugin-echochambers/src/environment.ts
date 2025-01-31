@@ -41,7 +41,7 @@ export async function validateEchoChamberConfig(
         runtime.getSetting("ECHOCHAMBERS_POLL_INTERVAL") || 120
     );
 
-    if (isNaN(pollInterval) || pollInterval < 1) {
+    if (Number.isNaN(pollInterval) || pollInterval < 1) {
         elizaLogger.error(
             "ECHOCHAMBERS_POLL_INTERVAL must be a positive number in seconds"
         );

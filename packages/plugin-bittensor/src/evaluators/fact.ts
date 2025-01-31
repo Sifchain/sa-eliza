@@ -2,11 +2,11 @@ import { composeContext } from "@elizaos/core";
 import { generateObjectArray } from "@elizaos/core";
 import { MemoryManager } from "@elizaos/core";
 import {
-    ActionExample,
-    IAgentRuntime,
-    Memory,
+    type ActionExample,
+    type IAgentRuntime,
+    type Memory,
     ModelClass,
-    Evaluator,
+    type Evaluator,
 } from "@elizaos/core";
 
 export const formatFacts = (facts: Memory[]) => {
@@ -89,9 +89,13 @@ async function handler(runtime: IAgentRuntime, message: Memory) {
         })
         .map((fact) => fact.claim);
 
+    if (!agentId) {
+        return filteredFacts;
+    }
+
     for (const fact of filteredFacts) {
         const factMemory = await factsManager.addEmbeddingToMemory({
-            userId: agentId!,
+            userId: agentId,
             agentId,
             content: { text: fact },
             roomId,

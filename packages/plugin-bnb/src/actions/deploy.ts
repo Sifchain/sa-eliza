@@ -2,21 +2,21 @@ import {
     composeContext,
     elizaLogger,
     generateObjectDeprecated,
-    HandlerCallback,
+    type HandlerCallback,
     ModelClass,
     type IAgentRuntime,
     type Memory,
     type State,
 } from "@elizaos/core";
 import solc from "solc";
-import { Abi, Address, parseUnits } from "viem";
+import { type Abi, type Address, parseUnits } from "viem";
 import {
     bnbWalletProvider,
     initWalletProvider,
-    WalletProvider,
+    type WalletProvider,
 } from "../providers/wallet";
 import { ercContractTemplate } from "../templates";
-import {
+import type {
     IDeployERC1155Params,
     IDeployERC721Params,
     IDeployERC20Params,
@@ -208,22 +208,24 @@ export const deployAction = {
         runtime: IAgentRuntime,
         message: Memory,
         state: State,
-        _options: any,
+        _options: Record<string, unknown>,
         callback?: HandlerCallback
     ) => {
         elizaLogger.log("Starting deploy action...");
 
         // Initialize or update state
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
-        state.walletInfo = await bnbWalletProvider.get(runtime, message, state);
+
+        state.walletInfo = await bnbWalletProvider.get(runtime, message, currentState);
 
         // Compose context
         const context = composeContext({
-            state,
+            state: currentState,
             template: ercContractTemplate,
         });
         const content = await generateObjectDeprecated({
@@ -236,7 +238,7 @@ export const deployAction = {
         const action = new DeployAction(walletProvider);
         try {
             const contractType = content.contractType;
-            let result;
+            let result: any;
             switch (contractType.toLocaleLowerCase()) {
                 case "erc20":
                     result = await action.deployERC20({
@@ -271,7 +273,7 @@ export const deployAction = {
                 });
             } else {
                 callback?.({
-                    text: `Unsuccessfully create contract`,
+                    text: "Unsuccessfully create contract",
                     content: { ...result },
                 });
             }

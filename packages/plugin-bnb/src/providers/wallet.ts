@@ -1,8 +1,8 @@
-import {
-    type IAgentRuntime,
-    type Provider,
-    type Memory,
-    type State,
+import type {
+     IAgentRuntime,
+     Provider,
+     Memory,
+     State,
 } from "@elizaos/core";
 import { EVM, createConfig, getToken } from "@lifi/sdk";
 import type {
@@ -101,7 +101,7 @@ export class WalletProvider {
                         createWalletClient({
                             account: this.account,
                             chain: chains.find(
-                                (chain) => chain.id == chainId
+                                (chain) => chain.id === chainId
                             ) as Chain,
                             transport: http(),
                         }),
@@ -122,9 +122,8 @@ export class WalletProvider {
         const resolvedAddress = await this.resolveWeb3Name(address);
         if (resolvedAddress) {
             return resolvedAddress as Address;
-        } else {
-            throw new Error("Invalid address");
         }
+        throw new Error("Invalid address");
     }
 
     async resolveWeb3Name(name: string): Promise<string | null> {
@@ -177,8 +176,8 @@ export class WalletProvider {
         }
     ): Promise<Hex> {
         const walletClient = this.getWalletClient(chain);
-        return walletClient.sendTransaction({
-            account: this.account!,
+        return await walletClient.sendTransaction({
+            account: this.account,
             to: toAddress,
             value: amount,
             chain: this.getChainConfigs(chain),
@@ -252,9 +251,9 @@ export class WalletProvider {
         if (!chains) {
             return;
         }
-        Object.keys(chains).forEach((chain: string) => {
+        for (const chain of Object.keys(chains)) {
             this.chains[chain] = chains[chain];
-        });
+        }
     };
 
     private setCurrentChain = (chain: SupportedChain) => {
@@ -302,10 +301,10 @@ const genChainsFromRuntime = (
     const chainNames = ["bsc", "bscTestnet", "opBNB", "opBNBTestnet"];
     const chains = {};
 
-    chainNames.forEach((chainName) => {
+    for (const chainName of chainNames) {
         const chain = WalletProvider.genChainFromName(chainName);
         chains[chainName] = chain;
-    });
+    }
 
     const mainnet_rpcurl = runtime.getSetting("BSC_PROVIDER_URL");
     if (mainnet_rpcurl) {

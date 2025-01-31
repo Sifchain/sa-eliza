@@ -1,4 +1,4 @@
-import { Evaluator, Memory, IAgentRuntime, elizaLogger } from "@elizaos/core";
+import { type Evaluator, type Memory, type IAgentRuntime, elizaLogger } from "@elizaos/core";
 import { EmailAutomationService } from "../services/emailAutomationService";
 
 export const emailEvaluator: Evaluator = {

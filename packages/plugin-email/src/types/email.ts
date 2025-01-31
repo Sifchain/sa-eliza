@@ -1,5 +1,5 @@
-import { Service } from "@elizaos/core";
-import { EmailContent } from "mail-notifier";
+import type { Service } from "@elizaos/core";
+import type { EmailContent } from "mail-notifier";
 
 interface EmailAttachment {
     filename: string;

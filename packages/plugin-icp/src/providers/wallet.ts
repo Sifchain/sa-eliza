@@ -25,7 +25,11 @@ export class WalletProvider {
             if (privateKeyBytes.length !== 32) {
                 throw new Error("Invalid private key length");
             }
-            return Ed25519KeyIdentity.fromSecretKey(privateKeyBytes);
+            const arrayBuffer = privateKeyBytes.buffer.slice(
+                privateKeyBytes.byteOffset,
+                privateKeyBytes.byteOffset + privateKeyBytes.length
+            );
+            return Ed25519KeyIdentity.fromSecretKey(arrayBuffer);
         } catch {
             throw new Error("Failed to create ICP identity");
         }
@@ -62,13 +66,23 @@ export class WalletProvider {
     };
 }
 
+// Add interface for the wallet provider return type
+interface ICPWalletResponse {
+    wallet: WalletProvider | null;
+    identity: Ed25519KeyIdentity | null;
+    principal: string | null;
+    isAuthenticated: boolean;
+    createActor?: typeof WalletProvider.prototype.createActor;
+    error?: string;
+}
+
 // Add the new provider instance
 export const icpWalletProvider: Provider = {
     async get(
         runtime: IAgentRuntime,
         _message: Memory,
         _state?: State
-    ): Promise<any> {
+    ): Promise<ICPWalletResponse> {
         try {
             const privateKey = runtime.getSetting(
                 "INTERNET_COMPUTER_PRIVATE_KEY"
@@ -86,13 +100,13 @@ export const icpWalletProvider: Provider = {
                 isAuthenticated: true,
                 createActor: wallet.createActor,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             return {
                 wallet: null,
                 identity: null,
                 principal: null,
                 isAuthenticated: false,
-                error: error.message,
+                error: error instanceof Error ? error.message : "Unknown error",
             };
         }
     },

@@ -13,7 +13,7 @@ export const RetrieveTokenBalanceReqSchema = z.object({
 });
 
 export const isRetrieveTokenBalanceReq = (
-    obj: any
+    obj: unknown
 ): obj is RetrieveTokenBalanceReq => {
     return RetrieveTokenBalanceReqSchema.safeParse(obj).success;
 };

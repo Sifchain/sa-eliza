@@ -1,13 +1,13 @@
 import dotenv from "dotenv";
 dotenv.config();
 import {
-    IAgentRuntime,
-    Memory,
-    State,
+    type IAgentRuntime,
+    type Memory,
+    type State,
     elizaLogger,
     ModelClass,
-    HandlerCallback,
-    ActionExample,
+    type HandlerCallback,
+    type ActionExample,
     type Action,
     composeContext,
     generateObject,
@@ -18,7 +18,9 @@ import { createDKGMemoryTemplate } from "../templates.ts";
 import DKG from "dkg.js";
 import { DKGMemorySchema, isDKGMemoryContent } from "../types.ts";
 
-let DkgClient: any = null;
+// Define a basic type for the DKG client
+type DKGClient = typeof DKG | null;
+let DkgClient: DKGClient = null;
 
 export const dkgInsert: Action = {
     name: "INSERT_MEMORY_ACTION",
@@ -78,7 +80,7 @@ export const dkgInsert: Action = {
         let match = currentPost.match(userRegex);
         let twitterUser = "";
 
-        if (match && match[1]) {
+        if (match?.[1]) {
             twitterUser = match[1];
             elizaLogger.log(`Extracted user: @${twitterUser}`);
         } else {
@@ -89,7 +91,7 @@ export const dkgInsert: Action = {
         match = currentPost.match(idRegex);
         let postId = "";
 
-        if (match && match[1]) {
+        if (match?.[1]) {
             postId = match[1];
             elizaLogger.log(`Extracted ID: ${postId}`);
         } else {
@@ -113,7 +115,7 @@ export const dkgInsert: Action = {
             throw new Error("Invalid DKG memory content generated.");
         }
 
-        let createAssetResult;
+        let createAssetResult: { UAL: string } | undefined;
 
         // TODO: also store reply to the KA, aside of the question
 
@@ -148,7 +150,7 @@ export const dkgInsert: Action = {
 
         // Reply
         callback({
-            text: `Created a new memory!\n\nRead my mind on @origin_trail Decentralized Knowledge Graph ${DKG_EXPLORER_LINKS[runtime.getSetting("DKG_ENVIRONMENT")]}${createAssetResult.UAL} @${twitterUser}`,
+            text: `Created a new memory!\n\nRead my mind on @origin_trail Decentralized Knowledge Graph ${DKG_EXPLORER_LINKS[runtime.getSetting("DKG_ENVIRONMENT")]}${createAssetResult?.UAL} @${twitterUser}`,
         });
 
         return true;

@@ -26,8 +26,11 @@ export const sendNativeAsset = async (
     const walletClient = walletProvider.getWalletClient();
 
     const args = {
+        account: walletProvider.getAddress(),
         to: recipient,
         value: parseUnits(amount.toString(), decimals),
+        kzg: undefined,
+        chain: b2Network
     };
     const tx = await walletClient.sendTransaction(args);
     return tx as Hash;
@@ -179,6 +182,8 @@ export const depositBTC = async (
             to: farmAddress,
             data,
             value: parseUnits(amount.toString(), decimals),
+            kzg: undefined,
+            chain: b2Network
         };
         const txHash = await walletClient.sendTransaction(args);
 
@@ -200,7 +205,7 @@ export const unstake = async (
         const BTC_PID = 0;
         const decimals = b2Network.nativeCurrency.decimals;
         const publicClient = walletProvider.getPublicClient();
-        const { _result, request } = await publicClient.simulateContract({
+        const { request } = await publicClient.simulateContract({
             account: walletProvider.getAccount(),
             address: farmAddress,
             abi: [
@@ -248,7 +253,7 @@ export const withdraw = async (
     try {
         const BTC_PID = 0;
         const publicClient = walletProvider.getPublicClient();
-        const { _result, request } = await publicClient.simulateContract({
+        const { request } = await publicClient.simulateContract({
             account: walletProvider.getAccount(),
             address: farmAddress,
             abi: [

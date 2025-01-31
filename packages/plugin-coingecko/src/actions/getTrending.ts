@@ -61,7 +61,7 @@ export const GetTrendingSchema = z.object({
 
 export type GetTrendingContent = z.infer<typeof GetTrendingSchema> & Content;
 
-export const isGetTrendingContent = (obj: any): obj is GetTrendingContent => {
+export const isGetTrendingContent = (obj: unknown): obj is GetTrendingContent => {
     return GetTrendingSchema.safeParse(obj).success;
 };
 
@@ -75,7 +75,7 @@ export default {
         "TRENDING_SEARCH",
     ],
     // eslint-disable-next-line
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (runtime: IAgentRuntime, _message: Memory) => {
         await validateCoingeckoConfig(runtime);
         return true;
     },
@@ -89,17 +89,20 @@ export default {
     ): Promise<boolean> => {
         elizaLogger.log("Starting CoinGecko GET_TRENDING handler...");
 
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
+
 
         try {
             // Compose trending context
             elizaLogger.log("Composing trending context...");
             const trendingContext = composeContext({
-                state,
+                state: currentState,
                 template: getTrendingTemplate,
             });
 

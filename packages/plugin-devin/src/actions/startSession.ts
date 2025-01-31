@@ -17,8 +17,8 @@ export const startSessionAction: Action = {
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State,
-        options?: Record<string, unknown>,
+        _state?: State,
+        _options?: Record<string, unknown>,
         callback?: HandlerCallback
     ) => {
         try {

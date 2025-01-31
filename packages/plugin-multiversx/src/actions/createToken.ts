@@ -12,7 +12,7 @@ import {
     type Action,
 } from "@elizaos/core";
 import { WalletProvider } from "../providers/wallet";
-import { validateMultiversxConfig } from "../enviroment";
+import { validateMultiversxConfig } from "../environment";
 import { createTokenSchema } from "../utils/schemas";
 export interface CreateTokenContent extends Content {
     tokenName: string;

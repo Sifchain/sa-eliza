@@ -1,4 +1,4 @@
-import {z} from "zod";
-import {IBCSwapParamsSchema} from "./schema.ts";
+import type { z } from "zod";
+import type { IBCSwapParamsSchema } from "./schema.ts";
 
 export type IBCSwapActionParams = z.infer<typeof IBCSwapParamsSchema>;

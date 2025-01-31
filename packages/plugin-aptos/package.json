@@ -29,7 +29,14 @@
 	"scripts": {
 		"build": "tsup --format esm --dts",
 		"dev": "tsup --format esm --dts --watch",
-		"test": "vitest run"
+		"test": "vitest run",
+		"lint": "biome lint .",
+		"lint:fix": "biome check --apply .",
+		"format": "biome format .",
+		"format:fix": "biome format --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4"
 	},
 	"peerDependencies": {
 		"form-data": "4.0.1",

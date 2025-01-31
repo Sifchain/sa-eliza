@@ -370,14 +370,23 @@ export class AgentRuntime implements IAgentRuntime {
 
         this.imageModelProvider =
             this.character.imageModelProvider ?? this.modelProvider;
-
+        
+        this.imageVisionModelProvider =
+            this.character.imageVisionModelProvider ?? this.modelProvider;
+            
         elizaLogger.info(
           `${this.character.name}(${this.agentId}) - Selected model provider:`,
           this.modelProvider
         );
+
         elizaLogger.info(
           `${this.character.name}(${this.agentId}) - Selected image model provider:`,
-          this.imageVisionModelProvider
+          this.imageModelProvider
+        );
+
+        elizaLogger.info(
+            `${this.character.name}(${this.agentId}) - Selected image vision model provider:`,
+            this.imageVisionModelProvider
         );
 
         // Validate model provider

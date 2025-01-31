@@ -24,11 +24,17 @@
         "axios": "^1.0.0"
     },
     "devDependencies": {
+        "@biomejs/biome": "1.9.4",
         "tsup": "8.3.5",
         "vitest": "^1.0.0"
     },
     "scripts": {
         "build": "tsup src/index.ts --format esm --dts --tsconfig ./tsconfig.json",
-        "dev": "tsup src/index.ts --format esm --dts --watch --tsconfig ./tsconfig.json"
+        "dev": "tsup src/index.ts --format esm --dts --watch --tsconfig ./tsconfig.json",
+        "clean": "rm -rf dist",
+        "lint": "biome lint .",
+        "lint:fix": "biome check --apply .",
+        "format": "biome format .",
+        "format:fix": "biome format --write ."
     }
 }

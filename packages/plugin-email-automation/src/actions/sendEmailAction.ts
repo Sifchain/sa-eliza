@@ -1,6 +1,6 @@
-import { Action, IAgentRuntime, Memory, State, Content, elizaLogger, HandlerCallback } from "@elizaos/core";
+import { type Action, type IAgentRuntime, type Memory, type State, type Content, elizaLogger, type HandlerCallback } from "@elizaos/core";
 import { EmailService } from "../services/emailService";
-import { EmailPrompt, GeneratedEmailContent } from "../types";
+import type { EmailPrompt, GeneratedEmailContent } from "../types";
 import { EmailGenerationService } from "../services/emailGenerationService";
 
 // Define the state interface
@@ -17,7 +17,7 @@ export const sendEmailAction: Action = {
         [{ user: "user1", content: { text: "Send the email to john@example.com" } }]
     ],
 
-    async validate(runtime: IAgentRuntime, message: Memory): Promise<boolean> {
+    async validate(_runtime: IAgentRuntime, message: Memory): Promise<boolean> {
         const content = message.content as Content;
         const text = content?.text?.toLowerCase() || '';
 
@@ -53,21 +53,23 @@ export const sendEmailAction: Action = {
                 userId: message.userId
             });
 
-            // Use state directly if provided, otherwise compose it
-            if (!state) {
-                state = (await runtime.composeState(message)) as EmailState;
+            // Initialize or update state
+            let currentState = state;
+            if (!currentState) {
+                currentState = (await runtime.composeState(message)) as State;
             } else {
-                state = await runtime.updateRecentMessageState(state);
+                currentState = await runtime.updateRecentMessageState(currentState);
             }
+
 
             elizaLogger.info('Send handler started', {
                 messageId: message.id,
-                hasState: !!state,
-                hasGeneratedEmail: !!state?.generatedEmail
+                hasState: !!currentState,
+                hasGeneratedEmail: !!currentState?.generatedEmail
             });
 
             // Check if we have a generated email
-            if (!state?.generatedEmail) {
+            if (!currentState?.generatedEmail) {
                 elizaLogger.info('No email content found, generating first...');
                 const emailService = new EmailGenerationService(runtime);
                 const content = message.content as Content;
@@ -80,14 +82,14 @@ export const sendEmailAction: Action = {
                 };
 
                 const generatedEmail = await emailService.generateEmail(prompt);
-                state.generatedEmail = {
+                currentState.generatedEmail = {
                     subject: generatedEmail.subject,
                     blocks: generatedEmail.blocks,
                     metadata: generatedEmail.metadata
                 };
 
                 // Update state with new email
-                await runtime.updateRecentMessageState(state);
+                await runtime.updateRecentMessageState(currentState);
             }
 
             // Get raw secrets string first

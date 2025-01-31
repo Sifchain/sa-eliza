@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IAgentRuntime as CoreAgentRuntime, Memory, State } from "@elizaos/core";
+import type{ IAgentRuntime as CoreAgentRuntime, Memory, State } from "@elizaos/core";
 
 export interface EmailOptions {
     from: string;
@@ -225,7 +225,7 @@ export interface GenerateTextOptions {
     tools?: {
         [key: string]: {
             type: "function";
-            parameters: any;
+            parameters: unknown;
             description?: string;
         };
     };
@@ -257,7 +257,7 @@ export interface EmailCondition {
 export interface EmailContext {
     memory: Memory;
     state: State;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
     timestamp: Date;
     conversationId: string;
 }
@@ -278,7 +278,7 @@ export class FollowUpCondition implements EmailCondition {
 export class InactiveCondition implements EmailCondition {
     private readonly thresholdHours: number;
 
-    constructor(thresholdHours: number = 24) {
+    constructor(thresholdHours = 24) {
         this.thresholdHours = thresholdHours;
     }
 

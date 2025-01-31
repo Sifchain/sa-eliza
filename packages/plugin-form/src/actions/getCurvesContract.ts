@@ -1,9 +1,9 @@
 import {
-    Action,
+    type Action,
     composeContext,
     elizaLogger,
     generateObjectDeprecated,
-    HandlerCallback,
+    type HandlerCallback,
     ModelClass,
     type IAgentRuntime,
     type Memory,
@@ -67,10 +67,12 @@ export const getCurvesAddressAction: Action = {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         elizaLogger.debug(
@@ -89,7 +91,7 @@ export const getCurvesAddressAction: Action = {
         const action = new GetCurvesAddressAction(wallet);
 
         try {
-            const params = await buildGetCurvesAddressDetails(state, runtime);
+            const params = await buildGetCurvesAddressDetails(currentState, runtime);
             const result = await action.getAddress(params);
 
             if (callback) {

@@ -1,9 +1,9 @@
 import {
-    Action,
-    IAgentRuntime,
-    Memory,
-    State,
-    HandlerCallback,
+    type Action,
+    type IAgentRuntime,
+    type Memory,
+    type State,
+    type HandlerCallback,
     elizaLogger,
     ModelClass,
     composeContext,
@@ -32,7 +32,7 @@ export const retrieveTokenBalance: Action = {
     description:
         "Retrieve all token balances for all ERC20 tokens for a specified address.",
 
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (runtime: IAgentRuntime, _message: Memory) => {
         elizaLogger.log("Validating runtime for RETRIEVE_TOKEN_BALANCE...");
         return !!(
             runtime.character.settings.secrets?.CHAINBASE_API_KEY ||
@@ -44,19 +44,20 @@ export const retrieveTokenBalance: Action = {
         runtime: IAgentRuntime,
         message: Memory,
         state?: State,
-        options?: { [key: string]: unknown },
+        _options?: { [key: string]: unknown },
         callback?: HandlerCallback,
     ) => {
         try {
             elizaLogger.log("Composing state for message:", message);
-            if (!state) {
-                state = (await runtime.composeState(message)) as State;
+            let currentState = state;
+            if (!currentState) {
+                currentState = (await runtime.composeState(message)) as State;
             } else {
-                state = await runtime.updateRecentMessageState(state);
+                currentState = await runtime.updateRecentMessageState(currentState);
             }
 
             const context = composeContext({
-                state,
+                state: currentState,
                 template: retrieveTokenBalanceTemplate,
             });
 
@@ -94,7 +95,7 @@ export const retrieveTokenBalance: Action = {
             const processedTokens = tokens.map((token) => ({
                 ...token,
                 balance: token.balance
-                    ? new Big(parseInt(token.balance, 16).toString())
+                    ? new Big(Number.parseInt(token.balance, 16).toString())
                           .div(new Big(10).pow(token.decimals))
                           .toFixed(18)
                     : "0",

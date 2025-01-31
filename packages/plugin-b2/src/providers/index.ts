@@ -13,12 +13,11 @@ import {
     type Account,
     type WalletClient,
     type PrivateKeyAccount,
+    type PublicClient,
+    type HttpTransport,
     http,
     createPublicClient,
     createWalletClient,
-    type PublicClient,
-    type Transport,
-    type RpcSchema,
 } from "viem";
 import { TOKEN_ADDRESSES } from "../utils/constants";
 import { b2Network } from "../utils/chains";
@@ -91,11 +90,14 @@ export class WalletProvider implements Provider {
         return this.account.address;
     }
 
-    getPublicClient(): PublicClient<Transport, Chain, Account | undefined, RpcSchema | undefined> {
+
+    // Refactor area 
+    getPublicClient(): PublicClient {
+        const transport = http(b2Network.rpcUrls.default.http[0]);
         return createPublicClient({
             chain: b2Network,
-            transport: http(),
-        });
+            transport,
+        }) as PublicClient;
     }
 
     getWalletClient(): WalletClient {
@@ -136,13 +138,13 @@ export class WalletProvider implements Provider {
     ): Promise<string | null> {
         elizaLogger.debug("walletProvider::get");
         try {
-            const privateKey = runtime.getSetting("B2_PRIVATE_KEY");
+            const privateKey = runtime.getSetting("B2_PRIVATE_KEY") as `0x${string}`;
             if (!privateKey) {
                 throw new Error(
                     "B2_PRIVATE_KEY not found in environment variables"
                 );
             }
-            let accountAddress;
+            let accountAddress: Address;
             if (this.account) {
                 accountAddress = this.getAddress();
             } else {
@@ -150,10 +152,11 @@ export class WalletProvider implements Provider {
                 accountAddress = walletProvider.getAddress();
             }
 
-            let output = `# Wallet Balances\n\n`;
-            output += `## Wallet Address\n\n\`${accountAddress}\`\n\n`;
+            let output = "# Wallet Balances\n\n";
+            output += "## Wallet Address\n\n";
+            output += `${accountAddress}\n\n`;
 
-            output += `## Latest Token Balances\n\n`;
+            output += "## Latest Token Balances\n\n";
             for (const [token, address] of Object.entries(TOKEN_ADDRESSES)) {
                 const decimals = await this.getDecimals(address);
                 const balance = await this.getTokenBalance(
@@ -162,7 +165,7 @@ export class WalletProvider implements Provider {
                 );
                 output += `${token}: ${formatUnits(balance, decimals)}\n`;
             }
-            output += `Note: These balances can be used at any time.\n\n`;
+            output += "Note: These balances can be used at any time.\n\n";
             elizaLogger.debug("walletProvider::get output:", output);
             return output;
         } catch (error) {
@@ -199,10 +202,11 @@ export const walletProvider: Provider = {
         try {
             const walletProvider = await initWalletProvider(runtime);
             const account = walletProvider.getAccount();
-            let output = `# Wallet Balances\n\n`;
-            output += `## Wallet Address\n\n\`${account.address}\`\n\n`;
+            let output = "# Wallet Balances\n\n";
+            output += "## Wallet Address\n\n";
+            output += `${account.address}\n\n`;
 
-            output += `## Latest Token Balances\n\n`;
+            output += "## Latest Token Balances\n\n";
             for (const [token, address] of Object.entries(TOKEN_ADDRESSES)) {
                 const decimals = await walletProvider.getDecimals(address);
                 const balance = await walletProvider.getTokenBalance(
@@ -211,7 +215,7 @@ export const walletProvider: Provider = {
                 );
                 output += `${token}: ${formatUnits(balance, decimals)}\n`;
             }
-            output += `Note: These balances can be used at any time.\n\n`;
+            output += "Note: These balances can be used at any time.\n\n";
             elizaLogger.debug("walletProvider::get output:", output);
             return output;
         } catch (error) {

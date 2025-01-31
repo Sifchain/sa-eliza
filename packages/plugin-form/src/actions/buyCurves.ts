@@ -101,10 +101,13 @@ export const buyCurvesTokenAction: Action = {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         elizaLogger.debug(
@@ -125,7 +128,7 @@ export const buyCurvesTokenAction: Action = {
 
         try {
             // Build buy parameters from conversation
-            const buyParams = await buildBuyCurvesDetails(state, runtime);
+            const buyParams = await buildBuyCurvesDetails(currentState, runtime);
 
             // Execute buy transaction
             const buyResp = await action.buy(buyParams);

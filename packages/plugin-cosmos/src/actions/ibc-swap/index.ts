@@ -1,11 +1,11 @@
 import {
     composeContext,
     generateObjectDeprecated,
-    HandlerCallback,
-    IAgentRuntime,
-    Memory,
+    type HandlerCallback,
+    type IAgentRuntime,
+    type Memory,
     ModelClass,
-    State,
+    type State,
 } from "@elizaos/core";
 
 import { initWalletChainsData } from "../../providers/wallet/utils";
@@ -14,7 +14,7 @@ import type {
     ICosmosPluginOptions,
     ICosmosWalletChains,
 } from "../../shared/interfaces";
-import { IBCSwapActionParams } from "./types.ts";
+import type { IBCSwapActionParams } from "./types.ts";
 import { IBCSwapAction } from "./services/ibc-swap-action-service.ts";
 import { prepareAmbiguityErrorMessage } from "./services/ibc-swap-utils.ts";
 

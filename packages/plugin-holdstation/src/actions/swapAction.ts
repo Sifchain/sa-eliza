@@ -1,30 +1,47 @@
 import {
-    Action,
-    IAgentRuntime,
-    Memory,
-    HandlerCallback,
-    State,
+    type Action,
+    type IAgentRuntime,
+    type Memory,
+    type HandlerCallback,
+    type State,
     composeContext,
     ModelClass,
     elizaLogger,
-    ActionExample,
+    type ActionExample,
     generateObjectDeprecated,
 } from "@elizaos/core";
 
 import { swapTemplate } from "../templates";
-import { SendTransactionParams, SwapParams } from "../types";
+import type { SendTransactionParams, SwapParams } from "../types";
 import {
     initWalletProvider,
-    WalletProvider,
+    type WalletProvider,
 } from "../providers/walletProvider";
 import { validateHoldStationConfig } from "../environment";
 import { HOLDSTATION_ROUTER_ADDRESS, NATIVE_ADDRESS } from "../constants";
-import { parseUnits } from "viem";
+import { parseUnits, type Hex, type Address } from "viem";
 
+// ------------------------------------------------------------------------------------------------
+// Interfaces
+// ------------------------------------------------------------------------------------------------
+interface SwapResult {
+    hash: Hex;
+    inputTokenCA?: Address;
+    inputTokenSymbol?: string;
+    outputTokenCA?: Address;
+    outputTokenSymbol?: string;
+    amount: bigint;
+    slippage?: number;
+    text?: string;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Core Action Class
+// ------------------------------------------------------------------------------------------------
 export class SwapAction {
     constructor(private walletProvider: WalletProvider) {}
 
-    async swap(params: SwapParams): Promise<any> {
+    async swap(params: SwapParams): Promise<SwapResult> {
         const { items: tokens } = await this.walletProvider.fetchPortfolio();
 
         if (!params.inputTokenCA && !params.inputTokenSymbol) {
@@ -36,7 +53,7 @@ export class SwapAction {
                 ? t.address === params.inputTokenCA
                 : t.symbol === params.inputTokenSymbol?.toUpperCase();
         });
-        if (filters.length != 1) {
+        if (filters.length !== 1) {
             throw new Error(
                 "Multiple tokens or no tokens found with the symbol"
             );
@@ -61,7 +78,7 @@ export class SwapAction {
                     ? t.address === params.outputTokenCA
                     : t.symbol === params.outputTokenSymbol?.toUpperCase();
             });
-            if (filters.length != 1) {
+            if (filters.length !== 1) {
                 throw new Error(
                     "Multiple tokens or no tokens found with the symbol"
                 );
@@ -127,8 +144,12 @@ export class SwapAction {
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Core Action Implementation
+// ------------------------------------------------------------------------------------------------
 export const swapAction: Action = {
     name: "TOKEN_SWAP_BY_HOLDSTATION",
+    description: "Perform swapping of tokens on ZKsync by HoldStation swap.",
     similes: [
         "SWAP_TOKEN",
         "SWAP_TOKEN_BY_HOLDSTATION_SWAP",
@@ -137,33 +158,31 @@ export const swapAction: Action = {
         "CONVERT_TOKENS",
         "CONVERT_TOKENS_BY_HOLDSTATION_SWAP",
     ],
-    validate: async (runtime: IAgentRuntime, _message: Memory) => {
+    validate: async (runtime: IAgentRuntime, _message: Memory): Promise<boolean> => {
         await validateHoldStationConfig(runtime);
         return true;
     },
-    description: "Perform swapping of tokens on ZKsync by HoldStation swap.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state: State,
-        _options: any,
-        callback: HandlerCallback
-    ) => {
+        state?: State,
+        _options?: Record<string, unknown>,
+        callback?: HandlerCallback
+    ): Promise<boolean> => {
         elizaLogger.log("Starting HoldStation Wallet TOKEN_SWAP handler...");
 
         const walletProvider = await initWalletProvider(runtime);
         const action = new SwapAction(walletProvider);
 
-        // compose state
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
-        } else {
-            state = await runtime.updateRecentMessageState(state);
+        // Initialize or update state
+        let currentState = state ?? await runtime.composeState(message) as State;
+        if (state) {
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         // compose swap context
         const swapContext = composeContext({
-            state,
+            state: currentState,
             template: swapTemplate,
         });
 
@@ -186,28 +205,27 @@ export const swapAction: Action = {
                 amount,
             } = await action.swap(content);
 
-            elizaLogger.success(
-                `Swap completed successfully from ${amount} ${inputTokenSymbol} (${inputTokenCA}) to ${outputTokenSymbol} (${outputTokenCA})!\nTransaction Hash: ${hash}`
-            );
+            const successMessage = `Swap completed successfully from ${amount} ${inputTokenSymbol} (${inputTokenCA}) to ${outputTokenSymbol} (${outputTokenCA})!\nTransaction Hash: ${hash}`;
+            elizaLogger.success(successMessage);
 
-            if (callback) {
-                callback({
-                    text: `Swap completed successfully from ${amount} ${inputTokenSymbol} (${inputTokenCA}) to ${outputTokenSymbol} (${outputTokenCA})!\nTransaction Hash: ${hash}`,
-                    content: {
-                        success: true,
-                        hash: hash,
-                    },
-                });
-            }
+            callback?.({
+                text: successMessage,
+                content: {
+                    success: true,
+                    hash: hash,
+                },
+            });
+            
             return true;
         } catch (error) {
             elizaLogger.error("Error during token swap:", error);
-            if (callback) {
-                callback({
-                    text: `Error during token swap: ${error.message}`,
-                    content: { error: error.message },
-                });
-            }
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            
+            callback?.({
+                text: `Error during token swap: ${errorMessage}`,
+                content: { error: errorMessage },
+            });
+            
             return false;
         }
     },

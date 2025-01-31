@@ -51,7 +51,7 @@ export class LatestTokensAction implements Action {
     suppressInitialMessage = true;
     template = latestTokensTemplate;
 
-    async validate(runtime: IAgentRuntime, message: Memory): Promise<boolean> {
+    async validate(_runtime: IAgentRuntime, message: Memory): Promise<boolean> {
         const content =
             typeof message.content === "string"
                 ? message.content
@@ -68,7 +68,7 @@ export class LatestTokensAction implements Action {
     async handler(
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State,
+        _state?: State,
         _options: { [key: string]: unknown } = {},
         callback?: HandlerCallback
     ): Promise<boolean> {
@@ -166,7 +166,7 @@ export class LatestBoostedTokensAction implements Action {
     suppressInitialMessage = true;
     template = latestBoostedTemplate;
 
-    async validate(runtime: IAgentRuntime, message: Memory): Promise<boolean> {
+    async validate(_runtime: IAgentRuntime, message: Memory): Promise<boolean> {
         const content =
             typeof message.content === "string"
                 ? message.content
@@ -186,7 +186,7 @@ export class LatestBoostedTokensAction implements Action {
     async handler(
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State,
+        _state?: State,
         _options: { [key: string]: unknown } = {},
         callback?: HandlerCallback
     ): Promise<boolean> {
@@ -284,7 +284,7 @@ export class TopBoostedTokensAction implements Action {
     suppressInitialMessage = true;
     template = topBoostedTemplate;
 
-    async validate(runtime: IAgentRuntime, message: Memory): Promise<boolean> {
+    async validate(_runtime: IAgentRuntime, message: Memory): Promise<boolean> {
         const content =
             typeof message.content === "string"
                 ? message.content
@@ -304,7 +304,7 @@ export class TopBoostedTokensAction implements Action {
     async handler(
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State,
+        _state?: State,
         _options: { [key: string]: unknown } = {},
         callback?: HandlerCallback
     ): Promise<boolean> {

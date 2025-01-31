@@ -28,11 +28,12 @@ export const DKGSelectQuerySchema = z.object({
 
 export type DKGMemoryContent = z.infer<typeof DKGMemorySchema>;
 export type DKGSelectQuery = z.infer<typeof DKGSelectQuerySchema>;
+export type DKGQueryResultEntry = Record<string, string>;
 
-export const isDKGMemoryContent = (object: any): object is DKGMemoryContent => {
+export const isDKGMemoryContent = (object: unknown): object is DKGMemoryContent => {
     return DKGMemorySchema.safeParse(object).success;
 };
 
-export const isDKGSelectQuery = (object: any): object is DKGSelectQuery => {
+export const isDKGSelectQuery = (object: unknown): object is DKGSelectQuery => {
     return DKGSelectQuerySchema.safeParse(object).success;
 };

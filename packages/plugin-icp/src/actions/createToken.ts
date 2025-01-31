@@ -72,7 +72,7 @@ async function generateTokenLogo(
             height: 512,
             count: 1,
         },
-        runtime as any
+        runtime
     );
 
     if (result.success && result.data && result.data.length > 0) {
@@ -96,7 +96,7 @@ export const executeCreateToken: Action = {
     ],
     description:
         "Create a new meme token on PickPump platform (Internet Computer). This action helps users create and launch tokens specifically on the PickPump platform.",
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (_runtime: IAgentRuntime, message: Memory) => {
         const keywords = [
             "pickpump",
             "pp",
@@ -137,14 +137,16 @@ export const executeCreateToken: Action = {
             type: "processing",
         });
 
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         const createTokenContext = composeContext({
-            state,
+            state: currentState,
             template: createTokenTemplate,
         });
 
@@ -200,9 +202,9 @@ export const executeCreateToken: Action = {
                 type: "success",
             };
             callback?.(responseMsg);
-        } catch (error: any) {
+        } catch (error: unknown) {
             const responseMsg = {
-                text: `Failed to create token: ${error.message}`,
+                text: `Failed to create token: ${error instanceof Error ? error.message : "Unknown error"}`,
                 action: "CREATE_TOKEN",
                 type: "error",
             };

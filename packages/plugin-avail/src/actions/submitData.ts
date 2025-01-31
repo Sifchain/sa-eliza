@@ -18,7 +18,7 @@ import {
     getKeyringFromSeed,
 } from "avail-js-sdk";
 import type { H256 } from "@polkadot/types/interfaces/runtime";
-import { ISubmittableResult } from "@polkadot/types/types";
+import type { ISubmittableResult } from "@polkadot/types/types";
 
 export interface DataContent extends Content {
     data: string;
@@ -79,15 +79,16 @@ export default {
         elizaLogger.log("Starting SUBMIT_DATA handler...");
 
         // Initialize or update state
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         // Compose transfer context
         const submitDataContext = composeContext({
-            state,
+            state: currentState,
             template: submitDataTemplate,
         });
 
@@ -112,7 +113,8 @@ export default {
         // }
         if (content.data != null) {
             try {
-                const SEED = runtime.getSetting("AVAIL_SEED")!;
+                const SEED = runtime.getSetting("AVAIL_SEED");
+                if (!SEED) throw new Error("AVAIL_SEED not set");
                 //const ACCOUNT = runtime.getSetting("AVAIL_ADDRESS")!;
                 const ENDPOINT = runtime.getSetting("AVAIL_RPC_URL");
                 const APP_ID = runtime.getSetting("AVAIL_APP_ID");
@@ -134,7 +136,7 @@ export default {
           `);
 
                 //submit data
-                const txResult:ISubmittableResult = await new Promise(
+                const txResult:ISubmittableResult = await new Promise<ISubmittableResult>(
                     (res) => {
                         api.tx.dataAvailability
                             .submitData(data)
@@ -146,7 +148,7 @@ export default {
                                         `Tx status: ${result.status}`
                                     );
                                     if (result.isFinalized || result.isError) {
-                                        res(result as any);
+                                        res(result);
                                     }
                                 }
                             );
@@ -155,12 +157,12 @@ export default {
 
                 // Rejected Transaction handling
                 if (txResult.isError) {
-                    console.log(`Transaction was not executed`);
+                    console.log('Transaction was not executed');
                 }
 
                 // Failed Transaction handling
                 const error = txResult.dispatchError;
-                if (error != undefined) {
+                if (error !== undefined) {
                     if (error.isModule) {
                         const decoded = api.registry.findMetaError(
                             error.asModule
@@ -173,8 +175,7 @@ export default {
                 }
 
                 elizaLogger.success(
-                    "Data submitted successfully! tx: \n " +
-                        `Tx Hash: ${txResult.txHash as H256}, Block Hash: ${txResult.status.asFinalized as H256}`
+                    `Data submitted successfully! tx: \nTx Hash: ${txResult.txHash as H256}, Block Hash: ${txResult.status.asFinalized as H256}`
                 );
                 if (callback) {
                     callback({

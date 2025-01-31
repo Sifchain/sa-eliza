@@ -1,4 +1,4 @@
-import { Plugin } from "@elizaos/core";
+import type { Plugin } from "@elizaos/core";
 import { retrieveTokenBalance } from "./actions/retrieveTokenBalance";
 import { queryBlockChainData } from "./actions/queryData";
 

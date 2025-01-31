@@ -20,14 +20,14 @@ import {
     elizaLogger,
 } from "@elizaos/core";
 import NodeCache from "node-cache";
-import * as path from "path";
+import * as path from "node:path";
 
 import { cronos, cronosTestnet } from "../constants/chains";
 import type { CronosChain, CronosProvider } from "../types";
 
 export class CronosWalletProvider {
     private cache: NodeCache;
-    private cacheKey: string = "cronos/wallet";
+    private cacheKey = "cronos/wallet";
     private currentChain: CronosChain = "cronos";
     private CACHE_EXPIRY_SEC = 5;
     chains: Record<CronosChain, Chain> = {

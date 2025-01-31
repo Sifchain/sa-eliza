@@ -2,7 +2,7 @@ import {
     composeContext,
     elizaLogger,
     generateObjectDeprecated,
-    HandlerCallback,
+    type HandlerCallback,
     ModelClass,
     type IAgentRuntime,
     type Memory,
@@ -20,10 +20,10 @@ import {
 import {
     bnbWalletProvider,
     initWalletProvider,
-    WalletProvider,
+    type WalletProvider,
 } from "../providers/wallet";
 import { transferTemplate } from "../templates";
-import { type TransferParams, type TransferResponse } from "../types";
+import type { TransferParams, TransferResponse } from "../types";
 
 export { transferTemplate };
 
@@ -54,9 +54,9 @@ export class TransferAction {
             token: params.token ?? nativeToken,
         };
 
-        if (!params.token || params.token == nativeToken) {
+        if (!params.token || params.token === nativeToken) {
             // Native token transfer
-            let options: { gas?: bigint; gasPrice?: bigint; data?: Hex } = {
+            const options: { gas?: bigint; gasPrice?: bigint; data?: Hex } = {
                 data: params.data,
             };
             let value: bigint;
@@ -123,7 +123,7 @@ export class TransferAction {
             );
         }
 
-        if (!resp.txHash || resp.txHash == "0x") {
+        if (!resp.txHash || resp.txHash === "0x") {
             throw new Error("Get transaction hash failed");
         }
 
@@ -153,7 +153,7 @@ export const transferAction = {
         runtime: IAgentRuntime,
         message: Memory,
         state: State,
-        _options: any,
+        _options: Record<string, unknown>,
         callback?: HandlerCallback
     ) => {
         elizaLogger.log("Starting transfer action...");
@@ -168,16 +168,21 @@ export const transferAction = {
         }
 
         // Initialize or update state
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
-        state.walletInfo = await bnbWalletProvider.get(runtime, message, state);
+        state.walletInfo = await bnbWalletProvider.get(
+            runtime,
+            message,
+            currentState
+        );
 
         // Compose transfer context
         const transferContext = composeContext({
-            state,
+            state: currentState,
             template: transferTemplate,
         });
         const content = await generateObjectDeprecated({

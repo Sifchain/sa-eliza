@@ -13,7 +13,7 @@ import {
 } from "@elizaos/core";
 import { WalletProvider } from "../providers/wallet";
 import { GraphqlProvider } from "../providers/graphql";
-import { validateMultiversxConfig } from "../enviroment";
+import { validateMultiversxConfig } from "../environment";
 import { swapSchema } from "../utils/schemas";
 import { MVX_NETWORK_CONFIG } from "../constants";
 import { swapQuery } from "../graphql/swapQuery";

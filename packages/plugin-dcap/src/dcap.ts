@@ -1,4 +1,4 @@
-import { TransactionResponse } from "ethers";
+import type { TransactionResponse } from "ethers";
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
 
 export namespace Chain {
@@ -42,7 +42,7 @@ export async function verifyAndAttestOnChain(
     const bp = await $bp;
     const { gasPrice, maxFeePerGas } = await $fee;
     const tx = await contract.verifyAndAttestOnChain(rawQuote, {
-        value: (gas * (gasPrice || maxFeePerGas)! * bp * 105n) / 1000000n,
+        value: (gas * (gasPrice ?? maxFeePerGas ?? 0n) * bp * 105n) / 1000000n,
     });
     return await (tx as TransactionResponse).wait();
 }

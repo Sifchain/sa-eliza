@@ -1,20 +1,20 @@
-import type {
+import {
+    elizaLogger,
     IAgentRuntime,
     ICacheManager,
     Memory,
     Provider,
     State,
 } from "@elizaos/core";
-import axios from "axios";
 
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
 
 import { MIST_PER_SUI } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import NodeCache from "node-cache";
-import * as path from "node:path";
-import { parseAccount } from "../utils";
-
+import * as path from "path";
+import { parseAccount, SuiNetwork } from "../utils";
+import axios from "axios";
 // Provider configuration
 const PROVIDER_CONFIG = {
     MAX_RETRIES: 3,
@@ -30,18 +30,18 @@ interface Prices {
     sui: { usd: string };
 }
 
-type SuiNetwork = "mainnet" | "testnet" | "devnet" | "localnet";
+const cacheTimeSeconds = 30;
 
 export class WalletProvider {
     private cache: NodeCache;
-    private cacheKey = "sui/wallet";
+    private cacheKey: string = "sui/wallet";
 
     constructor(
         private suiClient: SuiClient,
         private address: string,
         private cacheManager: ICacheManager
     ) {
-        this.cache = new NodeCache({ stdTTL: 300 }); // Cache TTL set to 5 minutes
+        this.cache = new NodeCache({ stdTTL: cacheTimeSeconds }); // Cache TTL set to 5 minutes
     }
 
     private async readFromCache<T>(key: string): Promise<T | null> {
@@ -53,7 +53,7 @@ export class WalletProvider {
 
     private async writeToCache<T>(key: string, data: T): Promise<void> {
         await this.cacheManager.set(path.join(this.cacheKey, key), data, {
-            expires: Date.now() + 5 * 60 * 1000,
+            expires: Date.now() + cacheTimeSeconds * 1000,
         });
     }
 
@@ -91,23 +91,16 @@ export class WalletProvider {
                 const cetusSuiUsdcPoolAddr =
                     "0x51e883ba7c0b566a26cbc8a94cd33eb0abd418a77cc1e60ad22fd9b1f29cd2ab";
                 const url = `https://api.dexscreener.com/latest/dex/pairs/sui/${cetusSuiUsdcPoolAddr}`;
+                elizaLogger.info(`Fetching SUI price from ${url}`);
                 const response = await axios.get(url);
-
-                // if (!response.ok) {
-                //     const errorText = await response.text();
-                //     throw new Error(
-                //         `HTTP error! status: ${response.status}, message: ${errorText}`
-                //     );
-                // }
-
-                // const data = await response.json();
                 return response.data;
             } catch (error) {
                 console.error(`Attempt ${i + 1} failed:`, error);
                 lastError = error;
                 if (i < PROVIDER_CONFIG.MAX_RETRIES - 1) {
-                    const delay = PROVIDER_CONFIG.RETRY_DELAY * (2 ** i);  // Replaced Math.pow with **
+                    const delay = PROVIDER_CONFIG.RETRY_DELAY * Math.pow(2, i);
                     await new Promise((resolve) => setTimeout(resolve, delay));
+                    continue;
                 }
             }
         }

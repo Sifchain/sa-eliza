@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { loadKZG, TrustedSetup } from 'kzg-wasm';
+import { loadKZG, type TrustedSetup } from 'kzg-wasm';
 
 // KZG
 interface KZG {
@@ -25,8 +25,8 @@ const MIN_BLOB_GASPRICE: bigint = 1n;
 const BLOB_GASPRICE_UPDATE_FRACTION: bigint = 3338477n;
 
 function fakeExponential(factor: bigint, numerator: bigint, denominator: bigint): bigint {
-    let i: bigint = 1n;
-    let output: bigint = 0n;
+    let i = 1n;
+    let output = 0n;
     let numerator_accum: bigint = factor * denominator;
     while (numerator_accum > 0n) {
         output += numerator_accum;

@@ -2,7 +2,7 @@ import {
     composeContext,
     elizaLogger,
     generateObjectDeprecated,
-    HandlerCallback,
+    type HandlerCallback,
     ModelClass,
     type IAgentRuntime,
     type Memory,
@@ -13,7 +13,7 @@ import { parseEther, getContract, parseUnits, erc20Abi } from "viem";
 import {
     bnbWalletProvider,
     initWalletProvider,
-    WalletProvider,
+    type WalletProvider,
 } from "../providers/wallet";
 import { bridgeTemplate } from "../templates";
 import {
@@ -67,9 +67,9 @@ export class BridgeAction {
         const account = this.walletProvider.getAccount();
         const chain = this.walletProvider.getChainConfigs(params.fromChain);
 
-        const selfBridge = !params.toAddress || params.toAddress == fromAddress;
+        const selfBridge = !params.toAddress || params.toAddress === fromAddress;
         const nativeTokenBridge =
-            !params.fromToken || params.fromToken == nativeToken;
+            !params.fromToken || params.fromToken === nativeToken;
 
         let amount: bigint;
         if (nativeTokenBridge) {
@@ -83,7 +83,7 @@ export class BridgeAction {
             amount = parseUnits(params.amount, decimals);
         }
 
-        if (params.fromChain == "bsc" && params.toChain == "opBNB") {
+        if (params.fromChain === "bsc" && params.toChain === "opBNB") {
             // from L1 to L2
             const l1BridgeContract = getContract({
                 address: this.L1_BRIDGE_ADDRESS,
@@ -173,7 +173,7 @@ export class BridgeAction {
                     }
                 );
             }
-        } else if (params.fromChain == "opBNB" && params.toChain == "bsc") {
+        } else if (params.fromChain === "opBNB" && params.toChain === "bsc") {
             // from L2 to L1
             const l2BridgeContract = getContract({
                 address: this.L2_BRIDGE_ADDRESS,
@@ -273,7 +273,7 @@ export class BridgeAction {
             throw new Error("Unsupported bridge direction");
         }
 
-        if (!resp.txHash || resp.txHash == "0x") {
+        if (!resp.txHash || resp.txHash === "0x") {
             throw new Error("Get transaction hash failed");
         }
 
@@ -294,7 +294,7 @@ export class BridgeAction {
             );
         }
 
-        if (params.fromChain == "bsc" && params.toChain == "opBNB") {
+        if (params.fromChain === "bsc" && params.toChain === "opBNB") {
             if (params.fromToken && !params.toToken) {
                 throw new Error(
                     "token address on opBNB is required when bridging ERC20 from BSC to opBNB"
@@ -312,22 +312,24 @@ export const bridgeAction = {
         runtime: IAgentRuntime,
         message: Memory,
         state: State,
-        _options: any,
+        _options: Record<string, unknown>,
         callback?: HandlerCallback
     ) => {
         elizaLogger.log("Starting bridge action...");
 
         // Initialize or update state
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
-        state.walletInfo = await bnbWalletProvider.get(runtime, message, state);
+
+        state.walletInfo = await bnbWalletProvider.get(runtime, message, currentState);
 
         // Compose bridge context
         const bridgeContext = composeContext({
-            state,
+            state: currentState,
             template: bridgeTemplate,
         });
         const content = await generateObjectDeprecated({

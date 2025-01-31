@@ -1,6 +1,6 @@
 import { elizaLogger, type ICacheManager, settings } from "@elizaos/core";
 import NodeCache from "node-cache";
-import * as path from "path";
+import * as path from "node:path";
 import {
     API_BASE_URL,
     BIRDEYE_ENDPOINTS,

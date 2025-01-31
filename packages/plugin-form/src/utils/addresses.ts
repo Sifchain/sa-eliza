@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import type { Address } from "viem";
 import formtTestnet from "../chains/form.testnet";
 import form from "../chains/form";
 

@@ -1,9 +1,9 @@
 import {
-    Action,
-    IAgentRuntime,
-    Memory,
-    State,
-    HandlerCallback,
+    type Action,
+    type IAgentRuntime,
+    type Memory,
+    type State,
+    type HandlerCallback,
     elizaLogger,
     generateText,
     ModelClass,
@@ -19,7 +19,7 @@ export const queryBlockChainData: Action = {
     description:
         "Query blockchain data using natural language starting with 'query onchain data:'",
 
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (runtime: IAgentRuntime, _message: Memory) => {
         elizaLogger.log("Validating runtime for QUERY_BLOCKCHAIN_DATA...");
         return !!(
             runtime.character.settings.secrets?.CHAINBASE_API_KEY ||
@@ -30,8 +30,8 @@ export const queryBlockChainData: Action = {
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State,
-        options?: { [key: string]: unknown },
+        _state?: State,
+        _options?: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
         try {

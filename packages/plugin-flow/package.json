@@ -32,6 +32,7 @@
 		"zod": "3.23.8"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
 		"@types/elliptic": "6.4.18",
 		"@types/uuid": "10.0.0",
 		"tsup": "8.3.5",
@@ -41,7 +42,11 @@
 		"lines": "find . \\( -name '*.cdc' -o -name '*.ts' \\) -not -path '*/node_modules/*' -not -path '*/tests/*' -not -path '*/deps/*' -not -path '*/dist/*' -not -path '*/imports*' | xargs wc -l",
 		"build": "tsup --format esm --dts",
 		"dev": "tsup --format esm --dts --watch",
-		"test": "vitest run"
+		"test": "vitest run",
+		"lint": "biome lint .",
+		"lint:fix": "biome check --apply .",
+		"format": "biome format .",
+		"format:fix": "biome format --write ."
 	},
 	"peerDependencies": {
 		"whatwg-url": "7.1.0"

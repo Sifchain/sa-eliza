@@ -24,7 +24,7 @@ export interface DevinState {
  * Manages session state and provides methods for creating sessions and sending messages
  */
 export const devinProvider: Provider = {
-    get: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
+    get: async (runtime: IAgentRuntime, _message: Memory, state?: State) => {
         try {
             const API_KEY = runtime.getSetting("DEVIN_API_TOKEN");
             if (!API_KEY) {

@@ -2,6 +2,7 @@ import {
     type Action,
     type ActionExample,
     elizaLogger,
+    type HandlerCallback,
     type IAgentRuntime,
     type Memory,
     type State,
@@ -60,9 +61,9 @@ export const tokenSearchSymbolAction = {
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state: State,
-        _options: any,
-        callback?: any
+        _state: State,
+        _options: Record<string, unknown>,
+        callback?: HandlerCallback
     ) => {
         try {
             const provider = new BirdeyeProvider(runtime.cacheManager);
@@ -200,12 +201,12 @@ export const tokenSearchSymbolAction = {
 
 const formatTokenSummary = (
     symbol: string,
-    index: number,
+    _index: number,
     tokens: TokenResult[]
 ) => {
     return tokens
         .map((token, i) => {
-            let output = ``;
+            let output = "";
             if (i === 0) {
                 output += `Search Results for ${symbol}:\n\n`;
             }

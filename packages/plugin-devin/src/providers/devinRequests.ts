@@ -21,11 +21,12 @@ export interface DevinSession {
 /**
  * Interface representing an error response from the Devin API
  */
-interface DevinError {
-    error: string;
-    message: string;
-    status: number;
-}
+
+// interface DevinError {
+//     error: string;
+//     message: string;
+//     status: number;
+// }
 
 /**
  * Rate limiting function to prevent API abuse

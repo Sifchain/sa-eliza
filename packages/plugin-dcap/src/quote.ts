@@ -1,6 +1,6 @@
 import { elizaLogger } from "@elizaos/core";
 import { SgxAttestationProvider } from "@elizaos/plugin-sgx";
-import { RemoteAttestationProvider, TEEMode } from "@elizaos/plugin-tee";
+import { RemoteAttestationProvider, type TEEMode } from "@elizaos/plugin-tee";
 import { DCAPMode } from "./types";
 
 export const DEFAULT_QUOTE =

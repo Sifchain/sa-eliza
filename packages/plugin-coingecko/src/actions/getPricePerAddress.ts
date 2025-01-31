@@ -26,7 +26,7 @@ export type GetTokenPriceContent = z.infer<typeof GetTokenPriceSchema> &
     Content;
 
 export const isGetTokenPriceContent = (
-    obj: any
+    obj: unknown
 ): obj is GetTokenPriceContent => {
     return GetTokenPriceSchema.safeParse(obj).success;
 };
@@ -53,7 +53,7 @@ export default {
         "LOOKUP_TOKEN_BY_ADDRESS",
     ],
     // eslint-disable-next-line
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (runtime: IAgentRuntime, _message: Memory) => {
         await validateCoingeckoConfig(runtime);
         return true;
     },
@@ -68,16 +68,19 @@ export default {
     ): Promise<boolean> => {
         elizaLogger.log("Starting GET_TOKEN_PRICE_BY_ADDRESS handler...");
 
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
+
 
         try {
             elizaLogger.log("Composing token price context...");
             const context = composeContext({
-                state,
+                state: currentState,
                 template: getPriceByAddressTemplate,
             });
 
@@ -160,7 +163,7 @@ export default {
                 error
             );
 
-            let errorMessage;
+            let errorMessage: string;
             if (error.response?.status === 429) {
                 errorMessage = "Rate limit exceeded. Please try again later.";
             } else if (error.response?.status === 403) {

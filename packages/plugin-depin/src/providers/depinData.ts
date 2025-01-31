@@ -7,7 +7,7 @@ import {
     type ICacheManager,
 } from "@elizaos/core";
 import NodeCache from "node-cache";
-import * as path from "path";
+import * as path from "node:path";
 
 import type { DepinScanMetrics, DepinScanProject } from "../types/depin";
 
@@ -107,7 +107,7 @@ export class DePINScanProvider {
             return ""; // Handle unexpected types gracefully
         }
 
-        if (isNaN(num)) return value.toString(); // Return as string if not a valid number
+        if (Number.isNaN(num)) return value.toString(); // Return as string if not a valid number
         if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
         if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
         return num.toString(); // Return original number as string if no abbreviation is needed

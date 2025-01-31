@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { elizaLogger } from "@elizaos/core";
-import {
+import type {
     EmailOptions,
     EmailResponse,
     EmailProviderError,
@@ -36,13 +36,17 @@ export class ResendProvider {
                     tags: options.tags
                 });
 
+                if (!response.data?.id) {
+                    throw new Error('Missing response data from Resend');
+                }
+
                 elizaLogger.debug('Email sent successfully', {
-                    id: (response as any).id,
+                    id: response.data.id,
                     attempt
                 });
 
                 return {
-                    id: (response as any).id,
+                    id: response.data.id,
                     provider: 'resend',
                     status: 'success',
                     timestamp: new Date()

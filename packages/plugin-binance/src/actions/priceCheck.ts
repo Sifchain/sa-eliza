@@ -52,12 +52,13 @@ export const priceCheck: Action = {
     ): Promise<boolean> => {
         try {
             // Initialize or update state
-            state = !state
+            let localState = state;
+            localState = !localState
                 ? await runtime.composeState(message)
-                : await runtime.updateRecentMessageState(state);
+                : await runtime.updateRecentMessageState(localState);
 
             const context = composeContext({
-                state,
+                state: localState,
                 template: priceCheckTemplate,
             });
 
@@ -103,7 +104,7 @@ export const priceCheck: Action = {
                 const errorMessage = error.message.includes("Invalid API key")
                     ? "Unable to connect to Binance API"
                     : error.message.includes("Invalid symbol")
-                      ? `Sorry, could not find price for the cryptocurrency symbol you provided`
+                      ? "Sorry, could not find price for the cryptocurrency symbol you provided"
                       : `Sorry, I encountered an error: ${error.message}`;
 
                 callback({

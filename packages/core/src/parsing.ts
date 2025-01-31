@@ -222,7 +222,6 @@ export function extractAttributes(
  * - Wraps unquoted values in double quotes.
  * - Converts single-quoted values to double-quoted.
  * - Ensures consistency in key-value formatting.
- * - Collapses multiple double quotes into a single one.
  * - Normalizes mixed adjacent quote pairs.
  *
  * This is useful for cleaning up improperly formatted JSON strings
@@ -251,11 +250,8 @@ export const normalizeJsonString = (str: string) => {
     // "key": someWord → "key": "someWord"
     str = str.replace(/("[\w\d_-]+")\s*:\s*([A-Za-z_]+)(?!["\w])/g, '$1: "$2"');
 
-    // Collapse multiple double quotes ("") into one
-    str = str.replace(/"+/g, '"');
-
     // Replace adjacent quote pairs with a single double quote
-    str = str.replace(/(["'])(['"])/g, '"');
+    str = str.replace(/(?:"')|(?:'")/g, '"');
     return str;
 };
 

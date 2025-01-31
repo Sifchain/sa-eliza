@@ -1,44 +1,67 @@
 import {
-    Provider,
-    IAgentRuntime,
-    Memory,
-    State,
+    type Provider,
+    type IAgentRuntime,
+    type Memory,
+    type State,
     elizaLogger,
 } from "@elizaos/core";
 
 import {
-    Address,
+    type Address,
     createPublicClient,
     erc20Abi,
-    PublicClient,
+    type PublicClient,
     http,
-    WalletClient,
-    HttpTransport,
-    Account,
-    Chain,
-    SendTransactionParameters,
+    type WalletClient,
+    type HttpTransport,
+    type Account,
+    type Chain,
+    type SendTransactionParameters,
+    type Hex,
 } from "viem";
 import { zksync } from "viem/chains";
-import { PrivateKeyAccount } from "viem/accounts";
+import type { PrivateKeyAccount } from "viem/accounts";
 
 import { useGetAccount, useGetWalletClient } from "../hooks";
-import { Item, SendTransactionParams, WalletPortfolio } from "../types";
+import type { Item, SendTransactionParams, WalletPortfolio } from "../types";
 
 import NodeCache from "node-cache";
+
+// Add interface for portfolio API response
+interface PortfolioItem {
+    contract_name: string;
+    contract_address: string;
+    contract_ticker_symbol: string;
+    contract_decimals: number;
+}
+
+// Add interface for token API response
+interface TokenApiItem {
+    name: string;
+    address: string;
+    symbol: string;
+    decimals: number;
+}
+
+// Update interface to match the actual return type
+interface HoldstationWalletResponse {
+    message: string;
+    error?: string;
+}
 
 export class WalletProvider {
     private cache: NodeCache;
     account: PrivateKeyAccount;
     walletClient: WalletClient;
-    publicClient: PublicClient<HttpTransport, Chain, Account | undefined>;
+    publicClient: PublicClient<HttpTransport, typeof zksync, Account | undefined>;
 
     constructor(account: PrivateKeyAccount) {
         this.account = account;
         this.walletClient = useGetWalletClient();
-        this.publicClient = createPublicClient<HttpTransport>({
+        this.publicClient = createPublicClient({
             chain: zksync,
             transport: http(),
-        }) as PublicClient<HttpTransport, Chain, Account | undefined>;
+        }) as PublicClient<HttpTransport, typeof zksync, Account | undefined>;
         this.cache = new NodeCache({ stdTTL: 300 });
     }
 
@@ -54,7 +77,7 @@ export class WalletProvider {
         tokenAddress: Address,
         owner: Address,
         spender: Address
-    ): Promise<any> {
+    ): Promise<bigint> {
         return this.publicClient.readContract({
             address: tokenAddress,
             abi: erc20Abi,
@@ -68,7 +91,7 @@ export class WalletProvider {
         tokenAddress: Address,
         amount: bigint
     ) {
-        const result = await this.walletClient.writeContract({
+        await this.walletClient.writeContract({
             account: this.account,
             address: tokenAddress,
             abi: erc20Abi,
@@ -78,12 +101,14 @@ export class WalletProvider {
         });
     }
 
-    async sendTransaction(req: SendTransactionParams): Promise<any> {
+    async sendTransaction(req: SendTransactionParams): Promise<Hex> {
         const txRequest: SendTransactionParameters = {
             ...req,
             account: this.account,
             chain: zksync,
             kzg: undefined,
+            data: req.data ? (req.data as `0x${string}`) : undefined,
+            to: req.to ? (req.to as `0x${string}`) : undefined,
         };
         const tx = await this.walletClient.sendTransaction(txRequest);
         console.log("sendTransaction txhash:", tx);
@@ -115,9 +140,11 @@ export class WalletProvider {
 
             const items: Array<Item> =
                 portfolioData.data.map(
-                    (item: any): Item => ({
+                    (item: PortfolioItem): Item => ({
                         name: item.contract_name,
-                        address: item.contract_address,
+                        address: item.contract_address.startsWith('0x') 
+                            ? item.contract_address as `0x${string}` 
+                            : `0x${item.contract_address}` as `0x${string}`,
                         symbol: item.contract_ticker_symbol,
                         decimals: item.contract_decimals,
                     })
@@ -134,7 +161,7 @@ export class WalletProvider {
 
     async fetchAllTokens(): Promise<Array<Item>> {
         try {
-            const cacheKey = `all-hswallet-tokens`;
+            const cacheKey = 'all-hswallet-tokens';
             const cachedValue = this.cache.get<Array<Item>>(cacheKey);
             if (cachedValue) {
                 elizaLogger.log("Cache hit for fetch all");
@@ -142,7 +169,7 @@ export class WalletProvider {
             }
             elizaLogger.log("Cache miss for fetch all");
 
-            const fetchUrl = `https://tokens.coingecko.com/zksync/all.json`;
+            const fetchUrl = 'https://tokens.coingecko.com/zksync/all.json';
 
             const tokensResp = await fetch(fetchUrl);
             const tokensData = await tokensResp.json();
@@ -157,9 +184,11 @@ export class WalletProvider {
 
             const tokens: Array<Item> =
                 tokensData.tokens.map(
-                    (item: any): Item => ({
+                    (item: TokenApiItem): Item => ({
                         name: item.name,
-                        address: item.address,
+                        address: item.address.startsWith('0x') 
+                            ? item.address as `0x${string}` 
+                            : `0x${item.address}` as `0x${string}`,
                         symbol: item.symbol,
                         decimals: item.decimals,
                     })
@@ -183,16 +212,21 @@ export const initWalletProvider = async (runtime: IAgentRuntime) => {
 export const holdstationWalletProvider: Provider = {
     get: async (
         runtime: IAgentRuntime,
-        message: Memory,
-        state: State
-    ): Promise<any> => {
+        _message: Memory,
+        state?: State
+    ): Promise<HoldstationWalletResponse> => {
         try {
             const walletProvider = await initWalletProvider(runtime);
-            const agentName = state.agentName || "The agent";
-            return `${agentName}'s HoldStation Wallet address: ${walletProvider.getAddress()}`;
+            const agentName = state?.agentName || "The agent";
+            return {
+                message: `${agentName}'s HoldStation Wallet address: ${walletProvider.getAddress()}`
+            };
         } catch (error) {
             console.error("Error in HoldStation Wallet provider:", error);
-            return null;
+            return {
+                message: "Failed to get wallet address",
+                error: error instanceof Error ? error.message : "Unknown error"
+            };
         }
     },
 };

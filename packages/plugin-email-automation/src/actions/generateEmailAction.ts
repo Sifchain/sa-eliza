@@ -1,8 +1,8 @@
-import { Action, IAgentRuntime, Memory, State, Content, elizaLogger, HandlerCallback, ServiceType } from "@elizaos/core";
+import { type Action, type IAgentRuntime, type Memory, type State, type Content, elizaLogger, type HandlerCallback, ServiceType } from "@elizaos/core";
 import { EmailGenerationService } from "../services/emailGenerationService";
 import { EmailPromptSchema } from "../schemas/emailGenerationSchema";
 import type { EmailPrompt } from "../types";
-import { GeneratedEmailContent } from "../types";
+import type { GeneratedEmailContent } from "../types";
 
 interface EmailState extends State {
     generatedEmail?: GeneratedEmailContent;
@@ -20,7 +20,7 @@ export const generateEmailAction: Action = {
         [{ user: "user1", content: { text: "Draft a professional email about the upcoming meeting" } }]
     ],
 
-    async validate(runtime: IAgentRuntime, message: Memory): Promise<boolean> {
+    async validate(_runtime: IAgentRuntime, message: Memory): Promise<boolean> {
         const content = message.content as Content;
         const isValid = content?.text?.toLowerCase().includes('email') ?? false;
         elizaLogger.info('Generate validation:', {
@@ -90,24 +90,26 @@ export const generateEmailAction: Action = {
 
             // Add preview message for Discord
             if (callback) {
-                const preview = `📧 **Generated Email Preview**\n\n` +
-                    `**Subject:** ${generatedEmail.subject}\n` +
-                    `**To:** [Recipient's email will be set when sending]\n` +
-                    `───────────────\n\n` +
-                    `${generatedEmail.blocks.map(block => {
-                        switch(block.type) {
-                            case 'heading':
-                                return `## ${block.content}\n\n`;
-                            case 'paragraph':
-                                return `${block.content}\n\n`;
-                            case 'bulletList':
-                                return Array.isArray(block.content)
-                                    ? block.content.map(item => `• ${item}`).join('\n') + '\n\n'
-                                    : `• ${block.content}\n\n`;
-                            default:
-                                return `${block.content}\n\n`;
-                        }
-                    }).join('')}`;
+                const preview = `📧 **Generated Email Preview**
+
+**Subject:** ${generatedEmail.subject}
+**To:** [Recipient's email will be set when sending]
+───────────────
+
+${generatedEmail.blocks.map(block => {
+    switch(block.type) {
+        case 'heading':
+            return `## ${block.content}\n\n`;
+        case 'paragraph':
+            return `${block.content}\n\n`;
+        case 'bulletList':
+            return Array.isArray(block.content)
+                ? `${block.content.map(item => `• ${item}`).join('\n')}\n\n`
+                : `• ${block.content}\n\n`;
+        default:
+            return `${block.content}\n\n`;
+    }
+}).join('')}`;
 
                 // Simply send the preview without any buttons
                 callback({

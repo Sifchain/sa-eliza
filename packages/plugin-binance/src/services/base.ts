@@ -11,6 +11,18 @@ import {
     MinNotionalError,
 } from "../types/internal/error";
 
+interface BinanceApiError {
+    response?: {
+        status?: number;
+        data?: {
+            code?: number;
+            msg?: string;
+        };
+    };
+    code?: number;
+    message?: string;
+}
+
 /**
  * Base service class with common functionality
  */
@@ -39,7 +51,7 @@ export abstract class BaseService {
             throw error;
         }
 
-        const apiError = error as any;
+        const apiError = error as BinanceApiError;
         const errorResponse = apiError.response?.data;
         const errorCode = errorResponse?.code || apiError.code;
         const errorMessage = errorResponse?.msg || apiError.message;

@@ -10,11 +10,16 @@
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
 		"tsup": "^8.3.5"
 	},
 	"scripts": {
 		"build": "tsup --format esm --dts",
 		"dev": "tsup --format esm --dts --watch",
-		"lint": "eslint --fix  --cache ."
+		"clean": "rm -rf dist",
+		"lint": "biome lint .",
+		"lint:fix": "biome check --apply .",
+		"format": "biome format .",
+		"format:fix": "biome format --write ."
 	}
 }

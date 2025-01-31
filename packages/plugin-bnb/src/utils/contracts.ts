@@ -26,13 +26,13 @@ function findImports(importPath: string) {
             return { contents: fs.readFileSync(localPath, "utf8") };
         }
         return { error: "File not found" };
-    } catch (e) {
+    } catch {
         return { error: `File not found: ${importPath}` };
     }
 }
 
 export async function compileSolidity(contractFileName: string) {
-    const contractPath = path.join(baseDir, contractFileName + ".sol");
+    const contractPath = path.join(baseDir, `${contractFileName}.sol`);
     const source = getContractSource(contractPath);
 
     const input = {

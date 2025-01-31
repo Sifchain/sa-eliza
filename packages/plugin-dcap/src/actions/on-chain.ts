@@ -44,8 +44,10 @@ export const dcapOnChainVerifyAction: Action = {
         [
             {
                 user: "{{user1}}",
-                content: { text: "Verify the DCAP attestation on-chain" },
-                action: "DCAP_ON_CHAIN",
+                content: { 
+                    text: "Verify the DCAP attestation on-chain",
+                    action: "DCAP_ON_CHAIN"
+                },
             },
             {
                 user: "{{user2}}",
@@ -57,8 +59,10 @@ export const dcapOnChainVerifyAction: Action = {
         [
             {
                 user: "{{user1}}",
-                content: { text: "DCAP_ON_CHAIN" },
-                action: "DCAP_ON_CHAIN",
+                content: { 
+                    text: "DCAP_ON_CHAIN",
+                    action: "DCAP_ON_CHAIN"
+                },
             },
             {
                 user: "{{user2}}",
@@ -68,14 +72,14 @@ export const dcapOnChainVerifyAction: Action = {
             },
         ],
     ],
-    async validate(runtime, message) {
+    async validate(runtime, _message) {
         if (!hasPrivateKey(runtime)) return false;
         const mode = getDCAPMode(runtime);
         if (!mode) return false;
         if (mode === DCAPMode.PLUGIN_TEE) return hasTEEMode(runtime);
         return true;
     },
-    async handler(runtime, message, state, options, callback) {
+    async handler(runtime, message, _state, _options, callback) {
         const { agentId } = runtime;
         const { userId, roomId, content } = message;
         const quote = await getQuote(
@@ -96,11 +100,12 @@ export const dcapOnChainVerifyAction: Action = {
                 action: "DCAP_ON_CHAIN",
             });
         try {
-            const tx = await verifyAndAttestOnChain(
-                runtime.getSetting("EVM_PRIVATE_KEY")!,
-                quote
-            );
-            reply("Verified! Transaction hash: " + tx.hash);
+            const privateKey = runtime.getSetting("EVM_PRIVATE_KEY");
+            if (!privateKey) {
+                throw new Error("EVM_PRIVATE_KEY not set");
+            }
+            const tx = await verifyAndAttestOnChain(privateKey, quote);
+            reply(`Verified! Transaction hash: ${tx.hash}`);
             return true;
         } catch (e) {
             reply(e instanceof Error ? e.message : "Attestation failed");

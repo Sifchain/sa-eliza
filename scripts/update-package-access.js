@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const glob = require('glob');
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const packages = glob.sync('packages/*/package.json');
 
-packages.forEach((packageJsonPath) => {
+for (const packageJsonPath of packages) {
   const packageJson = require(path.resolve(packageJsonPath));
 
   if (packageJson.name.startsWith('@elizaos/') && !packageJson.private && !packageJson.publishConfig) {
@@ -22,4 +22,4 @@ packages.forEach((packageJsonPath) => {
       console.error(`Error formatting file: ${packageJsonPath}`, error.message);
     }
   }
-});
+}

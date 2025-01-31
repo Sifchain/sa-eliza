@@ -12,7 +12,7 @@ import {
     type Action,
 } from "@elizaos/core";
 import { WalletProvider } from "../providers/wallet";
-import { validateMultiversxConfig } from "../enviroment";
+import { validateMultiversxConfig } from "../environment";
 import { transferSchema } from "../utils/schemas";
 import { GraphqlProvider } from "../providers/graphql";
 import { MVX_NETWORK_CONFIG } from "../constants";

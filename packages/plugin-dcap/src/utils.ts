@@ -1,4 +1,4 @@
-import { IAgentRuntime } from "@elizaos/core";
+import type { IAgentRuntime } from "@elizaos/core";
 import { TEEMode } from "@elizaos/plugin-tee";
 import { DCAPMode } from "./types";
 

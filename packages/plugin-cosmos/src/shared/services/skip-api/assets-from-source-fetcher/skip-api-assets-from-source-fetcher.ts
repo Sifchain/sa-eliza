@@ -44,7 +44,11 @@ export class SkipApiAssetsFromSourceFetcher {
         );
 
         if (this.cache.has(cacheKey)) {
-            return this.cache.get(cacheKey)!;
+            const cachedData = this.cache.get(cacheKey);
+            if (!cachedData) {
+                throw new Error("Cache inconsistency: data not found after check");
+            }
+            return cachedData;
         }
 
         const requestData: SkipApiAssetsFromSourceParams = {

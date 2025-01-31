@@ -1,11 +1,11 @@
-import { elizaLogger, IAgentRuntime } from "@elizaos/core";
+import { elizaLogger, type IAgentRuntime } from "@elizaos/core";
 import {
     EmailOutgoingProvider,
     EmailIncomingProvider,
-    OutgoingConfig,
-    GmailConfig,
-    IncomingConfig,
-    SmtpConfig,
+    type OutgoingConfig,
+    type GmailConfig,
+    type IncomingConfig,
+    type SmtpConfig,
 } from "../types/config";
 import { z } from "zod";
 
@@ -41,14 +41,13 @@ export function validateOutgoingEmailConfig(
     elizaLogger.debug("Verifying email service settings...");
     try {
         let config: GmailConfig | SmtpConfig;
-
         let result;
-        let provider =
+        const provider: string | undefined =
             runtime.getSetting("EMAIL_OUTGOING_SERVICE") ||
             process.env.EMAIL_PROVIDER;
 
         if (!provider) {
-            elizaLogger.warn(`Email outgoing service not set.`);
+            elizaLogger.warn("Email outgoing service not set.");
             return null;
         }
         switch (provider?.toLowerCase()) {
@@ -116,14 +115,14 @@ export function validateOutgoingEmailConfig(
 export function validateIncomingEmailConfig(
     runtime: IAgentRuntime
 ): IncomingConfig {
-    let provider =
+    const provider =
         runtime.getSetting("EMAIL_INCOMING_SERVICE") ||
         process.env.EMAIL_INCOMING_SERVICE;
     if (!provider) {
-        elizaLogger.warn(`Email incoming service not set.`);
+        elizaLogger.warn("Email incoming service not set.");
         return null;
     }
-    let config = {
+    const config = {
         provider: EmailIncomingProvider.IMAP,
         host:
             runtime.getSetting("EMAIL_INCOMING_HOST") ||

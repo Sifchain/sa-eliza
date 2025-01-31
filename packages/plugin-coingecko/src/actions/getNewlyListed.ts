@@ -31,7 +31,7 @@ export const GetNewCoinsSchema = z.object({
 
 export type GetNewCoinsContent = z.infer<typeof GetNewCoinsSchema> & Content;
 
-export const isGetNewCoinsContent = (obj: any): obj is GetNewCoinsContent => {
+export const isGetNewCoinsContent = (obj: unknown): obj is GetNewCoinsContent => {
     return GetNewCoinsSchema.safeParse(obj).success;
 };
 
@@ -43,7 +43,7 @@ export default {
         "NEW_LISTINGS",
         "LATEST_COINS",
     ],
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (runtime: IAgentRuntime, _message: Memory) => {
         await validateCoingeckoConfig(runtime);
         return true;
     },
@@ -57,16 +57,19 @@ export default {
     ): Promise<boolean> => {
         elizaLogger.log("Starting CoinGecko GET_NEW_COINS handler...");
 
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
+
 
         try {
             elizaLogger.log("Composing new coins context...");
             const newCoinsContext = composeContext({
-                state,
+                state: currentState,
                 template: getNewCoinsTemplate,
             });
 

@@ -1,28 +1,33 @@
-import { Client, elizaLogger, IAgentRuntime, ServiceType } from "@elizaos/core";
-import MailNotifier, { Config, EmailContent } from "mail-notifier";
-import nodemailer, { Transporter } from "nodemailer";
+import {
+    type Client,
+    elizaLogger,
+    type IAgentRuntime,
+    ServiceType,
+} from "@elizaos/core";
+import MailNotifier, { type Config, type EmailContent } from "mail-notifier";
+import nodemailer, { type Transporter } from "nodemailer";
 import {
     validateIncomingEmailConfig,
     validateOutgoingEmailConfig,
 } from "../config/email";
 import {
-    OutgoingConfig,
+    type OutgoingConfig,
     EmailOutgoingProvider,
-    GmailConfig,
-    SmtpConfig,
-    SendEmailOptions,
-    EmailResponse,
-    IncomingConfig,
+    type GmailConfig,
+    type SmtpConfig,
+    type SendEmailOptions,
+    type EmailResponse,
+    type IncomingConfig,
 } from "../types";
-import EventEmitter from "events";
+import { EventEmitter } from "node:events";
 
 class IncomingEmailManager extends EventEmitter {
     private static instance: IncomingEmailManager | null = null;
-    private notifier: any;
+    private notifier: ReturnType<typeof MailNotifier>;
 
     private constructor(config: IncomingConfig) {
         super();
-        let imapSettings: Config = {
+        const imapSettings: Config = {
             user: config.user,
             password: config.pass,
             host: config.host,
@@ -51,17 +56,17 @@ class IncomingEmailManager extends EventEmitter {
         this.notifier.on("mail", callback);
     }
     static getInstance(config: IncomingConfig): IncomingEmailManager {
-        if (!this.instance) {
+        if (!IncomingEmailManager.instance) {
             if (!config) {
                 // TODO - check the condition to enable Smtp
                 elizaLogger.warn(
-                    `IMAP configuration is missing. Unable to receive emails.`
+                    "IMAP configuration is missing. Unable to receive emails."
                 );
                 return null;
             }
-            this.instance = new IncomingEmailManager(config);
+            IncomingEmailManager.instance = new IncomingEmailManager(config);
         }
-        return this.instance;
+        return IncomingEmailManager.instance;
     }
 }
 
@@ -114,17 +119,17 @@ class OutgoingEmailManager {
     }
 
     static getInstance(config: OutgoingConfig): OutgoingEmailManager {
-        if (!this.instance) {
+        if (!OutgoingEmailManager.instance) {
             if (!config) {
                 // TODO - check the condition to enable Smtp
                 elizaLogger.warn(
-                    `SMTP configuration is missing. Unable to send emails.`
+                    "SMTP configuration is missing. Unable to send emails."
                 );
                 return null;
             }
-            this.instance = new OutgoingEmailManager(config);
+            OutgoingEmailManager.instance = new OutgoingEmailManager(config);
         }
-        return this.instance;
+        return OutgoingEmailManager.instance;
     }
 }
 export class EmailClient {
@@ -152,8 +157,8 @@ export class EmailClient {
         if (this.incomingEmailManager) {
             this.incomingEmailManager.start();
         }
-        let incomingStatus = this.incomingEmailManager ? "✅ " : "❌ ";
-        let outgoingStatus = this.outgoingEmailManager ? "✅ " : "❌ ";
+        const incomingStatus = this.incomingEmailManager ? "✅ " : "❌ ";
+        const outgoingStatus = this.outgoingEmailManager ? "✅ " : "❌ ";
         elizaLogger.info(
             `Email service initialized successfully: ${incomingStatus}Incoming - ${outgoingStatus}Outgoing`
         );

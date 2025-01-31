@@ -3,6 +3,9 @@ import type { PrivateKeyAccount } from "viem/accounts";
 import { privateKeyToAccount } from "viem/accounts";
 
 export const useGetAccount = (runtime: IAgentRuntime): PrivateKeyAccount => {
-    const PRIVATE_KEY = runtime.getSetting("HOLDSTATION_PRIVATE_KEY")!;
-    return privateKeyToAccount(`0x${PRIVATE_KEY}`);
+    const privateKey = runtime.getSetting("HOLDSTATION_PRIVATE_KEY");
+    if (!privateKey) {
+        throw new Error("HOLDSTATION_PRIVATE_KEY not found in settings");
+    }
+    return privateKeyToAccount(`0x${privateKey}`);
 };
