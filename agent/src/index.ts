@@ -170,6 +170,7 @@ import {
     githubIdeationPlugin,
     githubInteractWithPRPlugin,
     githubInteractWithIssuePlugin,
+    githubOrchestratePlugin,
 } from "@elizaos/plugin-github";
 import { GitHubClientInterface } from "@elizaos/client-github";
 
@@ -1327,6 +1328,7 @@ export async function createAgent(
                       githubIdeationPlugin,
                       githubInteractWithIssuePlugin,
                       githubInteractWithPRPlugin,
+                      githubOrchestratePlugin,
                   ]
                 : []),
         ]
