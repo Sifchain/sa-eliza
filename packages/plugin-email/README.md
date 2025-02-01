@@ -18,7 +18,7 @@ The following settings will be declared on your environment variable or inside y
 ## IMAP Section
 
 - `EMAIL_INCOMING_SERVICE`: "imap"
-- `EMAIL_INCOMING_HOST`: IMAP Hostname or IP to conenct to
+- `EMAIL_INCOMING_HOST`: IMAP Hostname or IP to connect to
 - `EMAIL_INCOMING_PORT`: the port to connect to (defaults to 993)
 - `EMAIL_INCOMING_USER`: Username
 - `EMAIL_INCOMING_PASS`: Password

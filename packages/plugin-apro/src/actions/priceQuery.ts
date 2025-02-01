@@ -1,6 +1,8 @@
-import { Action, composeContext, elizaLogger, generateObject, HandlerCallback, IAgentRuntime, Memory, ModelClass, State } from "@elizaos/core";
+import type { Action, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core";
+import { composeContext, elizaLogger, generateObject, ModelClass } from "@elizaos/core";
 import { priceQueryTemplate } from "../templates";
-import { isPriceQueryParams, PriceData, PriceQueryParams, PriceQueryParamsSchema } from "../types";
+import type { PriceData, PriceQueryParams } from "../types";
+import { isPriceQueryParams, PriceQueryParamsSchema } from "../types";
 
 async function fetchPriceData(pair: string) {
     const response = await fetch(`https://live-api.apro.com/api/live-stream/reports?pair=${pair}`);
@@ -14,7 +16,7 @@ export const priceQuery: Action = {
         'PRICE_FETCH',
     ],
     description: "Call remote API to fetch price data for a given pair.",
-    validate: async (runtime: IAgentRuntime, message: Memory) => {
+    validate: async (_runtime: IAgentRuntime, _message: Memory) => {
         return true;
     },
     handler: async (
@@ -24,10 +26,12 @@ export const priceQuery: Action = {
         _options?: { [key: string]: unknown },
         callback?: HandlerCallback
     ) => {
-        if (!state) {
-            state = (await runtime.composeState(message)) as State;
+        // Initialize or update state
+        let currentState = state;
+        if (!currentState) {
+            currentState = (await runtime.composeState(message)) as State;
         } else {
-            state = await runtime.updateRecentMessageState(state);
+            currentState = await runtime.updateRecentMessageState(currentState);
         }
 
         // Generate price query params
@@ -36,7 +40,7 @@ export const priceQuery: Action = {
             const response = await generateObject({
                 runtime,
                 context: composeContext({
-                    state,
+                    state: currentState,
                     template: priceQueryTemplate,
                 }),
                 modelClass: ModelClass.LARGE,
@@ -44,20 +48,25 @@ export const priceQuery: Action = {
             });
             priceQueryParams = response.object as PriceQueryParams;
             elizaLogger.info('The price query params received:', priceQueryParams);
-        } catch (error: any) {
-            elizaLogger.error('Failed to generate price query params:', error);
-            callback({
-                text: 'Failed to generate price query params. Please provide valid input.',
-            });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            elizaLogger.error('Failed to generate price query params:', errorMessage);
+            if (callback) {
+                callback({
+                    text: 'Failed to generate price query params. Please provide valid input.',
+                });
+            }
             return;
         }
 
         // Validate price query params
         if (!isPriceQueryParams(priceQueryParams)) {
             elizaLogger.error('Invalid price query params:', priceQueryParams);
-            callback({
-                text: 'Invalid price query params. Please provide valid input.',
-            });
+            if (callback) {
+                callback({
+                    text: 'Invalid price query params. Please provide valid input.',
+                });
+            }
             return;
         }
 
@@ -69,25 +78,31 @@ export const priceQuery: Action = {
 
             if (!priceData || priceData.length === 0) {
                 elizaLogger.error('No price data found for pair:', pair);
-                callback({
-                    text: `No price data found for pair ${pair}.`,
-                });
+                if (callback) {
+                    callback({
+                        text: `No price data found for pair ${pair}.`,
+                    });
+                }
                 return;
             }
 
-            let priceDataString = priceData.map((data) => {
+            const priceDataString = priceData.map((data) => {
                 return `Feed ID: ${data.feedId}\nBid Price: ${data.bidPrice}\nMid Price: ${data.midPrice}\nAsk Price: ${data.askPrice}\nTimestamp: ${data.timestamp}`;
             }).join('\n\n');
-            callback({
-                text: `Price data for pair ${pair}: \n${priceDataString}`,
-            });
-        } catch (error: any) {
-            elizaLogger.error(`Error fetching price data, error: `, error);
-            callback(
-                {
-                    text: 'Error fetching price data, error: ' + error.message,
-                }
-            )
+            
+            if (callback) {
+                callback({
+                    text: `Price data for pair ${pair}: \n${priceDataString}`,
+                });
+            }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            elizaLogger.error('Error fetching price data:', errorMessage);
+            if (callback) {
+                callback({
+                    text: `Error fetching price data: ${errorMessage}`,
+                });
+            }
         }
     },
     examples: [

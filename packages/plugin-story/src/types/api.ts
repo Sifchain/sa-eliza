@@ -29,7 +29,7 @@ export enum RESOURCE_TYPE {
     LATEST_TRANSACTIONS = "transactions/latest",
 }
 
-export enum RESPOURCE_REPONSE_TYPE {
+export enum RESOURCE_RESPONSE_TYPE {
     LICENSE_TOKEN = "LICENSETOKEN", // new version
     LICENSE_TEMPLATES = "LICENSETEMPLATE", // new version
     LICENSE_TERMS = "LICENSETERM", // new version

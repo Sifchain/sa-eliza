@@ -1,8 +1,10 @@
-import { Action, composeContext, elizaLogger, generateObject, HandlerCallback, IAgentRuntime, Memory, ModelClass, State } from "@elizaos/core";
-import { AgentSDK, AgentSettings, parseNewAgentAddress } from "ai-agent-sdk-js";
+import type { Action, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core";
+import { composeContext, elizaLogger, generateObject, ModelClass } from "@elizaos/core";
+import { AgentSDK, parseNewAgentAddress } from "ai-agent-sdk-js";
+import type { AgentSettings } from "ai-agent-sdk-js";
 import { createAgentTemplate } from "../templates";
+import type { ContractTransactionResponse } from "ethers";
 import { AgentSettingsSchema, isAgentSettings } from "../types";
-import { ContractTransactionResponse } from "ethers";
 
 export const createAndRegisterAgent: Action = {
   name: "CREATE_AND_REGISTER_AGENT",
@@ -21,10 +23,12 @@ export const createAndRegisterAgent: Action = {
     _options?: { [key: string]: unknown },
     callback?: HandlerCallback
   ) => {
-    if (!state) {
-        state = (await runtime.composeState(message)) as State;
+    // Initialize or update state
+    let currentState = state;
+    if (!currentState) {
+        currentState = (await runtime.composeState(message)) as State;
     } else {
-        state = await runtime.updateRecentMessageState(state);
+        currentState = await runtime.updateRecentMessageState(currentState);
     }
 
     // Generate agent settings
@@ -33,7 +37,7 @@ export const createAndRegisterAgent: Action = {
         const agentSettingsDetail = await generateObject({
             runtime,
             context: composeContext({
-                state,
+                state: currentState,
                 template: createAgentTemplate,
             }),
             modelClass: ModelClass.LARGE,
@@ -41,57 +45,69 @@ export const createAndRegisterAgent: Action = {
         });
         agentSettings = agentSettingsDetail.object as AgentSettings;
         elizaLogger.info('The Agent settings received:', agentSettings);
-    } catch (error: any) {
-        elizaLogger.error('Failed to generate Agent settings:', error);
-        callback({
-            text: 'Failed to generate Agent settings. Please provide valid input.',
-        });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        elizaLogger.error('Failed to generate Agent settings:', errorMessage);
+        if (callback) {
+            callback({
+                text: 'Failed to generate Agent settings. Please provide valid input.',
+            });
+        }
         return;
     }
 
     // Validate agent settings
     if (!isAgentSettings(agentSettings)) {
         elizaLogger.error('Invalid Agent settings:', agentSettings);
-        callback({
-            text: 'Invalid Agent settings. Please provide valid input.',
-        });
+        if (callback) {
+            callback({
+                text: 'Invalid Agent settings. Please provide valid input.',
+            });
+        }
         return;
     }
 
     // Create SDK agent
-    let agent: AgentSDK
+    let agent: AgentSDK;
     try {
         agent = new AgentSDK({
             proxyAddress: runtime.getSetting('APRO_PROXY_ADDRESS') ?? process.env.APRO_PROXY_ADDRESS,
             rpcUrl: runtime.getSetting('APRO_RPC_URL') ?? process.env.APRO_RPC_URL,
             privateKey: runtime.getSetting('APRO_PRIVATE_KEY') ?? process.env.APRO_PRIVATE_KEY,
         });
-    } catch (error: any) {
-        elizaLogger.error('Failed to create Agent SDK:', error);
-        callback({
-            text: 'Failed to create Agent SDK. Please check the apro plugin configuration.',
-        });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        elizaLogger.error('Failed to create Agent SDK:', errorMessage);
+        if (callback) {
+            callback({
+                text: 'Failed to create Agent SDK. Please check the apro plugin configuration.',
+            });
+        }
         return;
     }
 
     // Create and register agent
-    let tx: ContractTransactionResponse
+    let tx: ContractTransactionResponse;
     try {
-        tx = await agent.createAndRegisterAgent({agentSettings})
+        tx = await agent.createAndRegisterAgent({agentSettings});
         elizaLogger.info('Successfully send create and register agent transaction:', tx.hash);
 
-        const receipt = await tx.wait()
-        const agentAddress = parseNewAgentAddress(receipt)
+        const receipt = await tx.wait();
+        const agentAddress = parseNewAgentAddress(receipt);
 
-        elizaLogger.info(`Created agent at address: ${agentAddress}`)
-        callback({ text: 'Agent created and registered successfully: ' + agentAddress })
-    } catch (error: any) {
-        elizaLogger.error(`Error creating agent: ${error.message}`);
-        let message = 'Error creating agent: ' + error.message
-        if (tx?.hash) {
-            message += ` Transaction hash: ${tx.hash}`
+        elizaLogger.info(`Created agent at address: ${agentAddress}`);
+        if (callback) {
+            callback({ text: `Agent created and registered successfully: ${agentAddress}` });
         }
-        await callback({ text: message });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        elizaLogger.error(`Error creating agent: ${errorMessage}`);
+        if (callback) {
+            const message = tx?.hash 
+                ? `Error creating agent: ${errorMessage}. Transaction hash: ${tx.hash}`
+                : `Error creating agent: ${errorMessage}`;
+            await callback({ text: message });
+        }
     }
   },
   examples: [

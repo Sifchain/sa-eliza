@@ -1,8 +1,8 @@
-import { Action, composeContext, elizaLogger, generateObject, HandlerCallback, IAgentRuntime, Memory, ModelClass, State } from "@elizaos/core";
-import { AgentSDK, VerifyParams } from "ai-agent-sdk-js";
+import { type Action, composeContext, elizaLogger, generateObject, type HandlerCallback, type IAgentRuntime, type Memory, ModelClass, type State } from "@elizaos/core";
+import { AgentSDK, type VerifyParams } from "ai-agent-sdk-js";
 import { verifyDataTemplate } from "../templates";
 import { isVerifyParams, VerifyParamsSchema } from "../types";
-import { ContractTransactionResponse } from "ethers";
+import type { ContractTransactionResponse } from "ethers";
 
 export const verifyData: Action = {
   name: "VERIFY",
@@ -20,10 +20,12 @@ export const verifyData: Action = {
     _options?: { [key: string]: unknown },
     callback?: HandlerCallback
   ) => {
-    if (!state) {
-        state = (await runtime.composeState(message)) as State;
+    // Initialize or update state
+    let currentState = state;
+    if (!currentState) {
+        currentState = (await runtime.composeState(message)) as State;
     } else {
-        state = await runtime.updateRecentMessageState(state);
+        currentState = await runtime.updateRecentMessageState(currentState);
     }
 
     // Generate verify params
@@ -32,7 +34,7 @@ export const verifyData: Action = {
         const response = await generateObject({
             runtime,
             context: composeContext({
-                state,
+                state: currentState,
                 template: verifyDataTemplate,
             }),
             modelClass: ModelClass.LARGE,
@@ -41,8 +43,12 @@ export const verifyData: Action = {
 
         verifyParams = response.object as VerifyParams;
         elizaLogger.info('The verify params received:', verifyParams);
-    }  catch (error: any) {
-        elizaLogger.error('Failed to generate verify params:', error);
+    }  catch (error: unknown) {
+        if (error instanceof Error) {
+            elizaLogger.error('Failed to generate verify params:', error.message);
+        } else {
+            elizaLogger.error('Failed to generate verify params:', String(error));
+        }
         callback({
             text: 'Failed to generate verify params. Please provide valid input.',
         });
@@ -68,8 +74,12 @@ export const verifyData: Action = {
             autoHashData: (runtime.getSetting('APRO_AUTO_HASH_DATA') ?? process.env.APRO_AUTO_HASH_DATA) === 'true',
             converterAddress: runtime.getSetting('APRO_CONVERTER_ADDRESS') ?? process.env.APRO_CONVERTER_ADDRESS,
         });
-    } catch (error: any) {
-        elizaLogger.error('Failed to create Agent SDK:', error);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            elizaLogger.error('Failed to create Agent SDK:', error.message);
+        } else {
+            elizaLogger.error('Failed to create Agent SDK:', String(error));
+        }
         callback({
             text: 'Failed to create Agent SDK. Please check the apro plugin configuration.',
         });
@@ -80,23 +90,25 @@ export const verifyData: Action = {
     let tx: ContractTransactionResponse
     try {
         tx = await agent.verify(verifyParams)
-        elizaLogger.info(`Data verification transaction sent. Transaction ID: ${tx.hash}`);
+        elizaLogger.info('Data verification transaction sent. Transaction ID:', tx.hash);
 
         const receipt = await tx.wait();
-        elizaLogger.info(`Data verified successfully.`);
+        elizaLogger.info('Data verification transaction confirmed. Transaction ID:', receipt.hash);
 
         callback({
-            text: 'Success: Data verified successfully. Transaction ID: ' + receipt.hash,
+            text: `Success: Data verified successfully. Transaction ID: ${receipt.hash}`,
         })
-    } catch (error: any) {
-        elizaLogger.error(`Error verify data: ${error.message}`);
-        let message = 'Error verifying data: ' + error.message
-        if (tx?.hash) {
-            message += ` Transaction hash: ${tx.hash}`
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            elizaLogger.error(`Error verify data: ${error.message}`);
+            let message = `Error verifying data: ${error.message}`;
+            if (tx?.hash) {
+                message = `${message} Transaction hash: ${tx.hash}`;
+            }
+            callback({
+                text: message,
+            })
         }
-        callback({
-            text: message,
-        })
     }
   },
   examples: [

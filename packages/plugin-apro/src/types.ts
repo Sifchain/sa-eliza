@@ -32,11 +32,8 @@ export const AgentSettingsSchema = z.object({
     }),
 });
 
-export const isAgentSettings = (value: any): value is AgentSettings => {
-    if (AgentSettingsSchema.safeParse(value).success) {
-        return true;
-    }
-    return false;
+export const isAgentSettings = (value: unknown): value is AgentSettings => {
+    return AgentSettingsSchema.safeParse(value).success;
 }
 
 interface Signature {
@@ -77,11 +74,8 @@ export const VerifyParamsSchema = z.object({
     }),
 });
 
-export const isVerifyParams = (value: any): value is VerifyParams => {
-    if (VerifyParamsSchema.safeParse(value).success) {
-        return true;
-    }
-    return false;
+export const isVerifyParams = (value: unknown): value is VerifyParams => {
+    return VerifyParamsSchema.safeParse(value).success;
 }
 
 export interface PriceQueryParams {
@@ -92,11 +86,8 @@ export const PriceQueryParamsSchema = z.object({
     pair: z.string(),
 });
 
-export const isPriceQueryParams = (value: any): value is PriceQueryParams => {
-    if (PriceQueryParamsSchema.safeParse(value).success) {
-        return true;
-    }
-    return false;
+export const isPriceQueryParams = (value: unknown): value is PriceQueryParams => {
+    return PriceQueryParamsSchema.safeParse(value).success;
 }
 
 export interface PriceData {
@@ -117,11 +108,8 @@ export const AttpsPriceQuerySchema = z.object({
     feedId: z.string(),
 });
 
-export const isAttpsPriceQuery = (value: any): value is AttpsPriceQuery => {
-    if (AttpsPriceQuerySchema.safeParse(value).success) {
-        return true;
-    }
-    return false;
+export const isAttpsPriceQuery = (value: unknown): value is AttpsPriceQuery => {
+    return AttpsPriceQuerySchema.safeParse(value).success;
 }
 
 export interface AttpsPriceQuery {

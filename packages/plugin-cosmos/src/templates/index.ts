@@ -26,7 +26,7 @@ Respond with a JSON markdown block containing only the extracted values. All fie
     "chainName": string // The chain name.
 \`\`\`
 
-Example reponse for the input: "Make transfer 0.0001 OM to mantra1pcnw46km8m5amvf7jlk2ks5std75k73aralhcf on mantrachaintestnet2", the response should be:
+Example response for the input: "Make transfer 0.0001 OM to mantra1pcnw46km8m5amvf7jlk2ks5std75k73aralhcf on mantrachaintestnet2", the response should be:
 \`\`\`json
 {
     "symbol": "OM",
