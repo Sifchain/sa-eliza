@@ -54,6 +54,7 @@ import { fal } from "@fal-ai/client";
 
 import BigNumber from "bignumber.js";
 import { createPublicClient, http } from "viem";
+import { instrument } from "./instrumentation.ts";
 
 type Tool = CoreTool<any, any>;
 type StepResult = AIStepResult<any>;
@@ -490,6 +491,14 @@ export async function generateText({
     }
 
     elizaLogger.info("Selected model:", model);
+    // Instrument the model selection step (Orient phase)
+    instrument.modelSelected({
+        agentId: runtime.agentId,
+        characterName: runtime.character.name,
+        modelClass: modelClass,
+        modelProvider: runtime.modelProvider,
+        selectedModel: model,
+    });
 
     const modelConfiguration = runtime.character?.settings?.modelConfig;
     const temperature =
