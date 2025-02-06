@@ -1,6 +1,7 @@
-import { Pool } from 'pg';
-
 // Create a connection pool for local testing using your provided credentials.
+import { Pool } from 'pg';
+import { Span, SpanProcessor } from '@opentelemetry/sdk-trace-base';
+
 const pool = new Pool({
   host: 'localhost',
   port: 5433,
@@ -44,8 +45,6 @@ async function insertTrace(spanData: any): Promise<void> {
     console.error('Error inserting span into DB', error);
   }
 }
-
-import { Span, SpanProcessor } from '@opentelemetry/sdk-trace-base';
 
 export class DBSpanProcessor implements SpanProcessor {
   onStart(span: Span): void {
