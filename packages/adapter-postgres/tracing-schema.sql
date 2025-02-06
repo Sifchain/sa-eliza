@@ -29,14 +29,16 @@ CREATE INDEX idx_traces_room ON traces (room_id);
 
 -- Add events table
 CREATE TABLE IF NOT EXISTS events (
-    event_id UUID PRIMARY DEFAULT gen_random_uuid(),
-    trace_id VARCHAR(256) NOT NULL REFERENCES traces(trace_id),
+    event_id UUID DEFAULT gen_random_uuid(),
+    trace_id VARCHAR(256) NOT NULL,
+    span_id VARCHAR(256) NOT NULL,
     agent_id VARCHAR(256) NOT NULL,
     event_type VARCHAR(64) NOT NULL,
     event_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     event_data JSONB NOT NULL,
     room_id VARCHAR(256) NOT NULL,
-    PRIMARY KEY (event_id)
+    PRIMARY KEY (event_id),
+    FOREIGN KEY (trace_id, span_id) REFERENCES traces(trace_id, span_id)
 );
 
 -- Add indexes for common event queries

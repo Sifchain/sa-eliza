@@ -1,7 +1,7 @@
 {
     "name": "C-3PO",
     "clients": [],
-    "modelProvider": "anthropic",
+    "modelProvider": "openai",
     "settings": {
         "voice": {
             "model": "en_GB-alan-medium"

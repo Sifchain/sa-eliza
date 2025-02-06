@@ -265,7 +265,7 @@ export class AgentRuntime implements IAgentRuntime {
             stringToUuid(opts.character?.name ?? uuidv4());
         this.character = opts.character || defaultCharacter;
 
-        instrument.startSession({
+        instrument.sessionStart({
             agentId: this.agentId,
             characterName: this.character.name,
             environment: process.env.NODE_ENV || 'development',

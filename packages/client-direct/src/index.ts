@@ -27,7 +27,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import OpenAI from "openai";
-import { instrument } from "../../packages/core/src/instrumentation.ts";
+import { instrument } from "@elizaos/core";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -1051,3 +1051,5 @@ export const DirectClientInterface: Client = {
 };
 
 export default DirectClientInterface;
+
+instrument.sessionStart({ foo: "bar" });
