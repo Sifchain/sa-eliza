@@ -27,6 +27,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import OpenAI from "openai";
+import { instrument } from "../../packages/core/src/instrumentation.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -348,6 +349,14 @@ export class DirectClient {
                         res.json([]);
                     }
                 }
+
+                // Instrument the "message_received" event immediately after receiving the request.
+                instrument.messageReceived({
+                    agentId: agentId,
+                    inputSource: req.headers["user-agent"] || "unknown",
+                    messageType: "message",
+                    messageSnippet: (text || "").substring(0, 100),
+                });
             }
         );
 
