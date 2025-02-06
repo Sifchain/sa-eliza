@@ -1,5 +1,6 @@
 import "./config.ts"; // Add this line first
 
+export * from "./instrumentation.ts";
 export * from "./actions.ts";
 export * from "./context.ts";
 export * from "./database.ts";
