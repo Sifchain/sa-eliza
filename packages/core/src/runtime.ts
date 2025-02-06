@@ -56,6 +56,7 @@ import {
 import { stringToUuid } from "./uuid.ts";
 import { glob } from "glob";
 import { existsSync } from "fs";
+import { instrument } from "./instrumentation.ts";
 /**
  * Represents the runtime environment for an agent, handling message processing,
  * action registration, and interaction with external services like OpenAI and Supabase.
@@ -263,6 +264,13 @@ export class AgentRuntime implements IAgentRuntime {
             opts?.agentId ??
             stringToUuid(opts.character?.name ?? uuidv4());
         this.character = opts.character || defaultCharacter;
+
+        instrument.startSession({
+            agentId: this.agentId,
+            characterName: this.character.name,
+            environment: process.env.NODE_ENV || 'development',
+            platform: typeof window === 'undefined' ? 'node' : 'browser',
+        });
 
         elizaLogger.info(`${this.character.name}(${this.agentId}) - Initializing AgentRuntime with options:`, {
             character: opts.character?.name,
@@ -807,7 +815,7 @@ export class AgentRuntime implements IAgentRuntime {
                 elizaLogger.error(
                     `Error processing knowledge item ${item}:`,
                     error?.message || error || "Unknown error",
-                );
+                    );
                 continue;
             }
         }
@@ -1244,8 +1252,9 @@ export class AgentRuntime implements IAgentRuntime {
         message: Memory,
         additionalKeys: { [key: string]: unknown } = {},
     ) {
-        const { userId, roomId } = message;
+        const hydrationStart = Date.now();
 
+        const { userId, roomId } = message;
         const conversationLength = this.getConversationLength();
 
         const [actorsData, recentMessagesData, goalsData]: [
@@ -1691,6 +1700,14 @@ Text: ${attachment.text}
                 providers,
             ),
         };
+
+        const hydrationLatency = Date.now() - hydrationStart;
+        instrument.contextLoaded({
+            agentId: this.agentId,
+            characterName: this.character.name,
+            memoryCount: recentMessagesData?.length ?? 0,
+            hydrationLatency, // in milliseconds
+        });
 
         return { ...initialState, ...actionState } as State;
     }
