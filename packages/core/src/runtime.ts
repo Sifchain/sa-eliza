@@ -175,6 +175,8 @@ export class AgentRuntime implements IAgentRuntime {
 
     verifiableInferenceAdapter?: IVerifiableInferenceAdapter;
 
+    sessionId: string;
+
     registerMemoryManager(manager: IMemoryManager): void {
         if (!manager.tableName) {
             throw new Error("Memory manager must have a tableName");
@@ -258,18 +260,25 @@ export class AgentRuntime implements IAgentRuntime {
         logging?: boolean;
         verifiableInferenceAdapter?: IVerifiableInferenceAdapter;
     }) {
-        // use the character id if it exists, otherwise use the agentId if it is passed in, otherwise use the character name
-        this.agentId =
-            opts.character?.id ??
-            opts?.agentId ??
-            stringToUuid(opts.character?.name ?? uuidv4());
+        this.sessionId = uuidv4();
+        this.agentId = opts.character?.id ?? opts?.agentId ?? stringToUuid(opts.character?.name ?? uuidv4());
         this.character = opts.character || defaultCharacter;
+        
+        // Defer session logging to initialize()
+    }
 
+    async initialize() {
+        // First ensure room exists
+        await this.ensureRoomExists(this.agentId);
+        
+        // Now log session with guaranteed room ID
         instrument.sessionStart({
             agentId: this.agentId,
+            sessionId: this.sessionId,
+            roomId: this.agentId,
             characterName: this.character.name,
             environment: process.env.NODE_ENV || 'development',
-            platform: typeof window === 'undefined' ? 'node' : 'browser',
+            platform: typeof window === 'undefined' ? 'node' : 'browser'
         });
 
         elizaLogger.info(`${this.character.name}(${this.agentId}) - Initializing AgentRuntime with options:`, {
