@@ -53,12 +53,31 @@ export class Instrumentation {
    * outputs the event as a JSON string to console, and ends the span.
    */
   public logEvent(event: InstrumentationEvent): void {
+    const { sessionId, agentId, roomId } = event.data;
+    const hasRequiredIds = sessionId || agentId || roomId;
+    
+    if (!hasRequiredIds) {
+      console.warn('⚠️ Skipping event without context IDs:', event.event);
+      return;
+    }
+
     const span = this.tracer.startSpan(event.event, {
       attributes: {
-        'agent.stage': event.stage,
-        'agent.sub_stage': event.subStage,
-        ...event.data,
+        // Core identifiers (only include if present)
+        ...(sessionId && { 'session.id': sessionId }),
+        ...(agentId && { 'agent.id': agentId }),
+        ...(roomId && { 'room.id': roomId }),
+        
+        // Event metadata
+        'event.stage': event.stage,
+        'event.sub_stage': event.subStage,
         'event.timestamp': event.timestamp || Date.now(),
+        
+        // Environment info
+        'environment': process.env.NODE_ENV || 'development',
+        
+        // Additional context
+        ...event.data
       },
     });
 
@@ -72,12 +91,17 @@ export class Instrumentation {
 
   // Concise helper methods for common instrumentation events:
 
-  public sessionStart = (data: Record<string, any>): void =>
+  public sessionStart = (data: { sessionId: string; agentId: string; roomId: string }) =>
     this.logEvent({
       stage: 'Initialization',
       subStage: 'Runtime Boot',
       event: 'session_start',
-      data,
+      data: {
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        environment: process.env.NODE_ENV
+      },
     });
 
   public contextLoaded = (data: Record<string, any>): void =>
@@ -88,16 +112,22 @@ export class Instrumentation {
       data,
     });
 
-  public messageReceived = (data: Record<string, any>): void =>
+  public messageReceived = (data: { 
+    message: string; 
+    sessionId: string; 
+    agentId: string; 
+    roomId: string 
+  }) =>
     this.logEvent({
       stage: 'Observe',
       subStage: 'Input Reception',
       event: 'message_received',
       data: {
-        message_snippet: data.messageSnippet,
-        input_source: data.inputSource,
-        message_type: data.messageType,
-        agent_id: data.agentId,
+        message: data.message,
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        timestamp: Date.now()
       },
     });
 
@@ -131,6 +161,110 @@ export class Instrumentation {
       subStage: 'Memory Formation',
       event: 'memory_persisted',
       data,
+    });
+
+  public agentCreated = (data: { agentId: string; sessionId: string; model: string }) =>
+    this.logEvent({
+      stage: 'Agent',
+      subStage: 'Creation',
+      event: 'agent_created',
+      data: {
+        agentId: data.agentId,
+        sessionId: data.sessionId,
+        model: data.model,
+        timestamp: Date.now()
+      },
+    });
+
+  public roomCreated = (data: { roomId: string; purpose: string; creatorId: string }) =>
+    this.logEvent({
+      stage: 'Environment',
+      subStage: 'Room Setup',
+      event: 'room_created',
+      data: {
+        roomId: data.roomId,
+        creatorId: data.creatorId,
+        purpose: data.purpose,
+        timestamp: Date.now()
+      },
+    });
+
+  public evaluationStarted = (data: { 
+    sessionId: string; 
+    agentId: string; 
+    roomId: string;
+    messageId: string;
+  }) =>
+    this.logEvent({
+      stage: 'Evaluate',
+      subStage: 'Start',
+      event: 'evaluation_started',
+      data: {
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        messageId: data.messageId,
+        timestamp: Date.now()
+      },
+    });
+
+  public evaluationCompleted = (data: { 
+    sessionId: string; 
+    agentId: string; 
+    roomId: string;
+    messageId: string;
+    evaluators: number;
+  }) =>
+    this.logEvent({
+      stage: 'Evaluate',
+      subStage: 'Complete',
+      event: 'evaluation_completed',
+      data: {
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        messageId: data.messageId,
+        evaluatorCount: data.evaluators,
+        timestamp: Date.now()
+      },
+    });
+
+  public messageProcessed = (data: {
+    messageId: string;
+    sessionId: string;
+    agentId: string;
+    processingTime: number;
+  }) =>
+    this.logEvent({
+      stage: 'Process',
+      subStage: 'Complete',
+      event: 'message_processed',
+      data: {
+        messageId: data.messageId,
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        processingTime: data.processingTime,
+        timestamp: Date.now()
+      },
+    });
+
+  public messageError = (data: {
+    messageId: string;
+    error: string;
+    sessionId: string;
+    actionName?: string;
+  }) =>
+    this.logEvent({
+      stage: 'Error',
+      subStage: 'Message',
+      event: 'message_error',
+      data: {
+        messageId: data.messageId,
+        sessionId: data.sessionId,
+        error: data.error,
+        ...(data.actionName && { actionName: data.actionName }),
+        timestamp: Date.now()
+      },
     });
 }
 
