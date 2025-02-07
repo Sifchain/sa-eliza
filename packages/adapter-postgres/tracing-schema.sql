@@ -1,4 +1,8 @@
--- tracing-schema.sql
+-- Drop tables if they already exist (drop events first since it depends on traces)
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS traces;
+
+-- Create the traces table
 CREATE TABLE IF NOT EXISTS traces (
     trace_id VARCHAR(256) NOT NULL,
     span_id VARCHAR(256) NOT NULL,
@@ -22,12 +26,13 @@ CREATE TABLE IF NOT EXISTS traces (
     PRIMARY KEY (trace_id, span_id)
 );
 
+-- Create indexes for traces table
 CREATE INDEX idx_traces_trace_id ON traces (trace_id);
 CREATE INDEX idx_traces_span_name ON traces (span_name);
 CREATE INDEX idx_traces_start_time ON traces (start_time);
 CREATE INDEX idx_traces_room ON traces (room_id);
 
--- Add events table
+-- Create the events table with a composite foreign key referencing traces
 CREATE TABLE IF NOT EXISTS events (
     event_id UUID DEFAULT gen_random_uuid(),
     trace_id VARCHAR(256) NOT NULL,
@@ -41,7 +46,7 @@ CREATE TABLE IF NOT EXISTS events (
     FOREIGN KEY (trace_id, span_id) REFERENCES traces(trace_id, span_id)
 );
 
--- Add indexes for common event queries
+-- Create indexes for events table
 CREATE INDEX idx_events_agent ON events (agent_id);
 CREATE INDEX idx_events_type ON events (event_type);
 CREATE INDEX idx_events_time ON events (event_time);
