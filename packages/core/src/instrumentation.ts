@@ -53,17 +53,24 @@ export class Instrumentation {
    * outputs the event as a JSON string to console, and ends the span.
    */
   public logEvent(event: InstrumentationEvent): void {
+    console.log('Logging event:', {
+      event: event.event,
+      roomId: event.data.roomId,
+      data: event.data
+    });
+
     const span = this.tracer.startSpan(event.event, {
       attributes: {
         'agent.stage': event.stage,
         'agent.sub_stage': event.subStage,
         ...event.data,
         'event.timestamp': event.timestamp || Date.now(),
+        'roomId': event.data.roomId,
       },
     });
 
     try {
-      console.log(JSON.stringify(event));
+      console.log('Span attributes:', span.setAttributes);
       span.setStatus({ code: SpanStatusCode.OK });
     } finally {
       span.end();
@@ -98,6 +105,7 @@ export class Instrumentation {
         input_source: data.inputSource,
         message_type: data.messageType,
         agent_id: data.agentId,
+        roomId: data.roomId,
       },
     });
 
@@ -106,7 +114,10 @@ export class Instrumentation {
       stage: 'Orient',
       subStage: 'Model Preparation',
       event: 'model_selected',
-      data,
+      data: {
+        ...data,
+        roomId: data.roomId,
+      },
     });
 
   public generationStarted = (data: Record<string, any>): void =>
@@ -114,7 +125,10 @@ export class Instrumentation {
       stage: 'Decide',
       subStage: 'Response Generation',
       event: 'generation_started',
-      data,
+      data: {
+        ...data,
+        roomId: data.roomId,
+      },
     });
 
   public actionTriggered = (data: Record<string, any>): void =>
@@ -122,7 +136,10 @@ export class Instrumentation {
       stage: 'Act',
       subStage: 'Action Execution',
       event: 'action_triggered',
-      data,
+      data: {
+        ...data,
+        roomId: data.roomId,
+      },
     });
 
   public memoryPersisted = (data: Record<string, any>): void =>
@@ -130,7 +147,10 @@ export class Instrumentation {
       stage: 'Learn',
       subStage: 'Memory Formation',
       event: 'memory_persisted',
-      data,
+      data: {
+        ...data,
+        roomId: data.roomId,
+      },
     });
 }
 
