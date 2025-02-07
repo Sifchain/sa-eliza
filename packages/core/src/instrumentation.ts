@@ -266,6 +266,55 @@ export class Instrumentation {
         timestamp: Date.now()
       },
     });
+
+  // Add new event types
+  public actionUnresolved = (data: {
+    messageId: string;
+    actionAttempted: string;
+    sessionId: string;
+  }) => this.logEvent({
+    stage: 'Error',
+    subStage: 'Action',
+    event: 'action_unresolved',
+    data: {
+      messageId: data.messageId,
+      actionAttempted: data.actionAttempted,
+      sessionId: data.sessionId,
+      timestamp: Date.now()
+    },
+  });
+  
+  public actionInvalid = (data: {
+    actionName: string;
+    messageId: string;
+    sessionId: string;
+  }) => this.logEvent({
+    stage: 'Error',
+    subStage: 'Action',
+    event: 'action_invalid',
+    data: {
+      actionName: data.actionName,
+      messageId: data.messageId,
+      sessionId: data.sessionId,
+      timestamp: Date.now()
+    },
+  });
+
+  public messageWarning = (data: {
+    messageId: string;
+    warning: string;
+    sessionId: string;
+  }) => this.logEvent({
+    stage: 'Warning',
+    subStage: 'Message',
+    event: 'message_warning',
+    data: {
+      messageId: data.messageId,
+      warning: data.warning,
+      sessionId: data.sessionId,
+      timestamp: Date.now()
+    },
+  });
 }
 
 // Export the singleton instance
