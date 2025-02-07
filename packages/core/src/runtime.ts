@@ -261,24 +261,20 @@ export class AgentRuntime implements IAgentRuntime {
         verifiableInferenceAdapter?: IVerifiableInferenceAdapter;
     }) {
         this.sessionId = uuidv4();
-        this.agentId = opts.character?.id ?? opts?.agentId ?? stringToUuid(opts.character?.name ?? uuidv4());
+        this.agentId =
+            opts.character?.id ??
+            opts?.agentId ??
+            stringToUuid(opts.character?.name ?? uuidv4());
         this.character = opts.character || defaultCharacter;
-        
-        // Defer session logging to initialize()
-    }
 
-    async initialize() {
-        // First ensure room exists
-        await this.ensureRoomExists(this.agentId);
-        
-        // Now log session with guaranteed room ID
+        // Updated session start with required IDs
         instrument.sessionStart({
-            agentId: this.agentId,
             sessionId: this.sessionId,
-            roomId: this.agentId,
+            agentId: this.agentId,
+            roomId: this.agentId, // Or actual room ID if different
             characterName: this.character.name,
             environment: process.env.NODE_ENV || 'development',
-            platform: typeof window === 'undefined' ? 'node' : 'browser'
+            platform: typeof window === 'undefined' ? 'node' : 'browser',
         });
 
         elizaLogger.info(`${this.character.name}(${this.agentId}) - Initializing AgentRuntime with options:`, {
@@ -1007,6 +1003,23 @@ export class AgentRuntime implements IAgentRuntime {
         state?: State,
         callback?: HandlerCallback,
     ): Promise<void> {
+        // Add empty response check
+        if (responses.length === 0) {
+            instrument.messageWarning({
+                messageId: message.id,
+                warning: "empty_responses",
+                sessionId: this.sessionId
+            });
+            return;
+        }
+
+        instrument.messageReceived({
+            message: message.content.text,
+            sessionId: this.sessionId,
+            agentId: this.agentId,
+            roomId: message.roomId,
+        });
+
         for (const response of responses) {
             if (!response.content?.action) {
                 elizaLogger.warn("No action found in the response content.");
@@ -1058,21 +1071,42 @@ export class AgentRuntime implements IAgentRuntime {
                     "No action found for",
                     response.content.action,
                 );
+                instrument.actionUnresolved({
+                    messageId: message.id,
+                    actionAttempted: response.content.action,
+                    sessionId: this.sessionId
+                });
                 continue;
             }
 
             if (!action.handler) {
                 elizaLogger.error(`Action ${action.name} has no handler.`);
+                instrument.actionInvalid({
+                    actionName: action.name,
+                    messageId: message.id,
+                    sessionId: this.sessionId
+                });
                 continue;
             }
 
             try {
-                elizaLogger.info(
-                    `Executing handler for action: ${action.name}`,
-                );
+                elizaLogger.info(`Executing handler for action: ${action.name}`);
                 await action.handler(this, message, state, {}, callback);
+                instrument.actionTriggered({
+                    actionName: action.name,
+                    sessionId: this.sessionId,
+                    agentId: this.agentId,
+                    roomId: message.roomId,
+                    messageId: message.id
+                });
             } catch (error) {
                 elizaLogger.error(error);
+                instrument.messageError({
+                    messageId: message.id,
+                    error: error.message,
+                    sessionId: this.sessionId,
+                    actionName: action.name
+                });
             }
         }
     }
@@ -1091,6 +1125,14 @@ export class AgentRuntime implements IAgentRuntime {
         didRespond?: boolean,
         callback?: HandlerCallback,
     ) {
+        // Add evaluation instrumentation
+        instrument.evaluationStarted({
+            sessionId: this.sessionId,
+            agentId: this.agentId,
+            roomId: message.roomId,
+            messageId: message.id
+        });
+
         const evaluatorPromises = this.evaluators.map(
             async (evaluator: Evaluator) => {
                 elizaLogger.log("Evaluating", evaluator.name);
@@ -1146,6 +1188,14 @@ export class AgentRuntime implements IAgentRuntime {
             if (evaluator.handler)
                 await evaluator.handler(this, message, state, {}, callback);
         }
+
+        instrument.evaluationCompleted({
+            sessionId: this.sessionId,
+            agentId: this.agentId,
+            roomId: message.roomId,
+            messageId: message.id,
+            evaluators: evaluators?.length || 0
+        });
 
         return evaluators;
     }
@@ -1248,7 +1298,11 @@ export class AgentRuntime implements IAgentRuntime {
         const room = await this.databaseAdapter.getRoom(roomId);
         if (!room) {
             await this.databaseAdapter.createRoom(roomId);
-            elizaLogger.log(`Room ${roomId} created successfully.`);
+            instrument.roomCreated({
+                roomId,
+                purpose: 'agent_session',
+                creatorId: this.agentId,
+            });
         }
     }
 
@@ -1713,9 +1767,11 @@ Text: ${attachment.text}
         const hydrationLatency = Date.now() - hydrationStart;
         instrument.contextLoaded({
             agentId: this.agentId,
+            sessionId: this.sessionId,
+            roomId: message.roomId,
             characterName: this.character.name,
             memoryCount: recentMessagesData?.length ?? 0,
-            hydrationLatency, // in milliseconds
+            hydrationLatency,
         });
 
         return { ...initialState, ...actionState } as State;

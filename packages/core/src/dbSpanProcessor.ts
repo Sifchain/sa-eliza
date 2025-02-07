@@ -78,7 +78,7 @@ export class DBSpanProcessor implements SpanProcessor {
   onStart(span: ReadableSpan): void {
     console.log('🟢 Span started:', span.name);
 
-     const spanContext = span.spanContext();
+    const spanContext = span.spanContext();
     console.log('Span Context:', spanContext);
     console.log('Span Whole:', span);
   }
@@ -96,6 +96,12 @@ export class DBSpanProcessor implements SpanProcessor {
     const attributes = span.attributes || {};
     const resource = span.resource?.attributes || {};
 
+    const safeTrim = (value: unknown): string | null => {
+      if (typeof value !== 'string') return null;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    };
+
     const spanData = {
       trace_id: spanContext.traceId,
       span_id: spanContext.spanId,
@@ -111,13 +117,19 @@ export class DBSpanProcessor implements SpanProcessor {
       events: span.events || [],
       links: span.links || [],
       resource: resource,
-
-      // Ensure these fields are not null
-      agent_id: attributes.agentId || null,
-      session_id: attributes["session_id"] || null,
-      environment: attributes["environment"] || resource["telemetry.sdk.language"] || null,
-      room_id: attributes["room_id"] || null,
+      agent_id: safeTrim(attributes.agentId),
+      session_id: safeTrim(attributes["session.id"]),
+      environment: safeTrim(attributes["environment"]) || 
+                   safeTrim(resource["deployment.environment"]) ||
+                   'unknown',
+      room_id: safeTrim(attributes["room.id"]),
     };
+
+    // Add validation
+    if (!spanData.agent_id && !spanData.session_id && !spanData.room_id) {
+      console.log('⚠️ Skipping span with no context IDs:', span.name);
+      return;
+    }
 
     console.log('🟡 Span ended, inserting:', span.name, spanData);
 

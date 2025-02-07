@@ -91,7 +91,14 @@ export class Instrumentation {
 
   // Concise helper methods for common instrumentation events:
 
-  public sessionStart = (data: { sessionId: string; agentId: string; roomId: string }) =>
+  public sessionStart = (data: { 
+    sessionId: string; 
+    agentId: string; 
+    roomId: string; 
+    characterName: string; 
+    environment: string; 
+    platform: string; 
+  }) =>
     this.logEvent({
       stage: 'Initialization',
       subStage: 'Runtime Boot',
@@ -100,7 +107,9 @@ export class Instrumentation {
         sessionId: data.sessionId,
         agentId: data.agentId,
         roomId: data.roomId,
-        environment: process.env.NODE_ENV
+        characterName: data.characterName,
+        environment: data.environment,
+        platform: data.platform,
       },
     });
 
