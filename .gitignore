@@ -16,6 +16,11 @@ node-compile-cache
 .zed
 .DS_Store
 
+# Build directories
+/dist
+/build
+/out
+
 dist/
 # Allow models directory but ignore model files
 models/*.gguf

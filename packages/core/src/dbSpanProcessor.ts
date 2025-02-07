@@ -1,5 +1,5 @@
-// Create a connection pool for local testing using your provided credentials.
-import { Pool } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
 import type { Span } from '@opentelemetry/api';
 import { SpanProcessor, ReadableSpan } from '@opentelemetry/sdk-trace-base';
 
@@ -48,7 +48,7 @@ async function insertTrace(spanData: any): Promise<void> {
     spanData.trace_id,
     spanData.span_id,
     spanData.parent_span_id,
-    null, // trace_state (or set it as needed)
+    spanData.trace_state || null,
     spanData.span_name,
     spanData.span_kind,
     spanData.start_time,
@@ -56,63 +56,75 @@ async function insertTrace(spanData: any): Promise<void> {
     spanData.duration_ms,
     spanData.status_code,
     spanData.status_message,
-    spanData.attributes,
-    spanData.events,
-    null, // links (or set it as needed)
-    spanData.resource,
-    null, // agent_id (if you ever want to supply it)
-    null, // session_id
-    null, // environment
-    null, // room_id
+    JSON.stringify(spanData.attributes) || '{}',
+    JSON.stringify(spanData.events) || '[]',
+    JSON.stringify(spanData.links) || '[]',
+    JSON.stringify(spanData.resource) || '{}',
+    spanData.agent_id || null,
+    spanData.session_id || null,
+    spanData.environment || null,
+    spanData.room_id || null,
   ];
 
   try {
     await pool.query(query, values);
+    console.log('✅ Span inserted successfully:', spanData.span_name);
   } catch (error) {
-    console.error('Error inserting span into DB', error);
+    console.error('❌ Error inserting span into DB', error);
   }
 }
 
 export class DBSpanProcessor implements SpanProcessor {
   onStart(span: ReadableSpan): void {
-    // No action needed at span start
-    console.log('Span started:', span.name);
+    console.log('🟢 Span started:', span.name);
+
+     const spanContext = span.spanContext();
+    console.log('Span Context:', spanContext);
+    console.log('Span Whole:', span);
   }
 
   async onEnd(span: ReadableSpan): Promise<void> {
     const spanContext = span.spanContext();
-
+    console.log('Span Context:', spanContext);
+    console.log('Span Whole:', span);
     // Convert [seconds, nanoseconds] to milliseconds.
     const startTimeMs = span.startTime[0] * 1000 + span.startTime[1] / 1e6;
     const endTimeMs = span.endTime[0] * 1000 + span.endTime[1] / 1e6;
     const durationMs = Math.floor(endTimeMs - startTimeMs);
+
+    // Extract fields from attributes
+    const attributes = span.attributes || {};
+    const resource = span.resource?.attributes || {};
 
     const spanData = {
       trace_id: spanContext.traceId,
       span_id: spanContext.spanId,
       parent_span_id: span.parentSpanId || null,
       span_name: span.name,
-      // Note: Convert the enum value to a string if needed for your DB schema.
       span_kind: span.kind,
       start_time: new Date(startTimeMs).toISOString(),
       end_time: new Date(endTimeMs).toISOString(),
       duration_ms: durationMs,
       status_code: span.status.code,
-      status_message: span.status.message,
-      // Save attributes and events as JSON strings.
-      attributes: JSON.stringify(span.attributes),
-      events: JSON.stringify(span.events || []),
-      // If you have resource attributes you want to save:
-      resource: JSON.stringify(span.resource?.attributes || {}),
+      status_message: span.status.message || null,
+      attributes: attributes,
+      events: span.events || [],
+      links: span.links || [],
+      resource: resource,
+
+      // Ensure these fields are not null
+      agent_id: attributes.agentId || null,
+      session_id: attributes["session_id"] || null,
+      environment: attributes["environment"] || resource["telemetry.sdk.language"] || null,
+      room_id: attributes["room_id"] || null,
     };
 
-    console.log('Span ended, attempting to insert:', span.name, spanData);
+    console.log('🟡 Span ended, inserting:', span.name, spanData);
 
     try {
       await insertTrace(spanData);
-      console.log('Span inserted successfully:', span.name);
     } catch (error) {
-      console.error('Error inserting span into DB', error);
+      console.error('❌ Error inserting span into DB', error);
     }
   }
 
@@ -123,4 +135,4 @@ export class DBSpanProcessor implements SpanProcessor {
   forceFlush(): Promise<void> {
     return Promise.resolve();
   }
-} 
+}

@@ -374,7 +374,7 @@ export class GitHubClient extends EventEmitter {
             state.branch as string,
             this.apiToken,
             issuesLimit,
-            true,
+            true, 
         );
         await savePullRequestsToMemory(
             userId,
