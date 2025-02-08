@@ -32,6 +32,7 @@ import { getPriceInquiry } from "../../plugin-0x/src/actions/getIndicativePrice"
 import { getQuoteObj } from "../../plugin-0x/src/actions/getQuote";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
+import axios from 'axios';
 
 export type WalletType =
     | "short_term_trading"
@@ -52,6 +53,7 @@ export class CoinbaseClient implements Client {
         this.runtime.providers.push(pnlProvider);
         this.runtime.providers.push(balanceProvider);
         this.runtime.providers.push(addressProvider);
+        this.runtime.providers.push(tradingSignalBackTestProvider)
         this.server = express();
         this.port = Number(runtime.getSetting("COINBASE_WEBHOOK_PORT")) || 3001;
         this.wallets = [];
@@ -568,6 +570,102 @@ export const balanceProvider: Provider = {
 export const addressProvider: Provider = {
     get: async (runtime: IAgentRuntime, _message: Memory) => {
         return `Address: ${runtime.getSetting("WALLET_PUBLIC_KEY")}`;
+    },
+};
+
+export const tradingSignalBackTestProvider: Provider = {
+    get: async (runtime: IAgentRuntime, _message: Memory) => {
+        const timeFrames = {
+            '1D': {
+                netProfit: 1000,
+                totalTradesClosed: 50,
+                percentageProfitable: 60,
+                profitFactor: 1.5,
+                maxDrawdown: 10,
+                averageTrade: 20,
+                numberOfBarsPerTrade: 5,
+                winRate: 55,
+                timePeriod: '1D'
+            },
+            '5D': {
+                netProfit: 2000,
+                totalTradesClosed: 45,
+                percentageProfitable: 65,
+                profitFactor: 1.6,
+                maxDrawdown: 12,
+                averageTrade: 25,
+                numberOfBarsPerTrade: 6,
+                winRate: 60,
+                timePeriod: '5D'
+            },
+            '1W': {
+                netProfit: 3000,
+                totalTradesClosed: 40,
+                percentageProfitable: 70,
+                profitFactor: 1.7,
+                maxDrawdown: 15,
+                averageTrade: 30,
+                numberOfBarsPerTrade: 7,
+                winRate: 65,
+                timePeriod: '1W'
+            },
+            '1M': {
+                netProfit: 4000,
+                totalTradesClosed: 35,
+                percentageProfitable: 75,
+                profitFactor: 1.8,
+                maxDrawdown: 18,
+                averageTrade: 35,
+                numberOfBarsPerTrade: 8,
+                winRate: 70,
+                timePeriod: '1M'
+            },
+            '3M': {
+                netProfit: 5000,
+                totalTradesClosed: 30,
+                percentageProfitable: 80,
+                profitFactor: 1.9,
+                maxDrawdown: 20,
+                averageTrade: 40,
+                numberOfBarsPerTrade: 9,
+                winRate: 75,
+                timePeriod: '3M'
+            },
+            '6M': {
+                netProfit: 6000,
+                totalTradesClosed: 25,
+                percentageProfitable: 85,
+                profitFactor: 2.0,
+                maxDrawdown: 22,
+                averageTrade: 45,
+                numberOfBarsPerTrade: 10,
+                winRate: 80,
+                timePeriod: '6M'
+            },
+            'YTD': {
+                netProfit: 7000,
+                totalTradesClosed: 20,
+                percentageProfitable: 90,
+                profitFactor: 2.1,
+                maxDrawdown: 25,
+                averageTrade: 50,
+                numberOfBarsPerTrade: 11,
+                winRate: 85,
+                timePeriod: 'YTD'
+            }
+        };
+
+        const backtestResults = Object.entries(timeFrames).map(([timeFrame, data]) => {
+            return `
+            ETH ${timeFrame}: Net Profit: ${data.netProfit}, Total Trades Closed: ${data.totalTradesClosed}, Percentage Profitable: ${data.percentageProfitable}, Profit Factor: ${data.profitFactor}, Max Drawdown: ${data.maxDrawdown}, Average Trade: ${data.averageTrade}, Number of Bars per Trade: ${data.numberOfBarsPerTrade}, Win Rate: ${data.winRate}, Time Period: ${data.timePeriod}
+            `;
+        }).join('\n');
+
+        return `
+        BACKTEST RESULTS:
+        TICKER: ETH DIRECTION: LONG 
+        ${backtestResults}
+        `;
     },
 };
 
