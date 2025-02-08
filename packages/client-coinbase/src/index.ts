@@ -322,7 +322,7 @@ Generate only the tweet text, no commentary or markdown.`;
             pnl,
             formattedTimestamp,
             state,
-            '0xf83cbdf0a60f41d2efa4f11f94279a2bd2f1c4e8b01f852f55cbf983b3bc534f'
+            txHash
         );
     }
 
