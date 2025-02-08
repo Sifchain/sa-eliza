@@ -529,3 +529,30 @@ export const isGenerateCodeFileChangesContent = (
     elizaLogger.error("Invalid content: ", object);
     return false;
 };
+
+// Schema for a single orchestrated action
+export const OrchestratedGithubActionSchema = z.object({
+    githubAction: z.string(),
+    user: z.string(),
+    system: z.string(),
+});
+
+// Type for a single orchestrated action
+export interface OrchestratedGithubAction {
+    githubAction: string;
+    user: string;
+    system: string;
+}
+
+// Schema for the orchestration response
+export const OrchestrationSchema = z.object({
+    githubActions: z.array(OrchestratedGithubActionSchema),
+});
+
+export interface OrchestrationSchema {
+    githubActions: OrchestratedGithubAction[];
+}
+
+export const isOrchestrationSchema = (object: any): object is OrchestrationSchema => {
+    return OrchestrationSchema.safeParse(object).success;
+};

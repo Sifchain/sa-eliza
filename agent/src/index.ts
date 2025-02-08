@@ -166,6 +166,7 @@ import {
     githubIdeationPlugin,
     githubInteractWithPRPlugin,
     githubInteractWithIssuePlugin,
+    githubOrchestratePlugin,
 } from "@elizaos/plugin-github";
 import { GitHubClientInterface } from "@elizaos/client-github";
 import { CoinbaseClientInterface } from "@elizaos/client-coinbase";
@@ -1333,6 +1334,7 @@ export async function createAgent(
                       githubIdeationPlugin,
                       githubInteractWithIssuePlugin,
                       githubInteractWithPRPlugin,
+                      githubOrchestratePlugin,
                   ]
                 : []),
         ]
