@@ -464,5 +464,5 @@ export const coinbaseMassPaymentsPlugin: Plugin = {
     description:
         "Processes mass payouts using Coinbase SDK and logs all transactions (success and failure) to a CSV file. Provides dynamic transaction data through a provider.",
     actions: [sendMassPayoutAction],
-    providers: [massPayoutProvider],
+    providers: [],
 };

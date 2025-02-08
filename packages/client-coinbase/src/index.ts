@@ -221,10 +221,8 @@ Trade specifics:
 - Amount traded: $${amountInCurrency.toFixed(2)}
 - Price at trade: $${Number(event.price).toFixed(2)}
 - Timestamp: ${formattedTimestamp}
-- Txn: ${blockExplorerBaseTxUrl(hash)}
-- PNL: ${pnl}
 Guidelines:
-1. Keep it under 180 characters
+1. Keep it under 80 characters
 2. Include 1-2 relevant emojis
 3. Avoid hashtags
 4. Use varied wording for freshness
@@ -235,18 +233,18 @@ Guidelines:
 Sample buy tweets:
 "📈 Added $${amountInCurrency.toFixed(2)} of ${event.ticker} at $${Number(
                 event.price
-            ).toFixed(2)}. Overall PNL: ${pnl} ${blockExplorerBaseTxUrl(hash)}"
+            ).toFixed(2)}."
 "🎯 Strategic ${event.ticker} buy: $${amountInCurrency.toFixed(2)} at $${Number(
                 event.price
-            ).toFixed(2)}. Overall PNL: ${pnl} ${blockExplorerBaseTxUrl(hash)}"
+            ).toFixed(2)}."
 
 Sample sell tweets:
 "💫 Sold ${event.ticker}: $${amountInCurrency.toFixed(2)} at $${Number(
                 event.price
-            ).toFixed(2)}. Overall PNL: ${pnl} ${blockExplorerBaseTxUrl(hash)}"
+            ).toFixed(2)}."
 "📊 Sold $${amountInCurrency.toFixed(2)} of ${event.ticker} at $${Number(
                 event.price
-            ).toFixed(2)}. Overall PNL: ${pnl} ${blockExplorerBaseTxUrl(hash)}"
+            ).toFixed(2)}."
 
 Generate only the tweet text, no commentary or markdown.`;
             const context = composeContext({
@@ -261,9 +259,10 @@ Generate only the tweet text, no commentary or markdown.`;
             });
 
             const trimmedContent = tweetContent.trim();
-            return trimmedContent.length > 180
-                ? trimmedContent.substring(0, 177) + "..."
-                : trimmedContent;
+            const finalContent = `${trimmedContent} PNL: ${pnl} ${blockExplorerBaseTxUrl(hash)}`;
+            return finalContent.length > 180
+                ? finalContent.substring(0, 177) + "..."
+                : finalContent;
         } catch (error) {
             elizaLogger.error("Error generating tweet content:", error);
             const amount =
@@ -288,21 +287,24 @@ Generate only the tweet text, no commentary or markdown.`;
         // Get trading amount from settings
         const amount =
             Number(this.runtime.getSetting("COINBASE_TRADING_AMOUNT")) ?? 1;
-        elizaLogger.info("amount ", amount);
 
         // Create and store memory of trade
         const memory = this.createTradeMemory(event, amount, roomId);
-        elizaLogger.info("memory ", memory);
         await this.runtime.messageManager.createMemory(memory);
 
         // Generate state and format timestamp
         const state = await this.runtime.composeState(memory);
         const formattedTimestamp = this.getFormattedTimestamp();
-        elizaLogger.info("formattedTimestamp ", formattedTimestamp);
 
         // Execute token swap
         const buy = event.event.toUpperCase() === "BUY";
         const amountInCurrency = buy ? amount : amount / Number(event.price);
+        const pnl = await calculateOverallPNL(
+            this.runtime,
+            this.runtime.getSetting("WALLET_PUBLIC_KEY") as `0x${string}`,
+            1000
+        );
+        elizaLogger.info("pnl ", pnl);
         const txHash = await this.executeTokenSwap(
             event,
             amountInCurrency,
@@ -314,13 +316,6 @@ Generate only the tweet text, no commentary or markdown.`;
         }
         elizaLogger.info("txHash ", txHash);
 
-        const pnl = await calculateOverallPNL(
-            this.runtime,
-            this.runtime.getSetting("WALLET_PUBLIC_KEY") as `0x${string}`,
-            1000
-        );
-        elizaLogger.info("pnl ", pnl);
-
         // Generate and post tweet
         await this.handleTweetPosting(
             event,
@@ -328,7 +323,7 @@ Generate only the tweet text, no commentary or markdown.`;
             pnl,
             formattedTimestamp,
             state,
-            txHash
+            '0xf83cbdf0a60f41d2efa4f11f94279a2bd2f1c4e8b01f852f55cbf983b3bc534f'
         );
     }
 
@@ -518,8 +513,9 @@ export async function getTotalBalanceUSD(
     const ethBalanceBaseUnits = await client.getBalance({
         address: publicKey,
     });
+    elizaLogger.info(`ethBalanceBaseUnits ${ethBalanceBaseUnits}`);
     const ethBalance = Number(ethBalanceBaseUnits) / 1e18;
-    elizaLogger.info(`ethBalance ${ethBalance}`);
+    elizaLogger.info(`ethBalance ${ethBalance}`);   
     const priceInquiry = await getPriceInquiry(
         runtime,
         "ETH",
@@ -528,11 +524,8 @@ export async function getTotalBalanceUSD(
         "base"
     );
     // get latest quote
-    elizaLogger.info("Getting quote for swap", JSON.stringify(priceInquiry));
     const quote = await getQuoteObj(runtime, priceInquiry, publicKey);
-    elizaLogger.info("quote ", JSON.stringify(quote));
     const ethBalanceUSD = Number(quote.buyAmount) / 1e6;
-    elizaLogger.info(`ethBalanceUSD ${ethBalanceUSD}`);
     const usdcBalanceBaseUnits = await readContractWrapper(
         runtime,
         "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
@@ -544,7 +537,6 @@ export async function getTotalBalanceUSD(
         erc20Abi
     );
     const usdcBalance = Number(usdcBalanceBaseUnits) / 1e6;
-    elizaLogger.info(`usdcBalance ${usdcBalance}`);
     return ethBalanceUSD + usdcBalance;
 }
 

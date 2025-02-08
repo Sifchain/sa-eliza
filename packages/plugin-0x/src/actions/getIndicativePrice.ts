@@ -331,15 +331,11 @@ export const getPriceInquiry = async (
     buyTokenSymbol: string,
     chain: string
 ): Promise<PriceInquiry | null> => {
+    if (sellAmount < 0.000000000000000001) {
+        elizaLogger.error(`sellAmount ${sellAmount} is too small`);
+        return null;
+    }
     try {
-        // Log input parameters
-        elizaLogger.info('Getting price inquiry', {
-            sellTokenSymbol,
-            sellAmount, 
-            buyTokenSymbol,
-            chain
-        });
-
         // Hardcoded chainId for Base network
         const chainId = 8453;
         
@@ -406,7 +402,6 @@ export const getPriceInquiry = async (
 const getPrice = async (zxClient: any, params: any): Promise<GetIndicativePriceResponse | null> => {
     try {
         const price = await zxClient.swap.allowanceHolder.getPrice.query(params) as GetIndicativePriceResponse;
-        elizaLogger.info('Received price quote', price);
         return price;
     } catch (error) {
         elizaLogger.error("Error getting price:", error.message);
