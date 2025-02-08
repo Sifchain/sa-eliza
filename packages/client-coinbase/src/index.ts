@@ -61,7 +61,6 @@ export class CoinbaseClient implements Client {
     async initialize(): Promise<void> {
         elizaLogger.info("Initializing Coinbase client");
         try {
-            elizaLogger.info("Coinbase client initialized successfully");
             // await this.initializeWallets();
             elizaLogger.info("Wallets initialized successfully");
             await this.setupWebhookEndpoint();
@@ -517,6 +516,10 @@ export async function getTotalBalanceUSD(
         "USDC",
         "base"
     );
+    if (priceInquiry == null) {
+        elizaLogger.error("priceInquiry is null");
+        return 0;
+    }
     // get latest quote
     const quote = await getQuoteObj(runtime, priceInquiry, publicKey);
     const ethBalanceUSD = Number(quote.buyAmount) / 1e6;
