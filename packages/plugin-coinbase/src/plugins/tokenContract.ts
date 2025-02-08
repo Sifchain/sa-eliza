@@ -578,6 +578,5 @@ export const readContractWrapper = async (runtime: IAgentRuntime, contractAddres
         abi,
     });
     const serializedResult = serializeBigInt(result);
-    elizaLogger.info("Contract read result:", serializedResult);
     return serializedResult;
 };

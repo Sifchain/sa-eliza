@@ -480,22 +480,16 @@ export const calculateOverallPNL = async (
     publicKey: `0x${string}`,
     initialBalance: number
 ): Promise<string> => {
-    elizaLogger.info(`initialBalance ${initialBalance}`);
     const totalBalanceUSD = await getTotalBalanceUSD(runtime, publicKey);
-    elizaLogger.info(`totalBalanceUSD ${totalBalanceUSD}`);
     const pnlUSD = totalBalanceUSD - initialBalance;
-    elizaLogger.info(`pnlUSD ${pnlUSD}`);
     const absoluteValuePNL = Math.abs(pnlUSD);
-    elizaLogger.info(`absoluteValuePNL ${absoluteValuePNL}`);
     const formattedPNL = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(absoluteValuePNL);
-    elizaLogger.info("formattedPNL ", formattedPNL);
     const formattedPNLUSD = `${pnlUSD < 0 ? "-" : ""}${formattedPNL}`;
-    elizaLogger.info("formattedPNLUSD ", formattedPNLUSD);
     return formattedPNLUSD;
 };
 
