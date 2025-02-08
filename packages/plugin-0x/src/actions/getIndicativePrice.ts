@@ -331,15 +331,11 @@ export const getPriceInquiry = async (
     buyTokenSymbol: string,
     chain: string
 ): Promise<PriceInquiry | null> => {
+    if (sellAmount < 0.000000000000000001) {
+        elizaLogger.error(`sellAmount ${sellAmount} is too small`);
+        return null;
+    }
     try {
-        // Log input parameters
-        elizaLogger.info('Getting price inquiry', {
-            sellTokenSymbol,
-            sellAmount, 
-            buyTokenSymbol,
-            chain
-        });
-
         // Hardcoded chainId for Base network
         const chainId = 8453;
         
@@ -381,7 +377,7 @@ export const getPriceInquiry = async (
         if (!price) return null;
 
         // Handle token approvals
-        const approved = await handleTokenApprovals(client, price, sellTokenMetadata.address);
+        const approved = await handleTokenApprovals(client, price, sellTokenMetadata.address as `0x${string}`);
         if (!approved) return null;
 
         // Format response
@@ -406,7 +402,6 @@ export const getPriceInquiry = async (
 const getPrice = async (zxClient: any, params: any): Promise<GetIndicativePriceResponse | null> => {
     try {
         const price = await zxClient.swap.allowanceHolder.getPrice.query(params) as GetIndicativePriceResponse;
-        elizaLogger.info('Received price quote', price);
         return price;
     } catch (error) {
         elizaLogger.error("Error getting price:", error.message);
@@ -414,7 +409,7 @@ const getPrice = async (zxClient: any, params: any): Promise<GetIndicativePriceR
     }
 };
 
-const handleTokenApprovals = async (client: any, price: GetIndicativePriceResponse, sellTokenAddress: string = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'): Promise<boolean> => {
+const handleTokenApprovals = async (client: any, price: GetIndicativePriceResponse, sellTokenAddress: `0x${string}` = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'): Promise<boolean> => {
     try {
         const sellTokenContract = getContract({
             address: sellTokenAddress,

@@ -569,13 +569,6 @@ export const readContractWrapper = async (runtime: IAgentRuntime, contractAddres
             runtime.getSetting("COINBASE_PRIVATE_KEY") ??
             process.env.COINBASE_PRIVATE_KEY,
     });
-    elizaLogger.info("Reading contract:", {
-        contractAddress,
-        method,
-        args,
-        networkId,
-        abi,
-    });
 
     const result = await readContract({
         networkId,
@@ -585,6 +578,5 @@ export const readContractWrapper = async (runtime: IAgentRuntime, contractAddres
         abi,
     });
     const serializedResult = serializeBigInt(result);
-    elizaLogger.info("Contract read result:", serializedResult);
     return serializedResult;
 };

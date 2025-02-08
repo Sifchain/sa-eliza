@@ -469,5 +469,5 @@ export const advancedTradePlugin: Plugin = {
     name: "advancedTradePlugin",
     description: "Enables advanced trading using Coinbase Advanced Trading API",
     actions: [executeAdvancedTradeAction],
-    providers: [tradeProvider],
+    providers: [],
 };
