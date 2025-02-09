@@ -547,12 +547,12 @@ export async function getTotalBalanceUSD(
         erc20Abi
     );
     elizaLogger.info(`cbbtcBalanceBaseUnits ${cbbtcBalanceBaseUnits}`);
-    const cbbtcBalance = BigInt(cbbtcBalanceBaseUnits) / 1000000000000000000n;
-    elizaLogger.info(`cbbtcBalance ${Number(cbbtcBalance)}`);
+    const cbbtcBalance = Number(cbbtcBalanceBaseUnits) / 1e18;
+    elizaLogger.info(`cbbtcBalance ${cbbtcBalance}`);
     const cbbtcPriceInquiry = await getPriceInquiry(
         runtime,
         "CBBTC",
-        Number(cbbtcBalance),
+        cbbtcBalance,
         "USDC",
         "base"
     );
@@ -562,7 +562,10 @@ export async function getTotalBalanceUSD(
     }
     const cbbtcQuote = await getQuoteObj(runtime, cbbtcPriceInquiry, publicKey);
     const cbbtcBalanceUSD = Number(cbbtcQuote.buyAmount) / 1000000;
-    return ethBalanceUSD + Number(usdcBalance) + cbbtcBalanceUSD;
+    elizaLogger.info(`ethBalanceUSD ${ethBalanceUSD}`);
+    elizaLogger.info(`usdcBalance ${usdcBalance}`);
+    elizaLogger.info(`cbbtcBalanceUSD ${cbbtcBalanceUSD}`);
+    return ethBalanceUSD + usdcBalance + cbbtcBalanceUSD;
 }
 
 export const pnlProvider: Provider = {
