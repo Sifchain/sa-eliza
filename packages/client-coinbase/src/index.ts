@@ -28,11 +28,12 @@ import {
     type CoinbaseWallet,
 } from "@elizaos/plugin-coinbase";
 import { tokenSwap } from "@elizaos/plugin-0x";
-import { createWalletClient, erc20Abi, http, publicActions } from "viem";
+import { createWalletClient, erc20Abi, http, publicActions, formatUnits } from "viem";
 import { getPriceInquiry } from "../../plugin-0x/src/actions/getIndicativePrice";
 import { getQuoteObj } from "../../plugin-0x/src/actions/getQuote";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
+import { TOKENS } from "../../plugin-0x/src/utils";
 
 export type WalletType =
     | "short_term_trading"
@@ -521,12 +522,11 @@ export async function getTotalBalanceUSD(
         elizaLogger.error("priceInquiry is null");
         return 0;
     }
-    // get latest quote
     const quote = await getQuoteObj(runtime, priceInquiry, publicKey);
     const ethBalanceUSD = Number(quote.buyAmount) / 1e6;
     const usdcBalanceBaseUnits = await readContractWrapper(
         runtime,
-        "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        TOKENS.USDC.address as `0x${string}`,
         "balanceOf",
         {
             account: publicKey,
@@ -538,7 +538,7 @@ export async function getTotalBalanceUSD(
     // get cbbtc balance 
     const cbbtcBalanceBaseUnits = await readContractWrapper(
         runtime,
-        "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+        TOKENS.cbBTC.address as `0x${string}`,
         "balanceOf",
         {
             account: publicKey,
@@ -546,11 +546,13 @@ export async function getTotalBalanceUSD(
         "base-mainnet",
         erc20Abi
     );
-    const cbbtcBalance = Number(cbbtcBalanceBaseUnits) / 1e18;
+    elizaLogger.info(`cbbtcBalanceBaseUnits ${cbbtcBalanceBaseUnits}`);
+    const cbbtcBalance = BigInt(cbbtcBalanceBaseUnits) / 1000000000000000000n;
+    elizaLogger.info(`cbbtcBalance ${Number(cbbtcBalance)}`);
     const cbbtcPriceInquiry = await getPriceInquiry(
         runtime,
         "CBBTC",
-        cbbtcBalance,
+        Number(cbbtcBalance),
         "USDC",
         "base"
     );
@@ -558,10 +560,9 @@ export async function getTotalBalanceUSD(
         elizaLogger.error("cbbtcPriceInquiry is null");
         return 0;
     }
-    // get latest quote
     const cbbtcQuote = await getQuoteObj(runtime, cbbtcPriceInquiry, publicKey);
-    const cbbtcBalanceUSD = Number(cbbtcQuote.buyAmount) / 1e6;
-    return ethBalanceUSD + usdcBalance + cbbtcBalanceUSD;
+    const cbbtcBalanceUSD = Number(cbbtcQuote.buyAmount) / 1000000;
+    return ethBalanceUSD + Number(usdcBalance) + cbbtcBalanceUSD;
 }
 
 export const pnlProvider: Provider = {

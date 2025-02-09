@@ -69,7 +69,7 @@ export const TOKENS = {
         name: "Coinbase Wrapped BTC",
         symbol: "cbBTC",
         decimals: 8,
-        address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+        address: "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
         type: "ERC20",
         logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/info/logo.png"
     },

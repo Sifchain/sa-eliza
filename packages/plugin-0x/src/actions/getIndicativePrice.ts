@@ -331,7 +331,7 @@ export const getPriceInquiry = async (
     buyTokenSymbol: string,
     chain: string
 ): Promise<PriceInquiry | null> => {
-    if (sellAmount < 0.000000000000000001) {
+    if (sellAmount < 0.0000000000000000001) {
         elizaLogger.error(`sellAmount ${sellAmount} is too small`);
         return null;
     }
