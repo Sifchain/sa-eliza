@@ -18,4 +18,4 @@ export const blockExplorerBaseTxUrl = (txHash: string) =>
 export const blockExplorerBaseAddressUrl = (address: string) =>
     `https://basescan.org/address/${address}`;
 
-export const supportedTickers = ["ETH", "WETH"];
+export const supportedTickers = ["ETH", "WETH", "BTC", "WBTC", "CBBTC"];

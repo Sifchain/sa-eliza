@@ -18,6 +18,7 @@ import express from "express";
 import {
     blockExplorerBaseAddressUrl,
     blockExplorerBaseTxUrl,
+    supportedTickers,
     WebhookEvent,
 } from "./types";
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
@@ -275,7 +276,7 @@ Generate only the tweet text, no commentary or markdown.`;
 
     private async handleWebhookEvent(event: WebhookEvent) {
         // for now just support ETH
-        if (event.ticker !== "ETH" && event.ticker !== "WETH") {
+        if (!supportedTickers.includes(event.ticker)) {
             elizaLogger.info("Unsupported ticker:", event.ticker);
             return;
         }
@@ -534,7 +535,33 @@ export async function getTotalBalanceUSD(
         erc20Abi
     );
     const usdcBalance = Number(usdcBalanceBaseUnits) / 1e6;
-    return ethBalanceUSD + usdcBalance;
+    // get cbbtc balance 
+    const cbbtcBalanceBaseUnits = await readContractWrapper(
+        runtime,
+        "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+        "balanceOf",
+        {
+            account: publicKey,
+        },
+        "base-mainnet",
+        erc20Abi
+    );
+    const cbbtcBalance = Number(cbbtcBalanceBaseUnits) / 1e18;
+    const cbbtcPriceInquiry = await getPriceInquiry(
+        runtime,
+        "CBBTC",
+        cbbtcBalance,
+        "USDC",
+        "base"
+    );
+    if (cbbtcPriceInquiry == null) {
+        elizaLogger.error("cbbtcPriceInquiry is null");
+        return 0;
+    }
+    // get latest quote
+    const cbbtcQuote = await getQuoteObj(runtime, cbbtcPriceInquiry, publicKey);
+    const cbbtcBalanceUSD = Number(cbbtcQuote.buyAmount) / 1e6;
+    return ethBalanceUSD + usdcBalance + cbbtcBalanceUSD;
 }
 
 export const pnlProvider: Provider = {
