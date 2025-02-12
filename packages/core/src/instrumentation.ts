@@ -71,13 +71,14 @@ export class Instrumentation {
         console.error('‼️ Missing raw_context in llm_context_pre');
         return;
       }
-      if (event.data.raw_context.trim() === '') {
-        console.error('‼️ Empty raw_context in llm_context_pre');
-      }
+      event.data.raw_context = event.data.raw_context;
     }
-    if (event.event === 'llm_response_post' && !event.data.raw_response) {
-      console.error('‼️ Missing raw_response in llm_response_post');
-      return;
+    if (event.event === 'llm_response_post') {
+      if (!event.data.raw_response) {
+        console.error('‼️ Missing raw_response in llm_response_post');
+        return;
+      }
+      event.data.raw_response = event.data.raw_response;
     }
 
     const span = this.tracer.startSpan(event.event, {
@@ -97,8 +98,9 @@ export class Instrumentation {
         
         // Move spread FIRST to prevent overwrites
         ...event.data,
-        'raw.context': event.data.raw_context,
-        'raw.response': event.data.raw_response
+        'log.raw_data': true,
+        raw_context: event.data.raw_context,
+        raw_response: event.data.raw_response
       },
     });
 
@@ -134,13 +136,31 @@ export class Instrumentation {
       },
     });
 
-  public contextLoaded = (data: Record<string, any>): void =>
+  public contextLoaded = (data: {
+    sessionId: string;
+    agentId: string;
+    roomId: string;
+    context: string;
+    raw_context: string;
+  }): void => {
+    if (!data.raw_context) {
+      throw new Error('Missing raw_context in contextLoaded');
+    }
+    
     this.logEvent({
       stage: 'Observe',
       subStage: 'Context Hydration',
-      event: 'context_loaded',
-      data,
+      event: 'llm_context_loaded',
+      data: {
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        context: data.context,
+        raw_context: data.raw_context,
+        timestamp: Date.now()
+      },
     });
+  }
 
   public messageReceived = (data: { 
     message: string; 
@@ -356,7 +376,7 @@ export class Instrumentation {
     raw_context: string;
   }) => {
     if (!data.raw_context) {
-      console.warn('Missing raw_context in contextPrepared');
+      throw new Error('Missing raw_context in contextPrepared');
     }
     this.logEvent({
       stage: 'Orient',
@@ -384,7 +404,7 @@ export class Instrumentation {
     raw_response: string;
   }) => {
     if (!data.raw_response) {
-      console.warn('Missing raw_response in responseReceived');
+      throw new Error('Missing raw_response in responseReceived');
     }
     this.logEvent({
       stage: 'Decide',

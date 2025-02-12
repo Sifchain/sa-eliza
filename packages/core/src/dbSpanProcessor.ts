@@ -66,15 +66,21 @@ async function insertTrace(spanData: any): Promise<void> {
     spanData.session_id || null,
     spanData.environment || null,
     spanData.room_id || null,
-    spanData.raw_context || '',
-    spanData.raw_response || '',
+    spanData.raw_context,
+    spanData.raw_response,
   ];
 
   try {
     await pool.query(query, values);
     console.log('✅ Span inserted successfully:', spanData.span_name);
-  } catch (error) {
-    console.error('❌ Error inserting span into DB', error);
+  } catch (error: any) {
+    if (error.code === '23505') {
+      console.warn('Duplicate span ignored:', spanData.span_id);
+    } else if (error.code === 'ECONNREFUSED') {
+      console.error('Database connection refused. Check your database connection settings.');
+    } else {
+      console.error('❌ Error inserting span into DB', error);
+    }
   }
 }
 
@@ -88,8 +94,14 @@ export class DBSpanProcessor implements SpanProcessor {
   }
 
   async onEnd(span: ReadableSpan): Promise<void> {
-    if (!['llm_context_pre', 'llm_response_post'].includes(span.name)) {
-      return; // Skip non-LLM spans
+    console.log('🔵 [DEBUG] Processing span:', span.name);
+    console.log('🔵 [DEBUG] Span attributes:', span.attributes);
+
+    console.log('🔵 onEnd called for span:', span.name);
+
+    if (!span.name.startsWith('llm.') && !span.name.startsWith('custom.')) {
+      console.log('Span name does not start with llm. or custom., skipping.');
+      return;
     }
 
     const spanContext = span.spanContext();
@@ -104,11 +116,17 @@ export class DBSpanProcessor implements SpanProcessor {
     const attributes = span.attributes || {};
     const resource = span.resource?.attributes || {};
 
+    console.log('Span attributes before processing:', attributes);
+
     // Add truncation here
     const MAX_CONTEXT_LENGTH = 4000;
     const safeTrim = (value: unknown) => {
       if (typeof value !== 'string') return '';
-      return value.trim().substring(0, MAX_CONTEXT_LENGTH);
+      const trimmed = value.trim().substring(0, MAX_CONTEXT_LENGTH);
+      if (trimmed.length < value.length) {
+        console.warn(`Value was truncated. Original length: ${value.length}, Truncated length: ${trimmed.length}`);
+      }
+      return trimmed || '';
     };
 
     const spanData = {
@@ -126,30 +144,38 @@ export class DBSpanProcessor implements SpanProcessor {
       events: span.events || [],
       links: span.links || [],
       resource: resource,
-      agent_id: safeTrim(attributes.agentId),
+      agent_id: safeTrim(attributes['agent.id']),
       session_id: safeTrim(attributes['session.id']),
       environment:
         safeTrim(attributes['environment']) ||
         safeTrim(resource['deployment.environment']) ||
         'unknown',
       room_id: safeTrim(attributes['room.id']),
-      raw_context: safeTrim(attributes.raw_context) || '',
-      raw_response: safeTrim(attributes.raw_response) || '',
+      raw_context: ['llm_context_pre', 'llm_context'].includes(span.name)
+        ? safeTrim(attributes.raw_context)
+        : '',
+      raw_response: ['llm_response_post', 'llm_response'].includes(span.name)
+        ? safeTrim(attributes.raw_response)
+        : '',
     };
 
-    // Modify the validation check to allow spans with raw_context/response
-    if (
-      !spanData.agent_id && 
-      !spanData.session_id && 
-      !spanData.room_id
-    ) {
-      console.log('⚠️ Skipping span...');
-      return;
-    }
-
     console.log('🟡 Span ended, inserting:', span.name, spanData);
+    console.log('Raw context type:', typeof spanData.raw_context, 'value:', spanData.raw_context);
+    console.log('Raw response type:', typeof spanData.raw_response, 'value:', spanData.raw_response);
 
     console.log('Span attributes:', JSON.stringify(attributes, null, 2));
+
+    // Update the validation check to handle raw_context/response requirements
+    if (
+      !spanData.agent_id &&
+      !spanData.session_id &&
+      !spanData.room_id &&
+      !spanData.raw_context &&
+      !spanData.raw_response
+    ) {
+      console.log('⚠️ Skipping span without required identifiers:', span.name);
+      return;
+    }
 
     try {
       await insertTrace(spanData);
