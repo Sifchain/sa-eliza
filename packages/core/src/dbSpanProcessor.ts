@@ -33,13 +33,15 @@ async function insertTrace(spanData: any): Promise<void> {
       agent_id,
       session_id,
       environment,
-      room_id
+      room_id,
+      raw_context,
+      raw_response
     )
     VALUES (
       $1, $2, $3, $4, $5,
       $6, $7, $8, $9, $10,
       $11, $12, $13, $14, $15,
-      $16, $17, $18, $19
+      $16, $17, $18, $19, $20, $21
     )
     ON CONFLICT (trace_id, span_id) DO NOTHING;
   `;
@@ -64,6 +66,8 @@ async function insertTrace(spanData: any): Promise<void> {
     spanData.session_id || null,
     spanData.environment || null,
     spanData.room_id || null,
+    spanData.raw_context || '',
+    spanData.raw_response || '',
   ];
 
   try {
@@ -84,6 +88,10 @@ export class DBSpanProcessor implements SpanProcessor {
   }
 
   async onEnd(span: ReadableSpan): Promise<void> {
+    if (!['llm_context_pre', 'llm_response_post'].includes(span.name)) {
+      return; // Skip non-LLM spans
+    }
+
     const spanContext = span.spanContext();
     console.log('Span Context:', spanContext);
     console.log('Span Whole:', span);
@@ -96,10 +104,11 @@ export class DBSpanProcessor implements SpanProcessor {
     const attributes = span.attributes || {};
     const resource = span.resource?.attributes || {};
 
-    const safeTrim = (value: unknown): string | null => {
-      if (typeof value !== 'string') return null;
-      const trimmed = value.trim();
-      return trimmed.length > 0 ? trimmed : null;
+    // Add truncation here
+    const MAX_CONTEXT_LENGTH = 4000;
+    const safeTrim = (value: unknown) => {
+      if (typeof value !== 'string') return '';
+      return value.trim().substring(0, MAX_CONTEXT_LENGTH);
     };
 
     const spanData = {
@@ -118,20 +127,29 @@ export class DBSpanProcessor implements SpanProcessor {
       links: span.links || [],
       resource: resource,
       agent_id: safeTrim(attributes.agentId),
-      session_id: safeTrim(attributes["session.id"]),
-      environment: safeTrim(attributes["environment"]) || 
-                   safeTrim(resource["deployment.environment"]) ||
-                   'unknown',
-      room_id: safeTrim(attributes["room.id"]),
+      session_id: safeTrim(attributes['session.id']),
+      environment:
+        safeTrim(attributes['environment']) ||
+        safeTrim(resource['deployment.environment']) ||
+        'unknown',
+      room_id: safeTrim(attributes['room.id']),
+      raw_context: safeTrim(attributes.raw_context) || '',
+      raw_response: safeTrim(attributes.raw_response) || '',
     };
 
-    // Add validation
-    if (!spanData.agent_id && !spanData.session_id && !spanData.room_id) {
-      console.log('⚠️ Skipping span with no context IDs:', span.name);
+    // Modify the validation check to allow spans with raw_context/response
+    if (
+      !spanData.agent_id && 
+      !spanData.session_id && 
+      !spanData.room_id
+    ) {
+      console.log('⚠️ Skipping span...');
       return;
     }
 
     console.log('🟡 Span ended, inserting:', span.name, spanData);
+
+    console.log('Span attributes:', JSON.stringify(attributes, null, 2));
 
     try {
       await insertTrace(spanData);

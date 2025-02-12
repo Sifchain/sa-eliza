@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS traces (
     session_id VARCHAR(256),
     environment VARCHAR(64),
     room_id VARCHAR(256),
+    raw_context TEXT NOT NULL DEFAULT '',
+    raw_response TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (trace_id, span_id)
 );
 
@@ -51,3 +53,32 @@ CREATE INDEX idx_events_agent ON events (agent_id);
 CREATE INDEX idx_events_type ON events (event_type);
 CREATE INDEX idx_events_time ON events (event_time);
 CREATE INDEX idx_events_room ON events (room_id);
+
+-- Remove strict constraints temporarily
+ALTER TABLE traces 
+DROP CONSTRAINT IF EXISTS raw_context_not_empty,
+DROP CONSTRAINT IF EXISTS raw_response_not_empty;
+
+-- Keep NOT NULL but allow empty strings
+ALTER TABLE traces 
+ALTER COLUMN raw_context DROP DEFAULT,
+ALTER COLUMN raw_response DROP DEFAULT;
+
+-- Add smarter constraints that allow placeholders
+ALTER TABLE traces 
+DROP CONSTRAINT valid_raw_context,
+DROP CONSTRAINT valid_raw_response;
+
+ALTER TABLE traces 
+ADD CONSTRAINT valid_raw_context 
+CHECK (
+    (span_name = 'llm_context_pre' AND raw_context <> '')
+    OR (span_name <> 'llm_context_pre')
+);
+
+ALTER TABLE traces 
+ADD CONSTRAINT valid_raw_response 
+CHECK (
+    (span_name = 'llm_response_post' AND raw_response <> '')
+    OR (span_name <> 'llm_response_post')
+);

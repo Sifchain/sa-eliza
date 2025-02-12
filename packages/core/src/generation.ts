@@ -54,6 +54,7 @@ import { fal } from "@fal-ai/client";
 
 import BigNumber from "bignumber.js";
 import { createPublicClient, http } from "viem";
+import { instrument } from "./instrumentation.ts"; // Import the instrumentation
 
 type Tool = CoreTool<any, any>;
 type StepResult = AIStepResult<any>;
@@ -362,6 +363,8 @@ export async function generateText({
     verifiableInferenceAdapter?: IVerifiableInferenceAdapter;
     verifiableInferenceOptions?: VerifiableInferenceOptions;
 }): Promise<string> {
+    console.log('🏁 generateText called with context:', context.slice(0, 50) + '...'); // Add this
+    
     if (!context) {
         console.error("generateText context is empty");
         return "";
@@ -510,20 +513,36 @@ export async function generateText({
 
     const apiKey = runtime.token;
 
-    try {
-        elizaLogger.debug(
-            `Trimming context to max length of ${max_context_length} tokens.`
-        );
+    //  ADD startTime HERE, *OUTSIDE* the try block
+    const startTime = Date.now();
 
+    try {
+        console.log('🔧 Trimming context...');
+        // BEFORE trimming
+        const originalContext = context; // ✅ Correct
         context = await trimTokens(context, max_context_length, runtime);
 
+        // Add these at the start of generateText()
+        let originalResponse: string; // Will capture raw model output
+
+        console.log('📝 Logging context prepared');
+        console.log('📝 Context prepared - raw:', originalContext?.length);
+        instrument.contextPrepared({
+            sessionId: runtime.sessionId,
+            agentId: runtime.agentId,
+            roomId: runtime.agentId,
+            context: context,
+            model: model,
+            raw_context: originalContext || '[EMPTY_CONTEXT]',
+        });
+
+        // Before instrumentation calls
+        console.log('🐛 RAW_CTX:', originalContext?.substring(0,50));
+        console.log('🐛 RAW_RES:', originalResponse?.substring(0,50));
+
         let response: string;
-
-        const _stop = stop || modelSettings.stop;
-        elizaLogger.debug(
-            `Using provider: ${provider}, model: ${model}, temperature: ${temperature}, max response length: ${max_response_length}`
-        );
-
+        console.log('🤖 Selecting provider:', provider);
+        
         switch (provider) {
             // OPENAI & LLAMACLOUD shared same structure.
             case ModelProviderName.OPENAI:
@@ -536,6 +555,7 @@ export async function generateText({
             case ModelProviderName.NINETEEN_AI:
             case ModelProviderName.AKASH_CHAT_API:
             case ModelProviderName.LMSTUDIO: {
+                console.log('⚡ Using OpenAI provider');
                 elizaLogger.debug(
                     "Initializing OpenAI model with Cloudflare check"
                 );
@@ -568,6 +588,7 @@ export async function generateText({
 
                 response = openaiResponse;
                 console.log("Received response from OpenAI model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -655,6 +676,7 @@ export async function generateText({
 
                 response = openaiResponse;
                 elizaLogger.debug("Received response from EternalAI model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -683,6 +705,7 @@ export async function generateText({
 
                 response = googleResponse;
                 elizaLogger.debug("Received response from Google model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -704,6 +727,7 @@ export async function generateText({
 
                 response = mistralResponse;
                 elizaLogger.debug("Received response from Mistral model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -740,6 +764,7 @@ export async function generateText({
 
                 response = anthropicResponse;
                 elizaLogger.debug("Received response from Anthropic model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -772,6 +797,7 @@ export async function generateText({
                 elizaLogger.debug(
                     "Received response from Claude Vertex model."
                 );
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -804,6 +830,7 @@ export async function generateText({
 
                 response = grokResponse;
                 elizaLogger.debug("Received response from Grok model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -838,6 +865,7 @@ export async function generateText({
 
                 response = groqResponse;
                 elizaLogger.debug("Received response from Groq model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -857,12 +885,13 @@ export async function generateText({
                 response = await textGenerationService.queueTextCompletion(
                     context,
                     temperature,
-                    _stop,
+                    stop, // Corrected _stop to stop
                     frequency_penalty,
                     presence_penalty,
                     max_response_length
                 );
                 elizaLogger.debug("Received response from local Llama model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -894,6 +923,7 @@ export async function generateText({
 
                 response = redpillResponse;
                 elizaLogger.debug("Received response from redpill model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -925,6 +955,7 @@ export async function generateText({
 
                 response = openrouterResponse;
                 elizaLogger.debug("Received response from OpenRouter model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -954,6 +985,7 @@ export async function generateText({
                     });
 
                     response = ollamaResponse;
+                    originalResponse = response; // Capture raw model output
                 }
                 elizaLogger.debug("Received response from Ollama model.");
                 break;
@@ -986,6 +1018,7 @@ export async function generateText({
 
                 response = heuristResponse;
                 elizaLogger.debug("Received response from Heurist model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
             case ModelProviderName.GAIANET: {
@@ -1039,6 +1072,7 @@ export async function generateText({
 
                 response = openaiResponse;
                 elizaLogger.debug("Received response from GAIANET model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -1069,6 +1103,7 @@ export async function generateText({
 
                 response = atomaResponse;
                 elizaLogger.debug("Received response from Atoma model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -1107,6 +1142,7 @@ export async function generateText({
 
                 response = galadrielResponse;
                 elizaLogger.debug("Received response from Galadriel model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -1138,6 +1174,7 @@ export async function generateText({
                 });
                 response = inferaResponse;
                 elizaLogger.debug("Received response from Infera model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -1162,14 +1199,10 @@ export async function generateText({
                     maxTokens: max_response_length,
                 });
 
-                // console.warn("veniceResponse:")
-                // console.warn(veniceResponse)
-                //rferrari: remove all text from <think> to </think>\n\n
-                response = veniceResponse
-                    .replace(/<think>[\s\S]*?<\/think>\s*\n*/g, '');
-                // console.warn(response)
-
-                // response = veniceResponse;
+                // Capture raw response BEFORE processing
+                originalResponse = veniceResponse; 
+                response = veniceResponse.replace(/<think>[\s\S]*?<\/think>\s*\n*/g, '');
+                
                 elizaLogger.debug("Received response from Venice model.");
                 break;
             }
@@ -1196,6 +1229,7 @@ export async function generateText({
                 });
 
                 response = nvidiaResponse;
+                originalResponse = response; // Capture raw model output
                 elizaLogger.debug("Received response from NVIDIA model.");
                 break;
             }
@@ -1228,6 +1262,7 @@ export async function generateText({
 
                 response = deepseekResponse;
                 elizaLogger.debug("Received response from Deepseek model.");
+                originalResponse = response; // Capture raw model output
                 break;
             }
 
@@ -1280,10 +1315,8 @@ export async function generateText({
                     throw new Error("Invalid response format from Livepeer");
                 }
 
-                response = json.choices[0].message.content.replace(
-                    /<\|start_header_id\|>assistant<\|end_header_id\|>\n\n/,
-                    ""
-                );
+                originalResponse = json.choices[0].message.content; // BEFORE processing
+                response = originalResponse.replace(/<\|start_header_id\|>assistant<\|end_header_id\|>\n\n/, "");
                 elizaLogger.debug(
                     "Successfully received response from Livepeer model"
                 );
@@ -1291,15 +1324,27 @@ export async function generateText({
             }
 
             default: {
-                const errorMessage = `Unsupported provider: ${provider}`;
-                elizaLogger.error(errorMessage);
-                throw new Error(errorMessage);
+                console.error('🚨 Unsupported provider:', provider);
+                throw new Error(`Unsupported provider: ${provider}`);
             }
         }
 
-        return response;
+        console.log('📤 Logging response received');
+        const endTime = Date.now();
+        console.log('📤 Response received - raw:', originalResponse?.length);
+        instrument.responseReceived({
+            sessionId: runtime.sessionId,
+            agentId: runtime.agentId,
+            roomId: runtime.agentId,
+            response: originalResponse || '[EMPTY_RESPONSE]',
+            model: model,
+            latency: endTime - startTime,
+            raw_response: originalResponse || '[EMPTY_RESPONSE]',
+        });
+
+        return originalResponse;
     } catch (error) {
-        elizaLogger.error("Error in generateText:", error);
+        console.error('💥 generateText error:', error);
         throw error;
     }
 }

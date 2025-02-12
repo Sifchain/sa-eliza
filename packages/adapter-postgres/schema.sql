@@ -166,3 +166,8 @@ CREATE INDEX IF NOT EXISTS idx_knowledge_shared ON knowledge("isShared");
 CREATE INDEX IF NOT EXISTS idx_knowledge_embedding ON knowledge USING ivfflat (embedding vector_cosine_ops);
 
 COMMIT;
+
+-- Remove DEFAULT clauses since code provides empty strings
+ALTER TABLE traces 
+ALTER COLUMN raw_context DROP DEFAULT,
+ALTER COLUMN raw_response DROP DEFAULT;

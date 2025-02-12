@@ -12,6 +12,10 @@ export interface InstrumentationEvent {
   event: string;
   data: Record<string, any>;
   timestamp?: number;
+  context?: string;
+  response?: string;
+  model?: string;
+  latency?: number;
 }
 
 export class Instrumentation {
@@ -61,6 +65,21 @@ export class Instrumentation {
       return;
     }
 
+    // Add these checks
+    if (event.event === 'llm_context_pre') {
+      if (!event.data.raw_context) {
+        console.error('‼️ Missing raw_context in llm_context_pre');
+        return;
+      }
+      if (event.data.raw_context.trim() === '') {
+        console.error('‼️ Empty raw_context in llm_context_pre');
+      }
+    }
+    if (event.event === 'llm_response_post' && !event.data.raw_response) {
+      console.error('‼️ Missing raw_response in llm_response_post');
+      return;
+    }
+
     const span = this.tracer.startSpan(event.event, {
       attributes: {
         // Core identifiers (only include if present)
@@ -76,8 +95,10 @@ export class Instrumentation {
         // Environment info
         'environment': process.env.NODE_ENV || 'development',
         
-        // Additional context
-        ...event.data
+        // Move spread FIRST to prevent overwrites
+        ...event.data,
+        'raw.context': event.data.raw_context,
+        'raw.response': event.data.raw_response
       },
     });
 
@@ -324,6 +345,96 @@ export class Instrumentation {
       timestamp: Date.now()
     },
   });
+
+  // Add these new event types to the Instrumentation class
+  public contextPrepared = (data: {
+    sessionId: string;
+    agentId: string;
+    roomId: string;
+    context: string;
+    model: string;
+    raw_context: string;
+  }) => {
+    if (!data.raw_context) {
+      console.warn('Missing raw_context in contextPrepared');
+    }
+    this.logEvent({
+      stage: 'Orient',
+      subStage: 'LLM Context',
+      event: 'llm_context_pre',
+      data: {
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        context: data.context,
+        model: data.model,
+        raw_context: data.raw_context,
+        timestamp: Date.now()
+      },
+    });
+  }
+
+  public responseReceived = (data: {
+    sessionId: string;
+    agentId: string;
+    roomId: string;
+    response: string;
+    model: string;
+    latency: number;
+    raw_response: string;
+  }) => {
+    if (!data.raw_response) {
+      console.warn('Missing raw_response in responseReceived');
+    }
+    this.logEvent({
+      stage: 'Decide',
+      subStage: 'LLM Response',
+      event: 'llm_response_post',
+      data: {
+        sessionId: data.sessionId,
+        agentId: data.agentId,
+        roomId: data.roomId,
+        response: data.response,
+        model: data.model,
+        latency: data.latency,
+        raw_response: data.raw_response,
+        timestamp: Date.now()
+      },
+    });
+  }
+
+  public logLlmContext(data: {
+    sessionId: string;
+    agentId: string;
+    context: string;
+    model: string;
+  }) {
+    this.logEvent({
+      stage: 'Generation',
+      subStage: 'Context',
+      event: 'llm_context',
+      data: {
+        ...data,
+      }
+    });
+  }
+
+  public logLlmResponse(data: {
+    sessionId: string;
+    agentId: string;
+    response: string;
+    model: string;
+    latency: number;
+  }) {
+    this.logEvent({
+      stage: 'Generation', 
+      subStage: 'Response',
+      event: 'llm_response',
+      data: {
+        ...data,
+      }
+    });
+  }
 }
 
 // Export the singleton instance
