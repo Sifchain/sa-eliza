@@ -351,11 +351,17 @@ export class DirectClient {
                 }
 
                 // Instrument the "message_received" event immediately after receiving the request.
+                // instrument.messageReceived({
+                //     agentId: agentId,
+                //     // inputSource: req.headers["user-agent"] || "unknown",
+                //     messageType: "message",
+                //     messageSnippet: (text || "").substring(0, 100),
+                // });
                 instrument.messageReceived({
-                    agentId: agentId,
-                    inputSource: req.headers["user-agent"] || "unknown",
-                    messageType: "message",
-                    messageSnippet: (text || "").substring(0, 100),
+                    message: (text || "").substring(0, 100), // or the full text as needed
+                    sessionId: "default-session-id",           // replace with real session id if available
+                    agentId: agentId,                          // already available in your file
+                    roomId: roomId.toString(),                 // ensure roomId is a string if it's a UUID
                 });
             }
         );
@@ -1052,4 +1058,11 @@ export const DirectClientInterface: Client = {
 
 export default DirectClientInterface;
 
-instrument.sessionStart({ foo: "bar" });
+instrument.sessionStart({
+    sessionId: "default-session-id",
+    agentId: "direct-client",
+    roomId: "default-room",
+    characterName: "Default Character",
+    environment: process.env.NODE_ENV || "development",
+    platform: "direct"
+});

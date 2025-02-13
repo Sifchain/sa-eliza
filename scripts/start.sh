@@ -93,48 +93,48 @@ install_dependencies() {
 }
 
 # Early NVM setup before anything else
-setup_early_nvm() {
-    if ! command -v nvm &> /dev/null; then
-        early_log "Setting up NVM..."
-        # Download and run the nvm installation script
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+# setup_early_nvm() {
+#     if ! command -v nvm &> /dev/null; then
+#         early_log "Setting up NVM..."
+#         # Download and run the nvm installation script
+#         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
-        # Load NVM
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+#         # Load NVM
+#         export NVM_DIR="$HOME/.nvm"
+#         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         
-        # Verify installation
-        if ! command -v nvm &> /dev/null; then
-            early_error "Failed to install NVM. Please install it manually:"
-            echo "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
-            exit 1
-        fi
-        early_success "NVM installed successfully"
-    else
-        early_success "NVM already installed"
-    fi
+#         # Verify installation
+#         if ! command -v nvm &> /dev/null; then
+#             early_error "Failed to install NVM. Please install it manually:"
+#             echo "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
+#             exit 1
+#         fi
+#         early_success "NVM installed successfully"
+#     else
+#         early_success "NVM already installed"
+#     fi
 
-    # Install required Node version
-    if ! nvm install "$NODE_VERSION"; then
-        early_error "Failed to install Node.js $NODE_VERSION"
-        exit 1
-    fi
+#     # Install required Node version
+#     if ! nvm install "$NODE_VERSION"; then
+#         early_error "Failed to install Node.js $NODE_VERSION"
+#         exit 1
+#     fi
 
-    if ! nvm use "$NODE_VERSION"; then
-        early_error "Failed to use Node.js $NODE_VERSION"
-        exit 1
-    fi
+#     if ! nvm use "$NODE_VERSION"; then
+#         early_error "Failed to use Node.js $NODE_VERSION"
+#         exit 1
+#     fi
 
-    # Install pnpm
-    if ! command -v pnpm &> /dev/null; then
-        early_log "Installing pnpm..."
-        if ! npm install -g pnpm; then
-            early_error "Failed to install pnpm"
-            exit 1
-        fi
-        early_success "pnpm installed successfully"
-    fi
-}
+#     # Install pnpm
+#     if ! command -v pnpm &> /dev/null; then
+#         early_log "Installing pnpm..."
+#         if ! npm install -g pnpm; then
+#             early_error "Failed to install pnpm"
+#             exit 1
+#         fi
+#         early_success "pnpm installed successfully"
+#     fi
+# }
 
 # Global variables for process management
 SERVER_PID=""
@@ -599,10 +599,10 @@ check_existing_installation() {
     log_verbose "Checking for existing installation..."
     
     # Check for required files and dependencies
-    if [ -f ".env" ] && [ -d "node_modules" ]; then
-        # Load NVM if available
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    # if [ -f ".env" ] && [ -d "node_modules" ]; then
+    #     # Load NVM if available
+    #     export NVM_DIR="$HOME/.nvm"
+    #     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         
         # Check for required commands
         if command -v node &> /dev/null && command -v pnpm &> /dev/null; then
@@ -681,83 +681,82 @@ check_existing_installation() {
                 esac
             fi
         fi
-    fi
     
     log_verbose "No valid installation found"
     return 0
 }
 
 # Install NVM function
-install_nvm() {
-    log_verbose "Installing NVM..."
+# install_nvm() {
+#     log_verbose "Installing NVM..."
     
-    if ! command -v nvm &> /dev/null; then
-        # Download and run the nvm installation script
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+#     if ! command -v nvm &> /dev/null; then
+#         # Download and run the nvm installation script
+#         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
         
-        # Load NVM
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+#         # Load NVM
+#         export NVM_DIR="$HOME/.nvm"
+#         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         
-        # Verify installation
-        if ! command -v nvm &> /dev/null; then
-            log_error "Failed to install NVM. Please install it manually:"
-            echo "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
-            exit 1
-        fi
-        log_success "NVM installed"
-    else
-        log_success "NVM already installed"
-    fi
+#         # Verify installation
+#         if ! command -v nvm &> /dev/null; then
+#             log_error "Failed to install NVM. Please install it manually:"
+#             echo "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
+#             exit 1
+#         fi
+#         log_success "NVM installed"
+#     else
+#         log_success "NVM already installed"
+#     fi
 
-    # Install required Node version
-    if ! nvm install "$NODE_VERSION"; then
-        log_error "Failed to install Node.js $NODE_VERSION"
-        exit 1
-    fi
+#     # Install required Node version
+#     if ! nvm install "$NODE_VERSION"; then
+#         log_error "Failed to install Node.js $NODE_VERSION"
+#         exit 1
+#     fi
 
-    if ! nvm use "$NODE_VERSION"; then
-        log_error "Failed to use Node.js $NODE_VERSION"
-        exit 1
-    fi
+#     if ! nvm use "$NODE_VERSION"; then
+#         log_error "Failed to use Node.js $NODE_VERSION"
+#         exit 1
+#     fi
 
-    log_success "Node.js setup complete"
+#     log_success "Node.js setup complete"
     
-    if [ "$VERBOSE" = true ]; then
-        log_verbose "Node version: $(node -v)"
-        log_verbose "NPM version: $(npm -v)"
-    fi
-}
+#     if [ "$VERBOSE" = true ]; then
+#         log_verbose "Node version: $(node -v)"
+#         log_verbose "NPM version: $(npm -v)"
+#     fi
+# }
 
 # Setup Node.js environment
-setup_node() {
-    log_verbose "Setting up Node.js environment..."
+# setup_node() {
+#     log_verbose "Setting up Node.js environment..."
     
-    # Verify Node.js installation
-    if ! command -v node &> /dev/null; then
-        log_error "Node.js is not installed"
-        exit 1
-    fi
+#     # Verify Node.js installation
+#     if ! command -v node &> /dev/null; then
+#         log_error "Node.js is not installed"
+#         exit 1
+#     fi
     
-    # Install pnpm if not present
-    if ! command -v pnpm &> /dev/null; then
-        log_info "Installing pnpm..."
-        if ! npm install -g pnpm; then
-            log_error "Failed to install pnpm"
-            exit 1
-        fi
-        log_success "pnpm installed"
-    fi
+#     # Install pnpm if not present
+#     if ! command -v pnpm &> /dev/null; then
+#         log_info "Installing pnpm..."
+#         if ! npm install -g pnpm; then
+#             log_error "Failed to install pnpm"
+#             exit 1
+#         fi
+#         log_success "pnpm installed"
+#     fi
     
-    # Verify versions
-    if [ "$VERBOSE" = true ]; then
-        log_verbose "Node version: $(node -v)"
-        log_verbose "NPM version: $(npm -v)"
-        log_verbose "PNPM version: $(pnpm -v)"
-    fi
+#     # Verify versions
+#     if [ "$VERBOSE" = true ]; then
+#         log_verbose "Node version: $(node -v)"
+#         log_verbose "NPM version: $(npm -v)"
+#         log_verbose "PNPM version: $(pnpm -v)"
+#     fi
     
-    log_success "Node.js environment setup complete"
-}
+#     log_success "Node.js environment setup complete"
+# }
 
 main() {
     early_log "Detected operating system: $OS_TYPE"
@@ -781,11 +780,11 @@ main() {
 
     install_dependencies
     
-    if [ "$SKIP_NVM" = false ]; then
-        install_nvm
-    fi
+    # if [ "$SKIP_NVM" = false ]; then
+    #     install_nvm
+    # fi
 
-    setup_node
+    # setup_node
     setup_environment
     build_and_start
 

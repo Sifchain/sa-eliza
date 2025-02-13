@@ -346,7 +346,7 @@ export class Instrumentation {
     },
   });
 
-  // Add these new event types to the Instrumentation class
+
   public contextPrepared = (data: {
     sessionId: string;
     agentId: string;
